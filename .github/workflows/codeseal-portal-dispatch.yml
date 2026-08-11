@@ -37,7 +37,16 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install sgit
-        run: curl -fsSL "${SGIT_URL:-https://codeseal.example.com/install.sh}" | sh
+        env:
+          # Just the binary — no $CODESEAL home, no compose files, no deploy
+          # assets. CI needs none of it.
+          SGIT_ONLY: "1"
+          INSTALLER: https://raw.githubusercontent.com/mylife-inc/releases/main/codeseal/install.sh
+        run: |
+          set -euo pipefail
+          curl -fsSL "$INSTALLER" -o /tmp/install-sgit.sh
+          sh /tmp/install-sgit.sh
+          sgit --version
 
       - name: Unwrap dispatch token
         id: dispatch
@@ -77,6 +86,23 @@ jobs:
           shred -u /tmp/codeseal-runner-key || rm -f /tmp/codeseal-runner-key
           echo "SGIT_KEY=" >> "$GITHUB_ENV"
           echo "SGIT_IDENTITY=" >> "$GITHUB_ENV"
+
+      # Toolchains go here rather than at the top of the job. They are only
+      # needed once the source exists, and the source does not exist until the
+      # decrypt step above — so a run that fails before decryption fails in
+      # seconds instead of after two toolchain installs.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: cli
 
       - name: Build
         run: bash .github/workflows/codeseal-ci.sh
