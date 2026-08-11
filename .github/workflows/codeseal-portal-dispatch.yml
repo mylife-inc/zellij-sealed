@@ -34,7 +34,33 @@ jobs:
           ENCRYPTED_TOKEN: ${{ inputs.encrypted_token }}
         run: echo "::add-mask::$ENCRYPTED_TOKEN"
 
-      - uses: actions/checkout@v4
+      # Every third-party action is pinned to a commit, not a tag.
+      #
+      # A tag is a moving pointer its owner can repoint at any time. In an
+      # ordinary repository that is a supply-chain risk; in this one it is the
+      # whole threat model, because these steps run on a machine that is about
+      # to hold Zellij's decrypted source. An action that changed under its tag
+      # would execute beside the plaintext this repository exists to keep off
+      # GitHub.
+      #
+      # The toolchains are also installed BEFORE the decrypt step below, so
+      # that even a compromised one runs while there is nothing on disk but
+      # ciphertext. Defence in depth: the pin should hold, and if it does not,
+      # the ordering means there is nothing there to take.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+        with:
+          components: clippy, rustfmt
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          workspaces: cli
 
       - name: Install sgit
         env:
@@ -86,23 +112,6 @@ jobs:
           shred -u /tmp/codeseal-runner-key || rm -f /tmp/codeseal-runner-key
           echo "SGIT_KEY=" >> "$GITHUB_ENV"
           echo "SGIT_IDENTITY=" >> "$GITHUB_ENV"
-
-      # Toolchains go here rather than at the top of the job. They are only
-      # needed once the source exists, and the source does not exist until the
-      # decrypt step above — so a run that fails before decryption fails in
-      # seconds instead of after two toolchain installs.
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy, rustfmt
-
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: cli
 
       - name: Build
         run: bash .github/workflows/codeseal-ci.sh
