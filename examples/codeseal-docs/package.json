@@ -16,7 +16,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@shebka/zellij": "file:/Users/hamid/Dev/MyLife/Zellij/engine/packages/zellij",
+    "@shebka/zellij": "*",
     "next": "^16.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
