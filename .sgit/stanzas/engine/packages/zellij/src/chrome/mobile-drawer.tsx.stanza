@@ -1,0 +1,36 @@
+version: 1
+file: engine/packages/zellij/src/chrome/mobile-drawer.tsx
+recipients:
+- name: sid-med
+  role: developer
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSAxQk1SNGRTMmhwTkdTcWFx
+    UEZuZGgxZ3lUa3I5RHN4aTFjSHRkYkFxQmdNCk9nZEV1T28vU0VUbmdKK3NwdDNl
+    b2pmOWEyWjRQYThXOWE1V2hramdMQ0UKLT4gV1JjLWdyZWFzZSAkWUIkeHUoICUt
+    XDxdCjYzbk8KLS0tIDZrWS9Uc2c2YTZkZzR5VXZLVnlNMFVhTFMvbW5nZjVEc2FW
+    aHNxM0ZCaGcKWz32ChLa2BLkXMlWK6ce91CUotnT2ViiHR1UAtFsHwjrqi+NFmDX
+    SQpArm8AMCHIuL0BBrEcqOAxWs+Eysya4Q==
+    -----END AGE ENCRYPTED FILE-----
+- name: ci-runner
+  role: ci
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBoelc4VlZOSDBVemIyUHZh
+    bEZQTHBpOTdhWUlNQytZejFicFhpS0dhekdJCmRhVWh5KzJXa2hvQVJPYVVoMWo2
+    SnBCUVNNRlNneE5xSnpxSE1CVnFMdncKLT4gWm1ZLWdyZWFzZQp5c2V0Ci0tLSBF
+    dmxSY0cxMW9CWSs2VUVKRG9wUldYMW5LcnFWa3dTT0Y1Q0JVWW0vTnlvCpxPgALq
+    knv/KAaq9feIHmXomg62mcIXU4uiOrKEVialT4Y+xIxw21FQDKQWhDygXSLRib+e
+    WSF8ObmrszBquhE=
+    -----END AGE ENCRYPTED FILE-----
+- name: admin-server
+  role: admin
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBwUnlwMVVhdzFoazBiL05N
+    LzV3WitzdGFiYzB3QlYvU2RCS3drU0thbkJFCjczNU9wNmFYYU1KTU4yZFJicE9o
+    emFXMk1mNEJ0WFY3THpsRWZSK1dhOG8KLT4gNy1ncmVhc2UKc0x4SExNMEtYeGFj
+    Tjh1U1AyNXBNQjM2QUxiTHNnVWxnYXEzY0daSXovawotLS0gS0pZSnZ6VFhnK2M0
+    cDdMKzNrcEttNWppWkE1aFJuM3lXVGZuQUdjRGptUQojm4rL4ZjamB7bkxcTSzbH
+    U0cc5R61+it9QRQWUM/suO/McDAibxUnEkMGFie/KJ8PtxhKSc0JcJW3UhAlN2HW
+    -----END AGE ENCRYPTED FILE-----

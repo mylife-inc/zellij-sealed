@@ -1,0 +1,107 @@
+---
+title: zel migrate
+description: Detect, convert and check in one step, stopping at the first thing that fails.
+---
+
+<Callout type="tip" title="Available">
+Works today.
+</Callout>
+
+```bash title="terminal"
+zel migrate ./docs --out ./content
+```
+
+```
+mkdocs       MkDocs — mkdocs.yml with a nav tree  (certain)
+
+Converting ./docs as MkDocs — mkdocs.yml with a nav tree
+
+Wrote 9 files into ./content
+
+2 thing(s) could not be carried over:
+  https://blog.acme.dev: "Blog" is an external link; sidebars hold pages. Add it to menu.yaml.
+  draft.md: on disk but absent from the navigation; not converted
+
+✓ ./content
+  site        Acme · theme cupertino
+  pages       1
+  guides      1 (5 pages) · /guide
+  routes      6
+```
+
+## What it is
+
+[`zel detect`](/cli/detect) → [`zel convert`](/cli/convert) →
+[`zel check`](/cli/check), in that order, stopping at the first failure.
+
+It does nothing the three commands cannot. Running them yourself produces the
+same folder and the same report.
+
+## Then why does it exist
+
+Because of the order, and because of the third step.
+
+A conversion is the one moment when a folder full of prose changes shape, and
+the moment when it is easiest to assume it worked. The output looks right — it
+is your own writing, after all — and the failures are structural: a sidebar
+entry pointing at a file the converter skipped, a link to a page that used to
+exist under a different name.
+
+**Forgetting to validate after a conversion is the mistake everybody makes
+once.** This command is that once, spent in advance.
+
+The order matters too. Detecting first means an unrecognised folder costs you
+nothing; converting before checking means the check has something to look at.
+Reversing any of it produces either a wasted conversion or a check against the
+source folder, which is not what anyone wants to know.
+
+<Callout type="warning" title="It stops at the first failure">
+If detection finds nothing, no conversion is attempted. If the conversion
+fails, no check runs. This is deliberate: a command that carried on past a
+failure would leave you reading three reports to find which one mattered.
+</Callout>
+
+## What it does not do
+
+**It does not compile your Markdown.** `zel check` validates the content model —
+links, section types, sidebar entries — and MDX is a separate step. Prose
+written for MkDocs has never had to care that `{` opens an expression and `<`
+opens a tag.
+
+So a migration can succeed here and fail at build time. Build it once before
+you delete the original:
+
+```bash title="terminal"
+zel build ./content
+```
+
+The converter escapes what it can — see [what it rewrites](/cli/convert#markdown-that-is-not-mdx)
+— but it is careful rather than infallible.
+
+**It does not write a landing page.** Every tool it converts from describes a
+documentation tree. Zellij has that *and* marketing pages built from nineteen
+section types with no equivalent in the source, so you get a faithful guide
+folder and one hero to build on. The report says so every time.
+
+## Options
+
+| | | |
+| --- | --- | --- |
+| `<source>` | Required. The folder to read | — |
+| `--out <path>` | Required. Where to write. Never the source | — |
+
+The source is never modified and can never be the destination. There is no flag
+to permit it, because a conversion that overwrote the original would be
+unrecoverable.
+
+## When to run the three commands instead
+
+- You want to see the plan before writing anything — `zel convert --dry-run`
+- Detection is wrong and you want to force a format — `zel convert --from mkdocs`
+- The source is unrecognised, and you are taking [the AI route](/cli/context)
+
+## See also
+
+- [Converting existing docs](/guide/converting) — the concepts, and what to expect
+- [Lab 4](/guide/quickstart/existing-repo) — this command inside a real repository
+- [`zel ship`](/cli/ship) — migrate, then build and publish, in one line

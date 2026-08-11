@@ -1,0 +1,29 @@
+title: Quickstart
+order: 2
+description: Eight hands-on labs — one per combination of encryption mode and CI mode.
+
+# Grouped by where the key material lives, because that is the decision a
+# reader is actually making. Within each group, recipient before passphrase:
+# per-developer keys are the better default, and putting them first stops the
+# simpler option reading as the recommended one.
+nav:
+  - label: Start here
+    items:
+      - index
+
+  - label: Keys on your machine
+    items:
+      - rd
+      - pd
+
+  - label: Keys in GitHub Secrets
+    items:
+      - rs
+      - ps
+
+  - label: Keys in the Portal
+    items:
+      - rk
+      - pk
+      - rb
+      - pb

@@ -1,0 +1,12 @@
+type: zigzag
+id: camera
+heading: A camera that gets out of the way
+rows:
+  - title: Four lenses, one button
+    body: Ultra-wide to 10× telephoto, and the phone decides which one you meant.
+    image: assets/pro-camera.png
+    align: image-right
+  - title: Night that looks like night
+    body: Not a daylight photo taken after dark — **the room as you remember it**, only sharper.
+    image: assets/pro-display.png
+    align: image-left

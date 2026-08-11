@@ -1,0 +1,37 @@
+type: promo-grid
+gap: tight
+items:
+  - eyebrow: The engine
+    title: A folder of content is a website.
+    body: Point it at a directory and it builds the marketing pages and the docs.
+    image: assets/example/promo-wide.png
+    alt: ""
+    width: full
+    height: short
+    align: top
+    tone: dark
+    scrim: 0.5
+    links:
+      - { label: Read the guide, href: /guide }
+      - { label: Browse sections, href: /sections }
+  - eyebrow: Themes
+    title: Fourteen of them.
+    image: assets/example/promo-1.png
+    alt: ""
+    width: half
+    height: short
+    align: top
+    tone: dark
+    scrim: 0.45
+    links:
+      - { label: Learn more, href: /guide/themes }
+  - eyebrow: CLI
+    title: Check before you ship.
+    image: assets/example/promo-2.png
+    alt: ""
+    width: half
+    height: short
+    align: top
+    tone: light
+    scrim: 0
+    href: /cli

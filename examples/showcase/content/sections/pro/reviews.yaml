@@ -1,0 +1,12 @@
+type: testimonial
+id: reviews
+heading: What reviewers said
+quotes:
+  - quote: The first phone in years where the battery claim matched my week.
+    author: Nadia Okafor
+    role: Field Notes
+    avatar: assets/avatar/nadia.png
+  - quote: Twelve grams does not sound like much until you hold one in each hand.
+    author: Felix Brandt
+    role: The Daily Panel
+    avatar: assets/avatar/felix.png

@@ -1,0 +1,12 @@
+type: zigzag
+heading: How it works
+rows:
+  - title: Point the engine at a folder
+    body: One config object names your content directory. Zellij reads **everything else** from what it finds there.
+    image: assets/example/wide-1.png
+    align: image-right
+    cta: { label: See the content model, href: /guide/content-model }
+  - title: Write sections, not components
+    body: A section is a YAML file with a `type` and some fields. Pages list the ones they want, in order.
+    image: assets/example/wide-2.png
+    align: image-left

@@ -1,0 +1,87 @@
+---
+title: What Zellij is
+description: A versioned Next.js engine that turns a folder of structured content into a complete website.
+---
+
+Zellij is a package. Your site is a folder of YAML and Markdown, plus a Next.js
+app of about thirty lines that imports the package and gets out of the way.
+
+The name is Moroccan: *zellij* is mosaic tilework, where elaborate walls are
+composed from a small fixed set of geometric tiles. The engine works the same
+way — pages are composed from a fixed vocabulary of **sections**, styled by
+**themes**.
+
+<Callout type="info" title="Two things in one site">
+A product needs a landing page and a manual. Zellij builds both from the same
+folder, with the same theme and one navigation bar, and deploys them together.
+</Callout>
+
+## Getting content into it
+
+You do not have to start from an empty folder.
+
+<CardGrid>
+  <Card title="Start from nothing" href="/guide/quickstart" icon="sparkles">
+    `zel new docs` writes a folder that already validates.
+  </Card>
+  <Card title="Convert what you have" href="/cli/convert" icon="arrow-right-left">
+    MkDocs and Docusaurus convert into a new folder, never over the original.
+  </Card>
+  <Card title="Generate it from source" href="/cli/context" icon="bot">
+    `zel context` writes the reference an AI agent needs to author one.
+  </Card>
+</CardGrid>
+
+## What you write
+
+```
+my-product/
+├── site.yaml         # name, brand, theme, footer
+├── menu.yaml         # the top bar
+├── pages.yaml        # pages, each an ordered list of section names
+├── sections/         # one file per section
+├── assets/
+└── 01-guide/
+    ├── _sidebar.yaml # makes this folder a documentation tree
+    └── *.mdx
+```
+
+Every file is optional. A folder containing nothing but a `_sidebar.yaml` and
+some Markdown builds a complete documentation site, with a name taken from the
+folder itself.
+
+## What you get
+
+<CardGrid>
+  <Card title="Marketing pages" href="/sections" icon="layout">
+    Nineteen section types, composed per page and reusable across them.
+  </Card>
+  <Card title="Documentation" href="/guide/guide-folders" icon="book-open">
+    Sidebar, breadcrumbs, on-this-page, prev/next, and ⌘K search.
+  </Card>
+  <Card title="Themes" href="/guide/themes" icon="palette">
+    Fourteen, switchable at runtime, with no component aware of any of them.
+  </Card>
+  <Card title="A build that checks itself" href="/cli/check" icon="shield-check">
+    Broken links, missing files and unknown section types fail the build.
+  </Card>
+</CardGrid>
+
+## What it is not
+
+Zellij is **not a code generator**. It does not scaffold a project or emit
+files into your repository. That distinction is what makes upgrades a version
+bump instead of a merge — all the rendering logic lives in the package, and it
+improves without touching your site.
+
+It is also not a general-purpose page builder. The section vocabulary is fixed
+and deliberately small. If you need a layout that does not exist, the answer is
+to add a section type to the engine — where every site gets it, and where it is
+schema-validated and themed like the rest — rather than to hand-write one page.
+
+## Where to go next
+
+Read the [quickstart](/guide/quickstart) if you want something running in ten
+minutes. Read [the content model](/guide/content-model) if you want to
+understand the shape of the thing first; it is the decision every other part of
+the engine follows from.

@@ -1,0 +1,91 @@
+---
+title: zel publish
+description: Check, build and deploy — the three you run in that order anyway.
+---
+
+<Callout type="warning" title="Planned">
+`zel publish` exits with `not implemented yet`, and depends on
+[`zel deploy`](/cli/deploy), which also does. Run the three commands until both
+land.
+</Callout>
+
+```bash title="terminal"
+zel publish
+```
+
+## What it is
+
+[`zel check`](/cli/check) → [`zel build`](/cli/build) →
+[`zel deploy`](/cli/deploy), stopping at the first failure.
+
+It does nothing the three cannot, and it takes no arguments they do not.
+Everything about *what* gets published lives in [`zel.toml`](/cli/config):
+
+```toml title="zel.toml"
+content = "docs"
+
+[build]
+target = "static"
+
+[deploy]
+provider = "netlify"
+site = "acme-docs"
+```
+
+With that file, publishing your documentation is one word. Without it,
+`zel publish` needs the same flags the three commands would, and you may as
+well run them.
+
+## Why it exists
+
+`zel deploy` already checks and builds before uploading, so the two overlap.
+The distinction is where the intent lives.
+
+`zel deploy netlify docs` says *put this folder on Netlify now* — a decision
+made at the terminal. `zel publish` says *do the thing this repository is
+configured to do*, and the configuration is reviewed, committed and the same for
+everyone. The second is what belongs in a pipeline, in a Makefile, and in the
+sentence "how do I ship the docs?" that a new colleague asks.
+
+<Callout type="info" title="A workflow cannot do more than its parts">
+`publish` runs the three commands and nothing else. It has no behaviour of its
+own — no extra validation, no cleverness about what changed, no partial upload.
+
+That is deliberate. A workflow command that could do something its primitives
+could not would be a place for behaviour to hide, and the first time it
+surprised you it would be in front of a deploy.
+</Callout>
+
+## What each step contributes
+
+<Steps>
+<Step title="Check">
+Under a second. A broken internal link stops the publish here rather than
+shipping a 404 — and rather than wasting the four minutes the build would take
+before failing on the same thing.
+</Step>
+<Step title="Build">
+Produces whatever the target says. `static` for a CDN, `image` for a registry.
+</Step>
+<Step title="Deploy">
+The provider decides the target, so there is nothing to keep in step by hand.
+</Step>
+</Steps>
+
+## Until it lands
+
+The three commands, in order:
+
+```bash title="terminal"
+zel check docs && \
+zel build docs --out dist && \
+netlify deploy --prod --dir dist
+```
+
+`&&` rather than `;` matters: it is the whole of what `publish` adds.
+
+## See also
+
+- [`zel deploy`](/cli/deploy) — where the provider logic lives
+- [`zel ship`](/cli/ship) — the same idea, starting from another tool's docs
+- [`zel.toml`](/cli/config) — what makes this one word

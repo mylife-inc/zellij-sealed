@@ -1,0 +1,192 @@
+---
+title: Commands
+description: The six worth learning, and the twelve that run themselves.
+---
+
+`sgit` has eighteen commands and you will type six of them. The rest are
+plumbing — invoked by hooks, by the commit and push wrappers, or by a generated
+CI workflow — and they are documented because plumbing you cannot read is
+plumbing you cannot debug.
+
+| | who runs it |
+| --- | --- |
+| **You run this** | part of the daily workflow, worth learning |
+| **Behind the scenes** | a hook or a wrapper calls it for you |
+| **CI pipeline** | the generated workflow calls it on a runner |
+
+## You run this
+
+### `sgit init --wizard`
+
+The recommended first run. It asks for the encryption mode, the CI mode, your
+GitHub coordinates, whether to register with a Portal, and which paths are
+sensitive — then writes everything.
+
+```bash title="terminal"
+sgit init --wizard
+
+# Or skip the questions when the answers are already on disk:
+sgit init --config $CODESEAL/myproject.yaml
+sgit init --alias myproject
+```
+
+### `sgit init`
+
+The same thing without prompts, for scripts and for people who already know
+what they want.
+
+```bash title="terminal"
+sgit init -s src/secrets config/prod_rules.yaml
+sgit init --mode recipient --ci-mode portal-key -s src/secrets
+```
+
+It creates or repairs the manifest, the store, the managed `.gitignore` and
+`.gitattributes` blocks, the Git hooks, the merge driver, and a GitHub Actions
+workflow matching the CI mode you chose. In recipient mode it also generates an
+admin keypair — **back that up before you do anything else.**
+
+### `sgit add`
+
+A drop-in for `git add` that sorts files itself. Anything in the manifest gets
+encrypted; everything else goes straight to `git add`.
+
+```bash title="terminal"
+# Adopt a new sensitive file — encrypts it and writes the manifest entry
+sgit add -s src/secrets/api-keys.env
+
+# Afterwards, no flag needed: the path is already known to be sensitive
+sgit add src/secrets/api-keys.env
+
+# A mixed batch sorts itself
+sgit add src/main.go src/secrets/db.env
+```
+
+That last case is the point of the command. `main.go` is staged normally and
+`db.env` is encrypted, and you did not have to remember which was which.
+
+### `sgit commit`
+
+Encrypts protected files, stages the blobs, runs the safety checks, delegates
+to `git commit`.
+
+```bash title="terminal"
+sgit commit -m "protect sensitive files"
+```
+
+### `sgit push`
+
+Runs the checks again and delegates to `git push`. In portal-dispatch mode this
+is also what triggers the Portal build.
+
+```bash title="terminal"
+sgit push origin main
+```
+
+### `sgit onboard`
+
+Run by someone *joining* a recipient-mode repository. It generates their
+keypair locally, prints the public key, and writes the identity file to
+`$CODESEAL/<alias>/` with mode `0600`. If the repository has a Portal, it
+submits the request and waits for an admin to approve.
+
+```bash title="terminal"
+sgit onboard
+```
+
+The private key never leaves the machine that generated it. What travels is the
+public half.
+
+## Behind the scenes
+
+You will rarely type these. When something is wrong, they are how you find out
+what.
+
+### `sgit encrypt` · `sgit decrypt`
+
+`encrypt` runs from `sgit commit`, `sgit push` and the pre-commit hook whenever
+a protected plaintext is newer than its blob. `decrypt` runs from the
+post-checkout and post-merge hooks, so a freshly pulled blob becomes a real file
+on your machine.
+
+`decrypt` **refuses to overwrite modified plaintext** unless you pass `--force`.
+The one time you will type it yourself is just after your onboarding is
+approved.
+
+### `sgit doctor`
+
+The safety check, run automatically by `commit`, `push` and both hooks. It fails
+non-zero when a protected plaintext is staged, a managed block is stale, a hook
+is missing, or a blob is out of date.
+
+```bash title="terminal"
+sgit doctor
+```
+
+Type it whenever the repository feels wrong. It is the fastest way to find out
+what CodeSeal thinks the state is.
+
+### `sgit clean`
+
+Removes manifest-listed plaintext after it has been encrypted, and nothing else.
+`run-secure` calls it after a build — on success *and* on failure.
+
+### `sgit keygen`
+
+Generates an age X25519 keypair. Bundled so there is no separate `age` to
+install. `--public-only` prints just the public half, which is the form safe to
+paste into a script or an issue.
+
+### `sgit rekey`
+
+Adds, removes and rotates recipients. Adding someone, soft-removing them and
+rotating are **header-only** — the stanzas are rewritten and the blobs are
+untouched, so it is fast. A full removal re-encrypts everything, which is the
+difference between revoking future access and revoking access to what they
+already have.
+
+### `sgit repo-onboard` · `sgit migrate` · `sgit history-rewrite`
+
+One-time plumbing. `repo-onboard` registers an existing repository with a
+Portal. `migrate` converts a pre-release v1 layout and preserves every blob
+bit-for-bit — it never runs silently; `sgit` detects the old layout and tells
+you to run it.
+
+<Callout type="warning" title="history-rewrite is hygiene, not redaction">
+It re-encrypts historical revisions of currently-sensitive paths with the
+current key material. It does **not** un-leak anything: if plaintext was pushed
+and someone cloned it, rewriting your history does not reach their copy. Treat
+anything that was ever public as compromised, and rotate it.
+</Callout>
+
+## CI pipeline
+
+Written into your workflow by `sgit init`. You never type these.
+
+### `sgit run-secure`
+
+The core of every generated workflow: decrypt, run the command, delete the
+plaintext afterwards — on success and on failure — and preserve the command's
+exit code.
+
+```bash title="terminal"
+sgit run-secure -- ./build.sh
+```
+
+It is also useful locally, whenever you want a command to see plaintext without
+leaving any behind.
+
+### `sgit ci`
+
+The Portal handshakes for portal-key and portal-dispatch modes: exchanging a
+bootstrap secret for a single-use token, fetching the wrapped runner key,
+unwrapping it.
+
+### `sgit build`
+
+Portal-build mode: `trigger` posts the commit SHA, `status` polls until the
+build reaches a terminal state.
+
+## See also
+
+- [CI and CD](/guide/ci) — which of these your workflow will call, and why
+- [Reference](/guide/reference) — every flag, file and environment variable

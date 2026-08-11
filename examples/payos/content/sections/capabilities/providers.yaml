@@ -1,0 +1,15 @@
+type: feature-grid
+id: providers
+heading: 12 payment providers, one dashboard
+subhead: Every provider lives behind one common interface.
+columns: 3
+items:
+  - icon: mouse-pointer-click
+    title: One-click OAuth
+    body: Stripe, PayPal, Square, and Mollie connect through the provider's own hosted flow, which handles account creation, KYC, and bank details. Credentials return to PayOS automatically.
+  - icon: list-checks
+    title: Guided setup for the rest
+    body: A step-by-step wizard links you to the provider's signup, tells you exactly where to find each key, and validates the credentials server-side before saving.
+  - icon: layers
+    title: Multiple providers per product
+    body: Offer card *and* PayPal *and* crypto on the same checkout; the buyer picks.

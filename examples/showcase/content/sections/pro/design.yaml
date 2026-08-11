@@ -1,0 +1,13 @@
+type: media-panel
+id: design
+heading: Take a closer look.
+title: Grade 5 titanium, brushed to a finish you can feel
+body: Twelve grams lighter than last year, and stiffer in every direction that matters.
+image: assets/pro-design.png
+alt: ""
+align: left
+tone: dark
+ratio: ultrawide
+scrim: 0.5
+cta:
+  - { label: See the design, href: "#specs", style: primary }

@@ -1,0 +1,241 @@
+---
+title: Lab 3 — A new project, docs beside the code
+description: One repository, docs and product as siblings, and a pipeline that publishes on every push.
+---
+
+**You have:** an idea for a codebase. **You will have:** a repository where
+`docs/` and `product/` sit side by side, and a pipeline that turns the docs into
+a container image on every push.
+
+**Needs:** `zel`, a GitHub repository. A container runtime only if you want to
+build locally as well.
+
+<Callout type="info" title="What runs today">
+Every command in this lab runs.
+</Callout>
+
+The arrangement matters more than the commands. Documentation in the same
+repository as the code it describes stays in the same branch, the same review
+and the same pull request as the change it documents — which is the only
+arrangement under which it stays accurate.
+
+<Steps>
+
+<Step title="Lay out the repository">
+
+```bash title="terminal"
+zel new project acme --product-lang rust
+```
+
+```
+✓ acme
+  docs/                    the documentation, as Zellij content
+  product/                 yours
+  .github/workflows/docs.yml validates on every pull request, image on main
+  12 files
+
+  Write:  zel dev acme/docs
+  Code:   cd acme/product && cargo init
+```
+
+The `product/` folder is deliberately empty. `--product-lang` prints the command
+that starts a project in your language — with your project's name in it — and
+writes nothing: `cargo init` is better than anything Zellij would put there, and
+it is what you were going to run anyway.
+
+```bash title="terminal"
+cd acme/product && cargo init
+```
+
+<Callout type="info" title="There is no Next.js app in here">
+No `package.json`, no `node_modules`, no wrapper. The pipeline builds your
+documentation inside a container from a public image, and your repository stays
+a repository about your product.
+</Callout>
+
+</Step>
+
+<Step title="Write something, and look at it">
+
+```bash title="terminal"
+cd acme
+zel dev docs --open
+```
+
+Edit anything under `docs/` and the browser follows. This is
+[Lab 1](/guide/quickstart/from-scratch) from step 2 — the loop is the same
+wherever the folder lives.
+
+</Step>
+
+<Step title="Push it">
+
+```bash title="terminal"
+git init && git add . && git commit -m "acme"
+gh repo create acme --private --source=. --push
+```
+
+</Step>
+
+<Step title="Add the pipeline">
+
+```bash title="terminal"
+zel ci init github --content docs --target image
+```
+
+It writes this, and prints what you still have to do that a file cannot:
+
+
+```yaml title=".github/workflows/docs.yml"
+name: Documentation
+
+on:
+  push:
+    branches: [main]
+    paths: ['docs/**']
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install zel
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/mylife-inc/releases/main/zellij/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - run: zel check docs
+
+      - run: zel image build docs --tag ghcr.io/${{ github.repository }}/docs:${{ github.sha }}
+      - run: zel image push ghcr.io/${{ github.repository }}/docs:${{ github.sha }}
+```
+
+Four steps. Worth noticing:
+
+- **`paths: ['docs/**']`** — a push that only touches `product/` does nothing.
+- **`zel check` before the build.** A broken link fails in a second rather than
+  after a four-minute compile, and never reaches an image.
+- **No Dockerfile.** `zel image build` writes the multi-stage build itself, and
+  it stays correct when the base image changes.
+- **`GITHUB_TOKEN` is the only credential**, and GitHub issues it to the job.
+  `packages: write` is what lets it push to GHCR.
+
+<Callout type="info" title="The install step">
+`zel` is a single binary, so a pipeline installs it by downloading one. That
+needs a published release — until Zellij cuts its first, build the image with
+`docker build` using [`zel image dockerfile`](/cli/image#zel-image-dockerfile)
+to produce the Dockerfile, or run the steps from a machine that has `zel`.
+</Callout>
+
+</Step>
+
+<Step title="Turn on package writing">
+
+The one setting that is not in a file. **Repository → Settings → Actions →
+General → Workflow permissions → Read and write permissions.**
+
+Without it the push step fails with a 403 that reads like an authentication
+problem and is a permissions problem.
+
+</Step>
+
+<Step title="Watch it run">
+
+```bash title="terminal"
+git commit --allow-empty -m "trigger" && git push
+gh run watch
+```
+
+When it finishes, the image is at
+`ghcr.io/you/acme/docs:<sha>`. Pull and run it anywhere:
+
+```bash title="terminal"
+docker run -p 3000:3000 ghcr.io/you/acme/docs:<sha>
+```
+
+</Step>
+
+<Step title="Also check on pull requests">
+
+The most valuable pipeline is the one that fails a pull request whose
+documentation is broken — and it needs no credentials at all.
+
+```yaml title=".github/workflows/docs-check.yml"
+on:
+  pull_request:
+    paths: ['docs/**']
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install zel
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/mylife-inc/releases/main/zellij/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - run: zel check docs
+```
+
+A link to a page somebody deleted, a section type that does not exist, a
+sidebar entry pointing at a missing file — caught before review rather than
+after deploy.
+
+</Step>
+
+</Steps>
+
+## Publishing a site rather than an image
+
+An image is right when the docs deploy alongside your services. If they should
+just be a website, swap the pipeline:
+
+```bash title="terminal"
+zel ci init github --deploy netlify
+```
+
+```yaml
+      - run: zel check docs
+      - run: zel deploy netlify docs
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+```
+
+Getting those two values, and pointing a custom domain at the result, is
+[Lab 1, step 6](/guide/quickstart/from-scratch).
+
+## Settling the repeated arguments
+
+`docs` on every command gets old. Put it in a file once:
+
+```toml title="zel.toml"
+content = "docs"
+
+[build]
+target = "image"
+
+[check]
+strict = true
+```
+
+Now it is `zel check`, `zel dev`, `zel build` — in the pipeline too. See
+[`zel.toml`](/cli/config).
+
+## Next
+
+<CardGrid>
+  <Card title="Write the content" href="/guide/content-model" icon="folder-tree">
+    What lives in `docs/`, and why.
+  </Card>
+  <Card title="The pipeline command" href="/cli/ci" icon="workflow">
+    Every option `zel ci init` takes.
+  </Card>
+  <Card title="Containers, in detail" href="/guide/containers" icon="container">
+    What the base image is, and what your image contains.
+  </Card>
+</CardGrid>

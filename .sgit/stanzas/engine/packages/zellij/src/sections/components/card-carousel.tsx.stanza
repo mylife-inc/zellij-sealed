@@ -1,0 +1,38 @@
+version: 1
+file: engine/packages/zellij/src/sections/components/card-carousel.tsx
+recipients:
+- name: sid-med
+  role: developer
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBDdjh0ZzkvZVBleWVhOVJ4
+    S3V4WW1Ock9ScE5xU01iOW1EQ0tBejJZVVY0CmMxUjlpVmlSNWxjYkYzdTI5dGNG
+    S0Z3TTd5amRJcGhKeURYWllUWHN6TWcKLT4gciE4UGxYOi1ncmVhc2UgSUtueyA8
+    JSBcSz5rIElUS2o6ZG4KOGtUYWRaSVlBdUFLSVVmUmRBNmZ0ZnZGbVFWck1RCi0t
+    LSB3WXFvMEFldUc5Tjg3ZS9pb2h5U0U2MWVURmMrc3pwL09JQi9IYUE3RGNVCiru
+    nDqMwqOMxYVF6qh7DhtZ6D67Rvwx1CA6kGQPK51zeBgoDrfKa83E9lF8czEbYwKA
+    KCox88W7RPOtxcHhFdg=
+    -----END AGE ENCRYPTED FILE-----
+- name: ci-runner
+  role: ci
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA1UnhoaFVtZGE5M28zaEFv
+    ekM4OEk5Nno3RlVnWUE5UnlER1d5QmJva3dvCkcyZXIxdXpDZzl5TTAxdGJBaEdh
+    RXFtU25qRUVmUkZDR0twUmRTUzJmdGcKLT4gITZLcHMtZ3JlYXNlIHdPflh6VW05
+    ID5qNT1qNiBbIEUqQT1iN0IKblZLTXBRCi0tLSA5dlY1clkxTUNtVWdxQlpoUnhh
+    N0tJdXdtd0tFSThMNHl4TnJYdlJDYTk4Ch3WQOP8Sk94FBnjOE+DkYaLO0mqbOYZ
+    w1jyfNiQpa6HvvTwPrTo+L8N+g1c04Yn1HZU6kN/e1tuDDFtPIlo4fY=
+    -----END AGE ENCRYPTED FILE-----
+- name: admin-server
+  role: admin
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB1Qm5saTJlNVdHVFFNZllj
+    TDhEYmQ4ZE9QV3VUY0FIQTNlbDFlaC9ZQTBNCjNMQVg4MDdGNlpMcURUY1VQOCtM
+    aCtldnp0OEVsZUJZaGJmT0FXblJxTWcKLT4gRXRbalIqLFMtZ3JlYXNlCmE4ZTkz
+    T0NING55dS8veWFhQ2hyTTVndC94RzNzckdudDhsRUFybkg1c1Z3N1FnNlA3N1Mr
+    UktGdHp0QlNZM00KQUpKS2Jaejk4NWEzWmcKLS0tIFhERkwyU3Vwdy9xc20vRUMw
+    cDQybjhKM0QzUm50Wlljb0dlekRCS0J2ZnMKikf2uVwMRhHk0AAfXc/xj3nz85xg
+    vPBZjhBiTtMgMwwHAsTb9eZiF8rUZP3x1AYi5xQ8K4YaTqwPE/QMYEw8Rw==
+    -----END AGE ENCRYPTED FILE-----

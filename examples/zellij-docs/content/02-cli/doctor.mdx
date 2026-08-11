@@ -1,0 +1,144 @@
+---
+title: zel doctor
+description: What is installed, what is missing, and which socket the runtime is on.
+---
+
+<Callout type="tip" title="Available">
+Works today. It does not yet report credentials or a resolved `zel.toml` —
+neither of those exists yet.
+</Callout>
+
+```bash title="terminal"
+zel doctor
+```
+
+```
+zel            0.1.0  (aarch64-apple-darwin)
+
+Container runtime
+  ✓ docker     Docker version 28.0.4 via unix:///Users/you/.colima/default/docker.sock
+  · engine     ghcr.io/mylife-inc/zellij-base:latest  (local)
+
+Content
+  ✓ ./content
+```
+
+## What it is for
+
+Two situations, and they are not the same.
+
+**Something is wrong and the error is not obviously about the environment.** A
+build that fails, a `check` that reports a site with no pages, a command that
+hangs. `doctor` answers "is the machine set up the way this tool expects" in one
+second, and that answer is either the problem or eliminated.
+
+**A bug report.** The first thing anyone will ask is what runtime you have, on
+what socket, with which image. This prints exactly that, and prints no
+credential values, so the output is safe to paste into an issue.
+
+## The socket line
+
+The most valuable line, and the reason `doctor` reports the endpoint rather than
+just a tick.
+
+`docker info` failing does not mean Docker is not running. It usually means a
+runtime **is** running on a socket the default context does not look at. Colima
+puts its socket under `~/.colima/`; Rancher Desktop under `~/.rd/`; rootless
+Podman under `$XDG_RUNTIME_DIR`. In every case the daemon is fine and the client
+is looking in the wrong place.
+
+So `zel` probes those paths, uses whichever answers, and tells you which one it
+found. Being told
+
+```
+✓ docker     28.0.4 via unix:///Users/you/.colima/default/docker.sock
+```
+
+is a different experience from being told to start something that is already
+started.
+
+<Callout type="info" title="If no runtime is found">
+The failure names what is installed and what to do about it, and then says which
+commands still work:
+
+```
+Container runtime
+  ✗ none
+    docker is installed but not answering, and none of the usual sockets exist.
+    Try `colima start`, or start Docker Desktop.
+
+  Commands that only read the content model still work:
+  new, explain, list, context, detect, convert.
+```
+
+That last part matters. Writing, converting and inspecting content need no
+container at all — only the commands that run the engine do.
+</Callout>
+
+## The engine line
+
+```
+· engine     ghcr.io/mylife-inc/zellij-base:latest  (local)
+```
+
+Which image the build commands will use, and whether it is already pulled.
+
+`not pulled — the first build will fetch it` is not a problem; it is a warning
+that your next `zel dev` includes a 237 MB download before it does anything
+visible. Worth knowing before a demo, or before a flight.
+
+Override it with `ZELLIJ_IMAGE` when your organisation mirrors the image
+internally:
+
+```bash title="terminal"
+ZELLIJ_IMAGE=registry.internal/zellij-base:0.1.0 zel doctor
+```
+
+## Exit code
+
+`0` when everything a command would need is present, non-zero otherwise. It
+works as a preflight:
+
+```yaml
+      - run: zel doctor
+      - run: zel build docs
+```
+
+Which turns "the build failed after four minutes" into "the runner has no
+container runtime", stated first.
+
+## What it will report later
+
+| | |
+| --- | --- |
+| Configuration | Where [`zel.toml`](/cli/config) was found and everything it resolved to |
+| Credentials | Which environment variables the configured provider needs, and whether they are set — **names only, never values** |
+
+Both wait on the features they describe.
+
+## Housekeeping
+
+<Callout type="warning" title="Planned">
+All four exit with `not implemented yet`.
+</Callout>
+
+| | |
+| --- | --- |
+| `zel version` | Binary, engine image and content-model versions |
+| `zel pull` | Pull or update the engine image ahead of time |
+| `zel upgrade` | Replace this binary with the latest release |
+| `zel completions <shell>` | `bash`, `zsh`, `fish`, `powershell` |
+
+`zel pull` is the one worth having: the first `zel dev` on a cold machine spends
+a minute fetching an image with no indication that this is a one-off, and doing
+it deliberately — in a CI image build, or before getting on a plane — moves that
+minute somewhere it does not matter.
+
+Until then, `docker pull ghcr.io/mylife-inc/zellij-base:latest` does the same
+thing.
+
+## See also
+
+- [Containers](/guide/containers) — what the engine image is, and why
+- [`zel.toml`](/cli/config) — what doctor will resolve
+- [`zel check`](/cli/check) — the command most likely to send you here

@@ -1,0 +1,14 @@
+type: faq
+id: faq
+heading: Common questions
+items:
+  - question: Does PayOS hold my money?
+    answer: No. You connect your own provider accounts and funds settle directly with you. PayOS is an orchestrator, not a merchant of record — which is also why there is no money-transmitter licensing on our side.
+  - question: What does this do to my PCI scope?
+    answer: All checkout happens on the provider's hosted pages — PayOS never renders a card field. Your site carries no payment code, keeping you within SAQ-A.
+  - question: Do I need a real payment provider account to try it?
+    answer: No. The demo vendor ships with a built-in mock provider, so you can run the entire platform and complete a full purchase offline. Connecting a *real* provider does require that provider's own merchant account — that is what keeps your money yours.
+  - question: Can someone else be the merchant of record?
+    answer: Yes. Bring a Paddle or Lemon Squeezy account and PayOS supports them as ordinary providers, labelling their settlements accordingly. It is your choice, per product.
+  - question: Can I self-host it?
+    answer: Yes. The same container images run locally via Docker and on Railway, AWS, GCP, or DigitalOcean, deployed with one command.

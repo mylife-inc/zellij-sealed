@@ -1,0 +1,6 @@
+type: showcase
+id: custody
+eyebrow: Your money stays yours
+headline: PayOS never holds your funds
+body: "You connect your *own* provider accounts — your Stripe, your PayPal, your BTCPay. Money flows straight from the buyer to you. PayOS is the orchestration layer on top: replaceable plumbing, never a custodian."
+background: tinted

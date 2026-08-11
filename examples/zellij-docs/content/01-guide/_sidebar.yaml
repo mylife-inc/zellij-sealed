@@ -1,0 +1,40 @@
+title: Guide
+order: 1
+description: Install Zellij, learn the content model, and ship a site.
+
+nav:
+  - label: Start here
+    items:
+      - index
+      - quickstart/index
+      - label: Labs
+        items:
+          - quickstart/from-scratch
+          - quickstart/existing-docs
+          - quickstart/new-project
+          - quickstart/existing-repo
+  # Not "The content model": a group sharing a name with a page inside it makes
+  # the breadcrumb read "Guide / The content model / The content model".
+  - label: Authoring
+    items:
+      - content-model
+      - site-config
+      - pages-and-sections
+      - menu
+      - guide-folders
+      - maths-and-diagrams
+      - converting
+  - label: Look and feel
+    items:
+      - themes
+      - motion
+  - label: Shipping
+    items:
+      - containers
+      - deploying
+  # The wrapper app is not on the path most people take — zel runs it in a
+  # container and they never see one. It is here because anyone who checks a
+  # wrapper into their own repository owns those npm scripts and can break them.
+  - label: Reference
+    items:
+      - wrapper

@@ -1,0 +1,40 @@
+version: 1
+file: engine/packages/zellij/src/chrome/theme-switcher.tsx
+recipients:
+- name: sid-med
+  role: developer
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBmcW5Xc1BVSm81emZXRTB3
+    TGRNVWhNSHV4NlpYZDlvUkdzTThjZFh4MzFNCmI2NGdvdGhnVEE4VlN0ZG9sM2Mz
+    VUNLQUdXTWRFek15T3BiSFU4MUZkSm8KLT4gKTgsLS1ncmVhc2UgPlRedCBuei5O
+    ZSlOCjlRZzErNEd0N2cKLS0tIFFEb3VEMEcwL3dzcUgzWWFqU1ZwRUFJNEhySy9S
+    dkd5UmkzSjBmaEtJMzAKRu4RrBZjP/TN3zOnOzdWbbUhbqCkdqEsSuqkThwpvxNB
+    ys+xx3WPk/54l92uxoBwFtaYw+WcxF/MV+59UrLC4A==
+    -----END AGE ENCRYPTED FILE-----
+- name: ci-runner
+  role: ci
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBDZjU5VUQ2VVJvbkIvclRa
+    V2M2WThoM0xXNFRSNzc1bUhya2JLUGZZMmwwClJNV3dod1RqRWtKUGhHdkdwN0Jv
+    YVYwa0d5MWQ5aEJKYnJUNjRFTThSK28KLT4gPy52ZGdzUS1ncmVhc2UKNWpkOEo1
+    L0VwdHZCcEdiYjYxWHpyYzVPZXZBM3piWTA1WHZXZGRGTWU5V2VpOTBta1dvTnJF
+    eENJTGpiOFFxWQptTUFCZ1kzVld1dVJwcGtnMWduQVRzVEdVZEVSM2RxNFkrTDI3
+    SkFXVmRTdQotLS0gMStnOW9mZEhLaWhxcjhGa3ZHb0hjZW5xVWhOQ1RmY2xXTFI2
+    NE9xQnlaOAqcXtmDU7y7PxLcfgJyRUsVKHtYy0Zk+4WxbPuzpfoFFepDl+uSAmIo
+    MzE0qOGwGOFh3EXjv/2AxdUsET08SUhg
+    -----END AGE ENCRYPTED FILE-----
+- name: admin-server
+  role: admin
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA0RmRLbWN6Z3FSVFNGZDFh
+    OXExaDRXb05oV2tBbHU2bUQ5OTRXUExWa1hjClhFeW00d2I3ZDVCTlRicFBGd05P
+    V08yT2N3ZHhiNFRyZThqTjlSVXVTdVEKLT4gPV4mLWdyZWFzZQp6YTJmNTZYOHZp
+    Z3ZqWDhWN25JUzZEWUxubGpkM1RFcWdCWll5R0ZVUjBPU2NRczBCWURKNW4wZW5r
+    KytDMmQ0CjhSOUtzSE1MK25OM3lRanAwRkIvVnQrZlhzUGg0QVRaWmdHbVNvVjVj
+    ejRZRG8zVGJ2Y0gxNlEKLS0tIGlRTGdpZmprMVBtZ3VmbGNheWNDOWF4ZUdWK3Zq
+    VERlakVrbmlHRlJSWjQK1YES7AZ2Z6qGk2/Y2tnMfDCMDiuNSFWTuOCziMuDR0tf
+    qQi74gaJyRScuDgRcj5bzKMZ4/lY8v2nrDWVtqzKYw==
+    -----END AGE ENCRYPTED FILE-----

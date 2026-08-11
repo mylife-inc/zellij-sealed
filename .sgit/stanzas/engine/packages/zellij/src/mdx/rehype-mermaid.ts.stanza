@@ -1,0 +1,39 @@
+version: 1
+file: engine/packages/zellij/src/mdx/rehype-mermaid.ts
+recipients:
+- name: sid-med
+  role: developer
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA5KzV4ZkZYSzVmWWdNNmpq
+    NW1WR2ZPc0RIWG9hMWxxbmZxNnN4Si9JeG1ZCnpwU0tsVEcxK0pmNUdlZFRHUzY3
+    UXNZTjg0WnpyZ095aFVyaXFkZjJFTFUKLT4gai45SS8tZ3JlYXNlIGZYaSBHJWE+
+    YmwwaSB4fHUgRWlvcyghe2gKZHZRSk0rSVVtUHRmVVR2TnRYOWxuUEhQRjhseDUv
+    ZzAvdEhPQ3JnYU4rdUhNTnJnU1hrWGUzVERkVUhyRDA3aApLYjc0T3ovcnVML3Ex
+    d0xJOXFqQnp4S2FicmVCN05BCi0tLSBiZXA5OVdMSjVIbCs3cHRsRmhOMDVVM3di
+    N013WUdPbEtqNDV1UzJoTGI0Cg4kzk8ETMz4AMPAQfUDZH6LO8x97lzydai/BT3o
+    Y8bgQSKCLmf088T1BBXZ2uYNgO6iGATa/5IC5p6kGYYnkwY=
+    -----END AGE ENCRYPTED FILE-----
+- name: ci-runner
+  role: ci
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA2bzFDbDJrSXYxL0x0Sk1X
+    dmVpM0RSSmc5L0luTUhtUFgrM0Z5c3RCODFzClk1RENuRE5IbUtyWlNMcTQrZkFv
+    TmVVaGRPYTBGOHJNaVR3WkJmT1p2RncKLT4gPVs0REo/bGEtZ3JlYXNlIDJSZCBy
+    NGg7IV0gXCp+OHUKaUpSbHZCenlFVlJLSkEKLS0tIHJVTVhEQVpxcWZTQTE1b3VO
+    c2dyMzRlOFMvcmdzK0hkQmlrK1cvckQ2OU0KC1hzexPEG5DXUnQX3MjMa8m43mjb
+    DusrWtUx998T6SrVKbNstSZkTnSfBZimcG2QAG+9oPY9aG9lcAGL/zaQ9A==
+    -----END AGE ENCRYPTED FILE-----
+- name: admin-server
+  role: admin
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB3cVdyOFRQVUU1T3IrSzNQ
+    MTlMMUdJTGNiTlkyVXNpRzBoL2x1YmdmbEFrCnF2U3VEUWlTSk9mNWQ2NStCZmJK
+    ZGdrM2JlUkwxSWN2aW1XQjZIcDNWYzgKLT4ge1c6Yl15cy1ncmVhc2UgcChPIgpU
+    VTVsV2c5OHZhVFhXTEdaZ0lUUlNrdEhuOWdySTBSRFVDVWhIT2lzVEJrUFVFNVZz
+    WkVxYkRLVwotLS0gaUNzTytFa2NVUzBoT2ZveTlENzcrbitXeGtOUnpqdE9xTDJj
+    bTRLdlY3QQpVu90hcrpjuUTnG6meiD8aWyh8yG8vZTUWPCXGZkd4uN7b1HtJuNCD
+    gZeYeLXQEXAUhRcVulfEdKxKHp4whFcT
+    -----END AGE ENCRYPTED FILE-----

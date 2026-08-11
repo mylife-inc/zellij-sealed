@@ -1,0 +1,19 @@
+# Everything the image build has no use for. Keeping this tight matters twice:
+# it is the build context uploaded to the daemon, and it is what invalidates
+# the layer cache when it changes.
+**/node_modules
+**/.next
+**/out
+**/test-results
+**/playwright-report
+cli/target
+.git
+.github
+docker
+specs
+*.md
+
+# CodeSeal ciphertext. The image is built from the DECRYPTED tree, so the
+# blobs are dead weight in the build context — and shipping the ciphertext
+# inside an image that already contains the plaintext helps nobody.
+.sgit/

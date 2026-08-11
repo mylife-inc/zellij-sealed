@@ -1,0 +1,38 @@
+version: 1
+file: engine/packages/zellij/src/sections/components/quote-card.tsx
+recipients:
+- name: sid-med
+  role: developer
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBIaHJuc2FXVUtNMG4xelNx
+    RnlMSW9sMHZWY0ZDRGhGODV6US9tUk1SbnpnCkNPUHExTVMrR1lWczg3YXJVYVc1
+    cDJhbFcxdkxRaTRXWUQzQllTdndwS2sKLT4gfjhNLWdyZWFzZSAobSAkLCAjIWcg
+    LFFUcHZFdVMKTXIwS2M0SmF1ZEdJWXR5WTllb0xaQko4TnZOZDFoZTYzTG1HVVpi
+    aAotLS0gLzhldTNYZzErNUdXeFZmMUcxajlpOWN6Q1c1Y0tXTzVRdGJxMm0vMWZs
+    RQqwjj3tOJYvr8OgK91hjQasNT5apX4EvM8B1G05nK1Y1gPBI2mOaEV6UVKI0GoD
+    P5Zu0lEBUe7e85Y6bFTD49GY
+    -----END AGE ENCRYPTED FILE-----
+- name: ci-runner
+  role: ci
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSAwd1VrazRpbDRhbzByeS9S
+    dzFtMk1IY08vQ3E2SFozbE9FSURlQkIyQjNJCkRpNWRDZlN0NnNxMHAxbVh3eGF2
+    RlZ2ODZ0QmQ5MnlHSDhFSnB2aEVFQ1UKLT4gX09GYiRpLWdyZWFzZSA2X0t8KCM4
+    TyByZWgKWk41aGVMOGx6ZlJWTzRvWDhWOGUvNGV4S0lrMQotLS0gMkE4WDNrUUUz
+    WEZGdUNseHlQUCtNODhIYlhSeUMxU25ZUHhmM3VxblBybwpFvnGMnvtXt9n9fcEw
+    41n4sCkGz37z+5NSytX7Q1MD+EyWSka1LS69UpjDRJSDfql/q3cyKQPuPfia73S6
+    ITm6
+    -----END AGE ENCRYPTED FILE-----
+- name: admin-server
+  role: admin
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBXUE5paXlZY25HNm1QTjRJ
+    YUlKYUNPME1yS1RidldwRFVQUXNteFdZbnpnCjFvSFR1TXVMSS9rUzBuMnEvYnFJ
+    NTVRZCttMG9lckEzQUpoaTNtQWJNdjQKLT4gaEF8Py1ncmVhc2UgTE4Kd0JRbmUv
+    UHVYQU5VTjdsNzMvdjNxRFEKLS0tIFNoZG94cHdJZ2NTNEZwcnBRNEtmNThLRlM4
+    dGlCeXpxQ3NHOHluZm9wSmcKP7b2RaX+qqa+LYsoLjtpy4vTvJd4wrIBaIPNupgx
+    JCxumagRntKbGfzSc7ec7bzNHxDd9lVx37v36iK7FmuubA==
+    -----END AGE ENCRYPTED FILE-----

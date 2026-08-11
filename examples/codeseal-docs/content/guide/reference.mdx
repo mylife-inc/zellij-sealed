@@ -1,0 +1,138 @@
+---
+title: Reference
+description: The files CodeSeal writes, the rules it enforces, and where things live.
+---
+
+What is on disk, what enforces what, and the behaviour you can rely on.
+
+## The repository model
+
+Four things are committed and one is not.
+
+| path | committed | what it is |
+| --- | --- | --- |
+| `.sgit/manifest.yaml` | yes | which paths are protected, and the admin recipient |
+| `.sgit/recipients.yaml` | yes | everyone else with access (recipient mode) |
+| `.sgit/store/**` | yes | the ciphertext |
+| `.sgit/stanzas/**` | yes | per-file keys wrapped per recipient (recipient mode) |
+| the protected files themselves | **no** | plaintext, local, gitignored |
+
+`.sgit/tmp/` is scratch space and is ignored.
+
+The split between manifest and sidecar matters in daily use: adding a teammate
+touches only `recipients.yaml`, so the manifest stays stable and its history
+stays readable.
+
+## Directory expansion
+
+Nominating a directory does not store a wildcard. Every file inside is expanded
+into its own manifest entry.
+
+```bash title="terminal"
+sgit add -s src/secrets/
+```
+
+writes an entry per file, not a rule matching the folder.
+
+This is a deliberate trade. It means a file added to that folder later is **not
+automatically protected** — you adopt it explicitly. The alternative silently
+covers new files, which sounds safer until the manifest no longer tells you what
+is covered.
+
+<Callout type="warning" title="New files in a protected folder are not automatic">
+Run `sgit add -s <path>` when you add a file to a nominated directory, and
+`sgit doctor` before committing. Doctor is what catches the case you forgot.
+</Callout>
+
+## Path validation
+
+Refused, always:
+
+- paths outside the repository root
+- absolute paths
+- `..` traversal
+- symlinks pointing outside the repository
+
+A manifest that could reach outside the repository would make `sgit decrypt` an
+arbitrary-write primitive.
+
+## Fail-safe behaviour
+
+The rule is that CodeSeal stops rather than guesses.
+
+- `sgit decrypt` **refuses to overwrite modified plaintext** without `--force`
+- `sgit migrate` never rewrites a legacy layout silently — it detects, then
+  tells you
+- authenticated encryption means tampering **fails closed**; a modified blob is
+  an error, not corrupt output
+- `sgit clean` deletes only manifest-listed plaintext that has been encrypted
+
+## Managed blocks
+
+`sgit` maintains marked regions in `.gitignore` and `.gitattributes`:
+
+```text title=".gitignore"
+# >>> codeseal managed block — do not edit
+src/secrets/api-keys.env
+src/private/payment_engine.py
+# <<< codeseal managed block
+```
+
+Edit outside the markers freely; inside them is regenerated. `sgit doctor`
+reports a stale block, which is what happens when a protected path was added
+and the block was not refreshed.
+
+## Installed hooks
+
+| hook | what it does |
+| --- | --- |
+| `pre-commit` | encrypts stale blobs, runs `doctor` |
+| `pre-push` | runs `doctor` |
+| `post-checkout` | decrypts, so a switched branch materialises |
+| `post-merge` | decrypts after a merge brings new blobs |
+
+A merge driver is also installed, so a conflict in an encrypted blob is
+recognised rather than silently mangled.
+
+<Callout type="tip" title="If hooks go missing">
+Some tooling replaces `.git/hooks`. `sgit doctor` reports missing hooks, and
+`sgit init` in an existing repository repairs them without touching anything
+else.
+</Callout>
+
+## What `doctor` fails on
+
+Non-zero exit when:
+
+- a protected file is staged in plaintext
+- a manifest entry has no corresponding blob
+- a blob is older than its plaintext
+- a managed block is stale
+- a hook is missing or has been replaced
+- the layout is the legacy v1 one and needs `sgit migrate`
+
+## Environment
+
+| variable | what it is |
+| --- | --- |
+| `SGIT_KEY` | the passphrase, in passphrase mode |
+| `CODESEAL` | root for identity files — `$CODESEAL/<alias>/` |
+| `SGIT_ONLY` | set to `1` so the installer fetches only the binary; used in CI |
+
+Identity files are written `0600`. Key material is never accepted as a
+command-line argument and never printed to stdout.
+
+## Releases
+
+Binaries are published to GitHub Releases for five targets, each with a SHA-256
+checksum and a [sigstore](https://www.sigstore.dev/) signature bound to the
+release workflow's identity. There is no key to trust ahead of time — the
+signature carries its own provenance.
+
+See [Install](/guide/install#verifying-what-you-downloaded) for the verification
+commands.
+
+## See also
+
+- [Commands](/guide/commands) — every command and its flags
+- [Security model](/guide/security) — the reasoning behind the rules above

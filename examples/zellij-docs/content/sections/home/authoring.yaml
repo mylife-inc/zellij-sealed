@@ -1,0 +1,17 @@
+type: zigzag
+id: authoring
+heading: What authoring actually looks like
+rows:
+  - title: Declare a page as a list of sections
+    body: >-
+      Pages name sections; sections hold content. A page may reuse the same
+      section twice with a different background, and never restates its words.
+    image: assets/card-content.png
+    align: image-right
+  - title: Drop a sidebar file to get a manual
+    body: >-
+      Any folder holding `_sidebar.yaml` becomes a documentation tree with
+      left navigation, breadcrumbs, on-this-page and prev/next. A site can have
+      as many as it likes — one per chapter, if that is what you are building.
+    image: assets/card-guides.png
+    align: image-left

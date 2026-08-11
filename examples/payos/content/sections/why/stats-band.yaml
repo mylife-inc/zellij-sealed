@@ -1,0 +1,9 @@
+type: stats-band
+heading: What that replaces
+stats:
+  - value: N×M
+    label: Provider integrations you no longer maintain
+  - value: "1"
+    label: Signed event vocabulary instead of many
+  - value: "1"
+    label: Analytics view across every provider

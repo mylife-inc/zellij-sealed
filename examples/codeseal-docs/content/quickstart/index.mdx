@@ -1,0 +1,137 @@
+---
+title: Quickstart
+description: Eight labs, one per combination of encryption mode and CI mode. Pick the pair that matches your situation and follow it end to end.
+---
+
+Configuring CodeSeal is answering **two independent questions**. Every lab here
+is one pair of answers, followed from an empty repository to a green build.
+
+## The two questions
+
+**What is the decryption material?** — the *encryption mode*, chosen at
+`sgit init`, and about your team rather than your pipeline.
+
+| | |
+| --- | --- |
+| **R** · `recipient` | Every developer has their own keypair. Each file's key is wrapped to each person, so adding or removing someone is a rewrap rather than a shared-secret rotation. |
+| **P** · `passphrase` | One shared secret, stretched with scrypt. Simple, and everyone who has it has everything. |
+
+**Who holds it, who builds, and who starts the build?** — the *CI mode*.
+
+| | |
+| --- | --- |
+| **D** · `portal-dispatch` | You hold the keys. `sgit push` triggers the build and sends the key material, sealed, with it. |
+| **S** · `secrets` | GitHub Secrets holds the key material, permanently. GitHub triggers on push. |
+| **K** · `portal-key` | A Portal holds it and hands it to the runner for one build. GitHub triggers on push. |
+| **B** · `portal-build` | A Portal holds it and does the build. GitHub never sees plaintext. |
+
+Two axes, and they are genuinely independent: **eight working combinations.**
+
+Each pair has a two-letter name, and `sgit` takes it as a command:
+
+```bash title="terminal"
+sgit rd        # = sgit init --mode recipient --ci-mode portal-dispatch
+```
+
+The letters are the two answers — **R**ecipient or **P**assphrase, then
+**D**ispatch, **S**ecrets, portal-**K**ey or portal-**B**uild. Every lab below
+gives the shorthand and the long form; `sgit --help` lists all eight.
+
+## Pick your lab
+
+<CardGrid>
+  <Card title="RD · Recipient + Dispatch" href="/quickstart/rd" icon="shield-check">
+    **Recommended.** Keys on your machine, builds on GitHub, triggered by
+    `sgit push`. No long-lived decryption key anywhere on GitHub, and no
+    Portal to run. **~15 minutes.**
+  </Card>
+
+  <Card title="PD · Passphrase + Dispatch" href="/quickstart/pd" icon="key">
+    The same trigger model with one shared secret instead of per-developer
+    keys. Simplest thing that keeps decryption material off GitHub.
+  </Card>
+
+  <Card title="RS · Recipient + Secrets" href="/quickstart/rs" icon="git-branch">
+    Per-developer keys, with a CI runner key parked in GitHub Secrets.
+    Ordinary `on: push` CI — nothing to run locally.
+  </Card>
+
+  <Card title="PS · Passphrase + Secrets" href="/quickstart/ps" icon="lock">
+    One shared passphrase in GitHub Secrets. The least moving parts of the
+    eight, and the most trust placed in GitHub.
+  </Card>
+
+  <Card title="RK · Recipient + Portal Key" href="/quickstart/rk" icon="server">
+    A Portal you run holds the keys and lends one to the runner for a single
+    build. Central audit, builds still on GitHub.
+  </Card>
+
+  <Card title="PK · Passphrase + Portal Key" href="/quickstart/pk" icon="server">
+    The same, with a shared passphrase as the material the Portal hands out.
+  </Card>
+
+  <Card title="RB · Recipient + Portal Build" href="/quickstart/rb" icon="box">
+    The Portal decrypts and builds. GitHub is reduced to a trigger and a
+    checkmark, and never sees a plaintext file.
+  </Card>
+
+  <Card title="PB · Passphrase + Portal Build" href="/quickstart/pb" icon="box">
+    Portal-side builds with a shared passphrase.
+  </Card>
+</CardGrid>
+
+## Which one is yours
+
+| If… | Lab |
+| --- | --- |
+| You want the strongest default and are willing to trigger builds yourself | [RD](/quickstart/rd) |
+| You are one person, and per-developer keys are ceremony you do not need | [PD](/quickstart/pd) |
+| Builds must start on their own, with nothing running locally | [RS](/quickstart/rs) or [PS](/quickstart/ps) |
+| You already run a Portal and want central audit | [RK](/quickstart/rk) or [PK](/quickstart/pk) |
+| Your CI provider is explicitly outside the trust boundary | [RB](/quickstart/rb) or [PB](/quickstart/pb) |
+
+<Callout type="tip" title="Start at RD unless something rules it out">
+It keeps every decryption key on machines you control, needs no Portal, and
+gives each developer their own key — so removing someone is a rewrap rather
+than telling four people a new password.
+
+Its one cost, worth knowing before you start: **your machine needs a GitHub
+token permanently**, because every build you trigger is an API call. The other
+seven need one only at setup.
+
+There is no arrangement with no long-lived secret anywhere. The question is
+which one, and where — a scoped, revocable token on your laptop, or a key on
+GitHub that decrypts your source.
+</Callout>
+
+## What every lab assumes
+
+- `sgit` on your PATH — see [Install](/guide/install)
+- `git`, and a repository you can push to
+- `$CODESEAL` set, or the default `~/Dev/config/codeseal`
+- **a fine-grained GitHub token** — step 1 of every lab
+
+Nothing else. No Docker, no Node, no Portal unless the lab's name says Portal.
+
+<Callout type="info" title="Why every lab starts with a token">
+`sgit init` uploads the secrets your workflow reads. Which secrets differ by
+mode, but **all eight modes have some** — and a repository whose secrets were
+never uploaded looks finished and produces no builds.
+
+The tool does that setup so you do not have to paste keys into a web form. The
+token is the one thing it cannot create for you: GitHub has no API for minting
+one, so a human clicks through the UI once.
+
+RD and PD keep needing it afterwards, to trigger each build. The other six do
+not.
+</Callout>
+
+<Callout type="warning" title="Back up $CODESEAL">
+Every lab writes keys to `$CODESEAL/<project>/`. That directory is what lets
+you read your own source — the admin key, your identity, the CI runner key, the
+passphrase. It is deliberately visible rather than a dotfolder so you remember
+it exists.
+
+Copy it somewhere safe before you have anything you would miss. A repository
+can be re-cloned; these cannot be regenerated.
+</Callout>

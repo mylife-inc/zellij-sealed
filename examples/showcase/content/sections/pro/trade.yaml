@@ -1,0 +1,12 @@
+type: media-panel
+id: trade
+title: Trade in the one you have.
+body: Get up to £600 in credit, applied the moment you check out.
+image: assets/promo-trade.png
+alt: ""
+align: center
+tone: dark
+ratio: wide
+scrim: 0.55
+cta:
+  - { label: Get an estimate, href: /guide/quickstart, style: primary }

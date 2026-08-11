@@ -1,0 +1,30 @@
+type: bento-grid
+id: highlights
+heading: The rest of it
+items:
+  - title: The L3 Pro chip
+    body: Six performance cores, a 20-core GPU, and a neural engine that runs the camera pipeline in real time.
+    image: assets/pro-chip.png
+    span: large
+    href: "#chip"
+  - title: 2,600 nits
+    body: Readable in direct sun.
+    icon: sun
+    span: normal
+  - title: Thirty-one hours
+    body: Of video. Genuinely.
+    icon: battery-charging
+    span: normal
+    background: tinted
+  - title: Built to survive the year
+    body: Ceramic front, titanium frame, and an IP68 rating that assumes you will drop it in something.
+    image: assets/pro-battery.png
+    span: wide
+  - title: USB-C, 40Gb/s
+    body: One cable for everything.
+    icon: cable
+    span: normal
+  - title: Satellite messaging
+    body: Free for five years.
+    icon: satellite
+    span: normal

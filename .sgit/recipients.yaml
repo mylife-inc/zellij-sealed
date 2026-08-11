@@ -1,0 +1,12 @@
+version: 1
+recipients:
+- name: sid-med
+  public_key: age1t2ehghdefg9e53ggsgzdzwydx3j92xuyvly2uxc7vjnqvnl7g3hq3w79fl
+  role: developer
+  added: 2026-08-11
+  added_by: sgit init
+- name: ci-runner
+  public_key: age1stlnxu6r27la39vfygru5xh4l920kkv8vjjjt2v0kf9ynq2msppq63zgll
+  role: ci
+  added: 2026-08-11
+  added_by: sgit init

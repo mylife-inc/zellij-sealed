@@ -1,0 +1,35 @@
+{
+  "name": "@shebka/zellij-docs",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Zellij's own documentation site \u2014 built with Zellij.",
+  "type": "module",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "assets": "node scripts/make-assets.mjs",
+    "predev": "npm run assets && zellij prepare",
+    "dev": "next dev --port 4320",
+    "prebuild": "npm run assets && zellij prepare",
+    "build": "next build",
+    "start": "next start --port 4320",
+    "typecheck": "tsc --noEmit",
+    "verify:links": "node scripts/verify-links.mjs"
+  },
+  "dependencies": {
+    "@shebka/zellij": "*",
+    "next": "16.2.12",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3",
+    "@playwright/test": "^1.62.1"
+  }
+}

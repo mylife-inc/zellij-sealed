@@ -1,0 +1,8 @@
+type: cta-banner
+headline: Ready to ship?
+body: Three files, then write content.
+background: { gradient: [accent, inverted-bg] }
+command: curl -fsSL https://raw.githubusercontent.com/mylife-inc/releases/main/zellij/install.sh | sh
+cta:
+  - { label: Get started, href: /guide, style: primary }
+  - { label: Browse sections, href: /sections, style: ghost }

@@ -1,0 +1,8 @@
+type: cta-banner
+id: start
+headline: Start with the quickstart.
+body: Three files, then write content.
+background: { gradient: [accent, inverted-bg] }
+cta:
+  - { label: Quickstart, href: /guide/quickstart, style: primary }
+  - { label: Browse sections, href: /sections, style: ghost }

@@ -1,0 +1,124 @@
+---
+title: RK · Recipient + Portal Key
+description: A Portal holds the keys and lends one to the runner for a single build. GitHub triggers on push.
+---
+
+**Every developer has their own keypair. The CI runner has one too — but its
+private key lives in the Portal, not on GitHub. The runner fetches it for one
+build, unwraps it locally, and deletes it before compiling.**
+
+Builds still start on push, as in [RS](/quickstart/rs). The difference is that
+GitHub never holds a key that outlives a single build.
+
+<Callout type="warning" title="This lab needs a Portal">
+The Portal is a service you run — locally with `seal up`, or deployed. It is
+the piece that holds key material on your behalf, so unlike the first four labs
+there is infrastructure to stand up before anything works.
+
+```bash title="terminal"
+seal up          # the whole stack, locally
+seal help        # deploying it somewhere
+```
+
+If you are evaluating CodeSeal, start with [RD](/quickstart/rd) instead — it
+needs nothing but `sgit`.
+</Callout>
+
+## 1 · Create the token
+
+Do this first. `sgit init` uploads the secrets your workflow reads, and without
+a token it sets up everything except the half that makes builds run.
+
+**GitHub → Settings → Developer settings → Fine-grained tokens → Generate new**
+
+| | |
+| --- | --- |
+| Repository access | Only select repositories → **this one** |
+| Contents | **Read and write** — so you can push |
+| Secrets | **Read and write** — so `init` can upload them |
+
+Metadata: read is added for you.
+
+```bash title="terminal"
+export GITHUB_PAT=github_pat_…
+```
+
+`GH_TOKEN` and `GITHUB_TOKEN` work too. If none is set and you are at a
+terminal, `init` offers to take it and stores it per project.
+
+## 2 · Seal the repository
+
+```bash title="terminal"
+sgit rk
+```
+
+`rk` is the shorthand for this pair, and takes every flag `init` takes.
+Spelled out, it is:
+
+```bash title="the same thing, in full"
+sgit init --mode recipient --ci-mode portal-key
+```
+
+**On your disk:**
+
+```text title="$CODESEAL/<project>/"
+admin.key       # adds and removes recipients
+identity.age    # yours
+```
+
+Every key is outside the repository, at `0600`. A key in the working tree is
+one `git add -A` from being published.
+
+## 3 · Check GitHub is ready
+
+`sgit init` uploaded `CODESEAL_BOOTSTRAP_SECRET` and `GITHUB_WRAPPER_PRIVATE_KEY` as it went — that is what the token in step 1
+was for. Confirm it landed:
+
+```bash title="terminal"
+sgit ci verify
+```
+
+```
+mylife-inc/demo is ready to build.
+```
+
+Neither decrypts anything alone: the first buys a sixty-second single-use token, the second unwraps what that token fetches.
+
+<Callout type="info" title="If init said the secrets were not uploaded">
+Run `sgit ci provision`. Nothing is broken — that step is postponed, not lost,
+and `verify` tells you when it is done.
+</Callout>
+
+## 4 · Protect something
+
+```bash title="terminal"
+sgit add-sensitive src/private
+sgit encrypt
+```
+
+## 5 · The everyday loop
+
+```bash title="terminal"
+sgit add -s src/private/payment.rs
+sgit commit -- -m "protect payments"
+sgit push origin main
+```
+
+Push, and GitHub starts the workflow. The runner trades the bootstrap secret
+for a token, redeems it for a wrapped key, unwraps it with the wrapper key, and
+**deletes both before `build.sh` runs**.
+
+## What you end up with
+
+| | |
+| --- | --- |
+| On GitHub | ciphertext, and two secrets that are useless apart |
+| In the Portal | the runner key, stored encrypted to a key it does not have |
+| Adding a teammate | a rewrap |
+| To start a build | nothing — GitHub does it |
+
+## See also
+
+- [RS](/quickstart/rs) — the same triggering, key parked on GitHub
+- [PK](/quickstart/pk) — the same, with a shared passphrase
+- [RB](/quickstart/rb) — the Portal builds too

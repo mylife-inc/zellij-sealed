@@ -1,0 +1,63 @@
+name: Zellij
+tagline: Turn a folder of plain text into a website worth showing people.
+
+brand:
+  logo:
+    # One file for both colour modes: the mark is a full-colour tile on a
+    # transparent ground, so it reads on a light or a dark bar.
+    src: assets/logo.png
+    alt: Zellij
+    # Taller than the default, which is sized for a wordmark. This mark is
+    # round, so its ink is spread over two dimensions instead of one — at the
+    # wordmark height it reads as a thumbnail rather than a logo. This sits it
+    # a little above the bar's icons, which is where the eye expects the thing
+    # that names the site.
+    height: 1.75rem
+  # No `href`: this is a standalone site, so the mark goes to its own "/".
+
+theme: cupertino
+mode: system
+motion: expressive
+
+home: home
+
+siteUrl: https://zellij.shebka.net
+ogImage: assets/og.png
+basePath: ""
+
+nav:
+  sticky: true
+  align: left
+  themeToggle: true
+  # On, deliberately: the fastest way to understand what a theme does here is to
+  # switch one and watch this page change.
+  themeSwitcher: true
+  search: true
+  transparentOverHero: true
+  cta:
+    - { label: Get started, href: /guide/quickstart, style: primary }
+  social:
+    github: "https://github.com/shebka/zellij"
+
+footer:
+  columns:
+    - heading: Learn
+      links:
+        - { label: Guide, page: 01-guide }
+        - { label: Quickstart, href: /guide/quickstart }
+        - { label: The content model, href: /guide/content-model }
+    - heading: Reference
+      links:
+        - { label: All sections, page: 03-sections }
+        - { label: Themes, href: /guide/themes }
+        - { label: CLI, href: /cli }
+    - heading: More
+      links:
+        - { label: Why Zellij, page: why }
+        - { label: Source, href: "https://github.com/shebka/zellij" }
+  legal: "© 2026 Shebka LLC"
+  social:
+    github: "https://github.com/shebka/zellij"
+
+analytics:
+  provider: none

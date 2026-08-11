@@ -1,0 +1,6 @@
+type: showcase
+id: honest
+eyebrow: The honest note
+headline: Real providers need real accounts
+body: Connecting a live provider requires that provider's own merchant account — that is normal, and it is what keeps your money yours. You can run and demo the entire platform with the built-in mock provider first, with no real account needed.
+background: tinted

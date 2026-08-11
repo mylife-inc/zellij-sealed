@@ -1,0 +1,11 @@
+type: testimonial
+heading: What people say
+quotes:
+  - quote: We deleted a fortnight of layout work from every new product.
+    author: Dana Whitfield
+    role: Head of Platform, Northwind
+    avatar: assets/example/person-1.png
+  - quote: The build fails when a link breaks, which is the only review I trust.
+    author: Samir Haddad
+    role: Staff Engineer, Globex
+    avatar: assets/example/person-2.png

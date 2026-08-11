@@ -1,0 +1,42 @@
+version: 1
+file: engine/packages/zellij/src/guide/sidebar.tsx
+recipients:
+- name: sid-med
+  role: developer
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSAxeS9seEVvQk1LLzZhZlpo
+    Z3dkMFFMNkpUUDBYME1CQmVtZDFxbnljSDM0CjBMYzhRVUlyN1ZLaTA1VmtBSVlL
+    ZVM5WVJQY212YjU4c0pJc1NxbHVuczgKLT4gLEItZ3JlYXNlIDMrSmAgfE9hZGxQ
+    VQowYXVqcktYM1EySmFMY3R5WTRUWU9oNE9YSTV2MnN5RzZSeWFJZ2JvVzUycDNn
+    WXFRcmxsZWNFcTBoSUNHbjhICnkwY0txcEFUdm02cXJaRXZFZldmU0haV1VVU1RM
+    ZncKLS0tIE9GRlQwWCtNQStMZFF1SmxHUTYvc2VFd1lJeDFTVDR0bEJFZ0o0TFhl
+    TkEKKDu1TKRduu1u1iqS2UPZKhNzRLtoVKxsAZC0O6KRCu7BKTeYfeaXcOPPCD/V
+    WWC4cbJiux3t8xe84cU/wjNqDQ==
+    -----END AGE ENCRYPTED FILE-----
+- name: ci-runner
+  role: ci
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBCdzJ1d0k3WVRFY0NiUHMw
+    T3Izc0VTYm5lRTZOdXhHYy9EbExtSkRPeUZBClZ6M2djT3dJckJ3K1dMZGcvaEpG
+    YW1CNW02N0F5WkJueUFiYnRFWkp1K0UKLT4gaXZNTU8oSS1ncmVhc2UgYi0gcms1
+    QHN7LCA+WSVBOyIKbVdPM3krNTFCU3lqWmduMTBiQ3JWZ3czQVBTN1ZnbTlINklI
+    NnlrT3BveTNydGszemQzeW5SeFZrZTYvOTZqawpjTGkzT0Z0ZGJrTW9nbWozSnZW
+    N1lBZVM0eTdCdmN1enNrMU5GTWo3dzNKOHlyRQotLS0gdkR5WkFlMXh4bWJ3WTE0
+    WllDaDl3aTZzNmZqQ0tKMnZzNHVld0JHZTRBdwpn9NT7HMQZCzcyLeQycGQSj61r
+    h6xWyc1pQx5Royc8kmRgiuLfaO7gTAthvpzTrYlG05YckrSnpXmc5VOtwuof
+    -----END AGE ENCRYPTED FILE-----
+- name: admin-server
+  role: admin
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBqTGp2Z3hyZVl6bXJxeWpa
+    SkszeWsyWWxhcy9ZUWlGeFE0b0ZaaWRwbEY0CnRRSjQyVEwzQkVsQVZWSDREUkZE
+    TnZrT0pmOG54TnYra1JNRDhPd25udmcKLT4gRy1ncmVhc2UgImRoKSZxbCkgKmZd
+    aiw+USBEQ05+Vy4gLwo2VXd1MXJqdU5oRURzR3VmVHdLYTBGR2FuZjkwT1pQSWpo
+    bWZjRzlObnhJWWplRUpycG5BN1hlODRVblN5dTd3ClRsUGNNTjdwREZKbllQSTE2
+    UlZWZ1EKLS0tIGZheDluamNQbDQxcG9mVTZhNmlWY2RXNzdmTkRlVTUwWTNYUzU4
+    d2psR00Ktos/KrA0lioGHYubdKeDzGEtxaPhlxGIssQ+MpA6TeSnHlI5rQoQkz+8
+    vS/pCVNelzREiBxapByMyAnOeSIdug==
+    -----END AGE ENCRYPTED FILE-----

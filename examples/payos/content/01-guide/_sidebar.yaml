@@ -1,0 +1,18 @@
+# The mapping form: the folder carries its own title and ordering, so the
+# numeric prefix on the directory name is not load-bearing (design §8, §9).
+title: Guide
+order: 1
+description: Install, configure, deploy and operate PayOS.
+
+nav:
+  - label: Overview
+    items:
+      - index
+  - label: Install & run
+    items:
+      - getting-started
+      - setup
+  - label: Operate
+    items:
+      - configuration
+      - deploy

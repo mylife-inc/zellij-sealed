@@ -1,0 +1,42 @@
+version: 1
+file: engine/packages/zellij/src/guide/navigation.ts
+recipients:
+- name: sid-med
+  role: developer
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA3cXpRaFdwc1BaWkxIeTA0
+    djlYL3VIVmtka2ZGWFJ3anE1OUxwZHZZVldBCkhHQ3hUbk5MOE5wMGhFQWd2MGdz
+    WmFIYmM2ZU5WU1hGNXpTUzdSNWpTaVEKLT4gTHZLeit1RE0tZ3JlYXNlIDh+XFgy
+    eHYgMldWPSA0IC9mCitNRW5qQU1mRXpxODVibnhxc1pYTjlwOUVOeVAvWHNmbnpV
+    WHhTMHFlY2t2djZDd2I5U0lPdzMzd3c5UU9CZkcKQ214MVZ5NmRQRjNHamhuVXJk
+    OVlYQQotLS0gZ3hDREtyUWhsdHFQbFNoeElXeDZneU9oeVkzRVBBNUlVUkVrWU5a
+    SXA5bwrCopASWNld0gaatQqjWIiwHV51qOmwHKG8d/5mCtTfHqn7CCDotgYSUfsU
+    QOLafc9duAK2xvtPYww0W4+l3qRc
+    -----END AGE ENCRYPTED FILE-----
+- name: ci-runner
+  role: ci
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBCaVFiUk9JS0VMVWhLQjF5
+    elQvSm02enJ0VHkzSEtxVzVMNThKb1gvcGpVCjhYQ1VMaG10UzgzTlllZzJvekk3
+    SVhKZnYybE9NMEhoYmJmTEIyT1QyRjAKLT4geX5hbmktZ3JlYXNlID0gQE42SCcr
+    ICVNID9RPn1eJwp4MFU0VnNncHJYRXdmaEF0eEJ6ZzhJMFMxS3Q5M2plMXR5QUx5
+    SEthUWU2ZnZ3ZDQ2aFJ1WnEzcnBnKzIzOVZpClJGNCtpNjNBOUpxc0pSV2JreDFk
+    NXZkbFJXVkJCWjhPazhTYktUdXZjOVhZCi0tLSB0YTRCY1VSWnJwaHNBWFNWVW9N
+    L1hxNWpZZDFRZS8wNUhjRFlvdE0vcy9FCtCA/9u5GAHA/payvZnZMfzvhpBs6ce1
+    X6vPEOoVd9gwDEEkv59If2XaYqRgfvZy2ICcNb6CxvZid+W8fi9reP0=
+    -----END AGE ENCRYPTED FILE-----
+- name: admin-server
+  role: admin
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBRaHBCdDEzY2NoSDhkQmhU
+    bkVVb25TTnBWZ3RHcFJBYUh2SVd3aGJkMkRjClhyOVB6RzlpUzdRZWRnclpzUlVX
+    Q3FGeUNrU0Y1WU4xdGFiN01ZT3c0THcKLT4gczEye1tPeygtZ3JlYXNlIF9YcTsK
+    Lzk5RitWVFpZUWMrNGNWRmRsZkQxVm1qL3hidXI4VlV6djIwblVwR0treHpYaVJn
+    OUNMaEUrYlpZV08wcE9kQQpNcDNXdGdyYW5ubC8rUlcwOFZTYjlqNk9HNyt6Wk5S
+    bHIrN2wKLS0tIGEreG1oRTNacUJLWGRGL0xvQ0VqcXRNZGNxRStNaUZJakNVdEI5
+    ZzNPc1UKS8oymcXMHnZSsZXthPAM+/ruX98qbYC22tHysIf2k7j23WSw+j6PxqIr
+    ebrDRMZ5HjSPh4KH9A4VcK/RGO8J5g==
+    -----END AGE ENCRYPTED FILE-----

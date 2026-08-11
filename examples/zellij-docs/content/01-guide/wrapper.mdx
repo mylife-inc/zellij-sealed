@@ -1,0 +1,137 @@
+---
+title: The wrapper app
+description: The Next.js application that renders a content folder — what is in it, and the build steps it runs.
+---
+
+<Callout type="info" title="You may not need this page">
+If you write content and ship it with [`zel`](/cli), there is no application in
+your repository and nothing here applies. `zel dev`, `zel build` and
+`zel deploy` run the wrapper inside a container you never see.
+
+This page is for the case where you keep a wrapper app checked in — because you
+host on a platform that builds Next.js itself, or because Zellij pages are part
+of an application you already have.
+</Callout>
+
+The wrapper is a small Next.js application, about forty lines of it, generated
+by [`zel new app`](/cli/new#zel-new-app-dir). Its only opinion is where your
+content lives:
+
+```tsx title="src/app/[[...slug]]/page.tsx"
+const zellij = createZellijPages({
+  contentDir: '../content',
+});
+```
+
+That is what lets a product repository keep documentation beside the product:
+
+```
+payos/
+├── apps/
+│   ├── product/           # the application
+│   └── external/          # the Zellij wrapper — no content of its own
+└── docs/
+    ├── external/          # the content root
+    └── internal/          # not Zellij's business
+```
+
+## The build steps it runs
+
+`@shebka/zellij` ships a small binary called `zellij`, and the generated
+`package.json` calls it:
+
+```json title="package.json"
+{
+  "scripts": {
+    "predev": "zellij prepare",
+    "prebuild": "zellij prepare"
+  }
+}
+```
+
+Four commands, all build-time. Nothing here runs in production, and nothing here
+is something you type — they exist because two things have to happen before
+Next.js starts.
+
+| | |
+| --- | --- |
+| `zellij prepare` | `sync-assets` and `search-index` together — the usual choice |
+| `zellij sync-assets` | Copies `<content>/assets/**` into `public/_zellij/assets/**` |
+| `zellij search-index` | Writes `public/_zellij/search-index.json` |
+| `zellij check [dir]` | Validates the content folder |
+
+**`sync-assets`** exists because content lives outside the Next app and assets
+have to be bridged into it. It is what turns the authored path
+`assets/hero.png` into the served path `/_zellij/assets/hero.png`. It replaces
+rather than merges, so a deleted asset does not linger in `public/`.
+
+**`search-index`** walks every guide folder, extracts text from the MDX, splits
+it per heading and writes a static JSON index. The ⌘K modal fetches that file
+and loads FlexSearch on first open. Section pages are excluded by design.
+
+<Callout type="tip" title="If you change the build command">
+This is the one thing worth knowing. If your CI calls `next build` directly
+rather than `npm run build`, the `prebuild` hook does not fire — and you get a
+site with no search and no images, which builds successfully. Run
+`zellij prepare` yourself in that case.
+</Callout>
+
+`zellij check` is the same validation [`zel check`](/cli/check) will run, and is
+available today. It exits non-zero when the folder would fail a build, so it
+works as a pre-commit hook or a CI step:
+
+```bash title="terminal"
+npx zellij check
+```
+
+```
+✓ /Users/you/acme/content
+  site        Acme · theme cupertino
+  pages       6
+  guides      1 (5 pages) · /guide
+  menu        Features · Pricing · Solutions · Resources · Security
+  home        /
+  routes      11
+
+  ! sections/unused.yaml is not referenced by any page in pages.yaml.
+```
+
+## What fails a build
+
+Invalid content fails loudly, with the file, the path inside it and what was
+expected. Errors are aggregated so everything can be fixed in one pass rather
+than one per run.
+
+| Failure | Behaviour |
+| --- | --- |
+| Malformed YAML or MDX | Error naming the file and the parser message |
+| Unknown section `type` | Error listing every valid type |
+| Unknown lucide icon name | Error naming the icon and the export it looked for |
+| Section reference with no file | Error listing the sections that do exist |
+| `page:` naming no page or guide folder | Error listing the available names |
+| A page and a guide folder sharing a name | Error naming both |
+| Two sections on one page with the same `id` | Error — `#id` would be ambiguous |
+| A nav, CTA or footer link to a nonexistent route | Error naming the label and href |
+| An anchor no section declares | Error listing the anchors that page has |
+
+And the warnings, which do not stop a build:
+
+| Situation | Behaviour |
+| --- | --- |
+| A section file no page references | Warning |
+| A guide page missing from its sidebar | Warning — the page still builds |
+| A folder with content but no `_sidebar.yaml` | Warning — the folder is skipped |
+| An unknown key in `site.yaml` | Warning — forward compatibility |
+
+<Callout type="tip" title="Unknown keys inside a section file are accepted silently">
+Sections gain fields far more often than the top-level schema does, so a content
+folder written for a newer engine still builds on an older one. The cost is that
+a typo in a section file is not reported — which is one more reason to run
+`check` and read what it says about unused files.
+</Callout>
+
+## See also
+
+- [`zel new app`](/cli/new#zel-new-app-dir) — generating one
+- [Deploying](/guide/deploying) — path prefixes, SEO, where content lives
+- [Containers](/guide/containers) — how `zel` runs this without one in your repo

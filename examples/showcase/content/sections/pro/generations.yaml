@@ -1,0 +1,20 @@
+type: timeline
+id: generations
+heading: Three generations
+subhead: What changed, and when.
+items:
+  - date: 2024
+    title: Lumen 1
+    body: Aluminium, two cameras, and a battery that needed a mid-afternoon top-up.
+    icon: sparkles
+    image: assets/gen-1.png
+  - date: 2025
+    title: Lumen 2
+    body: A brighter panel and the first of the L-series chips.
+    icon: zap
+    image: assets/gen-2.png
+  - date: 2026
+    title: Lumen 3 Pro
+    body: Titanium, four cameras, thirty-one hours, and satellite messaging.
+    icon: award
+    image: assets/gen-3.png

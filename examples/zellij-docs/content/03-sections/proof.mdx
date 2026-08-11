@@ -1,0 +1,55 @@
+---
+title: Proof
+description: logo-strip, stats-band, testimonial and team-grid — sections that show rather than claim.
+---
+
+## logo-strip
+
+Customer or partner marks, greyscale until hover.
+
+<SectionPreview example="logo-strip" />
+
+Rendered as plain `<img>` rather than through `next/image`, deliberately: these
+are small SVGs where the optimizer adds a request and saves nothing.
+
+## stats-band
+
+Three to five numbers.
+
+<SectionPreview example="stats-band" />
+
+Numeric values count up as the band enters the viewport, and render at their
+final value under `motion: none` or reduced motion. `value` is free text, so
+`2.4M` and `Fortune 500` work as well as `12`; a bare number is accepted and
+stringified.
+
+<Callout type="info" title="Three to five, enforced">
+Two numbers is not a band, and six will not fit at any breakpoint that also
+reads well. The schema says so, and the build fails rather than producing a
+layout nobody wants.
+</Callout>
+
+## testimonial
+
+One quote, or a carousel of up to five.
+
+<SectionPreview example="testimonial" />
+
+With more than one quote it becomes a carousel with dots and arrows. Every
+slide stays in the DOM so the quotes remain crawlable and reachable without
+JavaScript; hidden slides are `inert`, which keeps their links out of the tab
+order.
+
+## team-grid
+
+People: a board, a faculty, a team, a list of contributors.
+
+<SectionPreview example="team-grid" />
+
+<Callout type="tip" title="A portrait's alt is the person">
+Zellij uses the name as the image's alt text rather than describing the
+photograph, and prefixes each link with the person's name for screen readers —
+a page of links all called "Website" is unusable when tabbed through.
+</Callout>
+
+External links open in a new tab; internal ones route in place.

@@ -1,0 +1,107 @@
+---
+title: zel list
+description: What this build of the binary knows about — section types, themes, formats, targets.
+---
+
+<Callout type="tip" title="Available">
+Works today. Reads a schema compiled into the binary, so it needs no container,
+no network and no content folder.
+</Callout>
+
+```bash title="terminal"
+zel list sections
+zel list themes
+zel list formats
+zel list targets
+```
+
+Four inventories. Each answers a question you would otherwise answer by reading
+documentation that might describe a different version of the tool than the one
+you have.
+
+## Why it exists
+
+Zellij has nineteen section types and fourteen themes. Nobody holds that in
+their head, and the failure it prevents is specific: writing a plausible
+section type that the build rejects, or picking a theme name that does not
+exist and finding out four minutes into a build.
+
+More importantly, **this prints what *your* binary knows**, not what the website
+says. Converters are compiled in; a build without the Docusaurus converter will
+not list it. The reference on this site describes the current release, and the
+binary in your hand may not be it.
+
+## `zel list sections`
+
+```
+bento-grid       3 fields, 1 required
+card-carousel    5 fields, 1 required
+cta-banner       3 fields, 1 required
+faq              2 fields, 1 required
+feature-grid     4 fields, 1 required
+gallery          5 fields, 1 required
+hero             6 fields, 1 required
+logo-strip       2 fields, 1 required
+…
+```
+
+The field counts are the useful part. A type with one required field is
+something you can write in thirty seconds; a type with six is worth reading
+[`zel explain`](/cli/explain) for first.
+
+Every one of them is a file you write in `sections/`, and a name you put in
+`pages.yaml`. See [Pages and sections](/guide/pages-and-sections) for how they
+assemble, and [the section reference](/sections) for what each one looks like
+rendered.
+
+## `zel list themes`
+
+All fourteen, with what distinguishes them. A theme is one line in `site.yaml`:
+
+```yaml title="site.yaml"
+theme: cupertino
+```
+
+Changing it changes every colour, every font stack and every radius on the site,
+and changes nothing about your content. See [Themes](/guide/themes) for what
+each one is for.
+
+## `zel list formats`
+
+```
+docusaurus     Docusaurus — sidebars.js and a docs folder
+mkdocs         MkDocs — mkdocs.yml with a nav tree
+```
+
+What [`zel convert`](/cli/convert) can read. **Run this before planning a
+migration.** Converters are plugins compiled into the binary, so this is the
+authoritative answer for the binary you have — and a format that is not listed
+is one you will need the [AI route](/cli/context) for.
+
+## `zel list targets`
+
+```
+static   A folder of HTML, CSS and JS. Any CDN, free. The default.
+image    A container running the site on port 3000. Any registry. ~150 MB.
+```
+
+What [`zel build`](/cli/build) can produce. Two, not four — earlier drafts
+listed `node` and `image:static`, and neither was a product anyone chooses
+between. [`zel build`](/cli/build#what-happened-to-node-and-imagestatic)
+explains why they went.
+
+## Machine-readable
+
+```bash title="terminal"
+zel list sections --json
+```
+
+<Callout type="warning" title="Planned">
+`--json` is accepted and ignored. The output is the human table either way.
+</Callout>
+
+## See also
+
+- [`zel explain <type>`](/cli/explain) — one section type, in full
+- [`zel new section`](/cli/new#zel-new-section-type) — create one from that
+- [`zel context`](/cli/context) — all of it at once, for an AI agent

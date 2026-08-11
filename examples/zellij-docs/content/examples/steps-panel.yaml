@@ -1,0 +1,37 @@
+type: steps-panel
+heading: Four commands, and a folder that explains itself
+subhead: >-
+  The steps say what you run. The panel says what you end up with, so the two
+  can be checked against each other without leaving the section.
+steps:
+  - title: Write the folder
+    body: >-
+      `zel new docs my-site` puts eight files on disk — identity, a menu, a page
+      and a guide. It writes files and exits; nothing is started.
+  - title: Watch it while you edit
+    body: >-
+      `zel dev my-site` mounts the folder into the engine and serves it. Every
+      save is on screen before you have switched windows.
+  - title: Check before you build
+    body: >-
+      `zel check my-site` reads the whole folder and reports what is wrong with
+      it, in about a second, without starting the application.
+  - title: Build what you deploy
+    body: >-
+      `zel build my-site` produces either a directory of static files or a
+      container image, from the same content.
+terminal:
+  title: my-site
+  body: |
+    my-site/
+    ├── site.yaml               ← identity and theme
+    ├── menu.yaml               ← the bar
+    ├── pages.yaml              ← pages, as section lists
+    ├── sections/
+    │   └── home/hero.yaml      ← one band of content
+    └── 01-guide/
+        ├── _sidebar.yaml       ← order and grouping
+        └── index.mdx           ← a page
+caption: >-
+  Nothing about the site lives outside this folder, which is why it travels
+  between a laptop, a pipeline and a container unchanged.

@@ -1,0 +1,18 @@
+type: feature-grid
+id: licensing
+heading: Licensing & anti-piracy
+subhead: Payment, key issuance, machine-capped validation, and revoke-on-refund as one atomic pipeline.
+columns: 2
+items:
+  - icon: key-round
+    title: Key issuance on confirmed payment
+    body: Never on a redirect — a browser redirect is not proof of payment.
+  - icon: monitor-check
+    title: Machine-activation caps
+    body: A per-product limit on how many machines a key can run on, with online validation.
+  - icon: wifi-off
+    title: Signed offline-grace receipts
+    body: Ed25519-signed, so a customer's software keeps working through a network outage.
+  - icon: undo-2
+    title: Revoke, and revoke-on-refund
+    body: Revoke a key by hand, or let a refund do it automatically. Customers can self-serve the 'I got a new laptop' flow.

@@ -1,0 +1,72 @@
+type: steps-panel
+id: mode-portal-dispatch
+eyebrow: Mode 4 · portal-dispatch
+heading: Portal-dispatched build — GitHub never learns where your Portal is
+subhead: >-
+  The trigger direction is reversed: the Portal calls GitHub, never the other
+  way. Your Portal can run on a laptop behind a home router, because the workflow
+  holds no Portal URL and no Portal credentials.
+media: left
+
+diagram: |
+  sequenceDiagram
+      autonumber
+      participant D as Developer<br/>sgit push
+      participant P as CodeSeal Portal<br/>anywhere, even a laptop
+      participant G as GitHub<br/>repo + Actions API
+      participant C as CI Runner<br/>GitHub Actions
+
+      D->>G: git push (ciphertext)
+      D->>P: auto-dispatch {sha}
+      P->>P: mint + encrypt token
+      P->>G: workflow_dispatch + token
+      G->>C: start workflow
+      C->>C: unwrap-dispatch-token
+      C->>C: run-secure, build, clean
+
+steps:
+  - title: git push — ciphertext
+    body: >-
+      `sgit push` encrypts anything stale, runs the doctor safety checks, and
+      delegates to `git push`. What lands on GitHub is ciphertext at the
+      protected paths, as always.
+
+  - title: auto-dispatch {sha}
+    body: >-
+      With `auto_on_push` set in the manifest, `sgit push` also notifies the
+      Portal with the commit SHA. Note the direction: the *developer's* machine
+      talks to the Portal — the workflow never does.
+
+  - title: mint and encrypt a token
+    body: >-
+      The Portal mints a short-lived token bound to that one commit and encrypts
+      it to the dispatch public key in the manifest. Only the holder of the
+      matching private key — the runner — can open it.
+
+  - title: workflow_dispatch + token
+    body: >-
+      The Portal calls GitHub's `workflow_dispatch` API with the encrypted token
+      as an input. This is the property the whole mode exists for: the Portal
+      opens the connection, so GitHub needs no URL and no credentials, and could
+      not reach the Portal if it wanted to.
+
+  - title: start workflow
+    body: >-
+      GitHub schedules a run on a fresh runner with the token as an input. The
+      first step is `echo "::add-mask::$ENCRYPTED_TOKEN"`, so it is redacted from
+      every later log line.
+
+  - title: unwrap-dispatch-token
+    body: >-
+      The runner installs `sgit` and combines the encrypted input with
+      `DISPATCH_PRIVATE_KEY` to recover the per-build decryption material. Both
+      are read from the environment, never from argv.
+
+  - title: run-secure, build, clean
+    body: >-
+      The standard finale. The dispatch token was valid for this one commit and
+      is now spent.
+
+caption: >-
+  The only mode where your Portal needs no reachable address. GitHub is told
+  when to build and never told by what.

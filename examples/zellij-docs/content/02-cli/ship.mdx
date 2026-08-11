@@ -1,0 +1,104 @@
+---
+title: zel ship
+description: Somebody else's documentation to a published site, in one line.
+---
+
+<Callout type="warning" title="Planned">
+`zel ship` exits with `not implemented yet`. Everything it composes except the
+final upload works today — see [below](#until-it-lands).
+</Callout>
+
+```bash title="terminal"
+zel ship ./docs --provider netlify
+```
+
+```
+✓ Detected MkDocs (certain)
+✓ Converted 47 pages, 3 unmapped — see the report
+✓ Content valid
+✓ Built static — 47 routes
+✓ Uploaded to acme-docs
+  https://acme-docs.netlify.app
+```
+
+## What it is
+
+[`detect`](/cli/detect) → [`convert`](/cli/convert) → [`check`](/cli/check) →
+[`build`](/cli/build) → [`deploy`](/cli/deploy), stopping at the first failure.
+
+The whole of a migration, from a folder written for another tool to a site
+someone can read.
+
+## Why one command for five
+
+Because it is one intention. "I have MkDocs documentation and I want to see what
+it looks like in Zellij, live, before I decide anything" is a single question,
+and answering it in five steps means five opportunities to stop halfway and
+lose the thread.
+
+It is also the honest way to evaluate a migration. Reading a converted folder
+tells you the files exist; seeing the site tells you whether the navigation
+survived, whether the prose still reads, and whether the pages you cared about
+are where you expect. That judgement needs a URL, and this is the shortest path
+to one.
+
+<Callout type="tip" title="Deploy it somewhere disposable first">
+```bash title="terminal"
+netlify sites:create --name acme-docs-preview
+zel ship ./docs --provider netlify
+```
+
+A preview site costs nothing and can be deleted. Circulating it for a week finds
+what no validator can — a page that lost its ordering, a diagram that was an
+image, a link that pointed somewhere clever.
+</Callout>
+
+## What it will not hide
+
+Every warning the individual commands produce, `ship` produces:
+
+```
+! 3 thing(s) could not be carried over:
+    https://blog.acme.dev: "Blog" is an external link; sidebars hold pages.
+    draft.md: on disk but absent from the navigation; not converted
+    internal/notes.md: on disk but absent from the navigation; not converted
+```
+
+**And the landing page is still yours.** Every tool it converts from describes a
+documentation tree; Zellij has that and marketing pages built from nineteen
+section types with no equivalent in the source. What ships is a faithful guide
+folder and one hero to build on. That is not a gap in the converter — it is the
+part Zellij has that the source did not.
+
+## The one risk worth naming
+
+`zel check` does not compile MDX. A converted folder can pass every step here
+and still fail a later build, because MDX treats `{` and `<` as syntax and prose
+written for MkDocs never had to care.
+
+`ship` builds, so it *does* compile — which means it catches this where
+`migrate` would not. If `ship` succeeds, the conversion is sound.
+
+## Options
+
+| | | |
+| --- | --- | --- |
+| `<source>` | Required. The folder to convert | — |
+| `--provider <name>` | Where to publish | from [`zel.toml`](/cli/config) |
+| `--out <path>` | Where the converted folder goes | `./content` |
+
+## Until it lands
+
+Everything except the upload works:
+
+```bash title="terminal"
+zel migrate ./docs --out ./content
+zel build ./content --out dist
+netlify deploy --prod --dir dist
+```
+
+## See also
+
+- [`zel migrate`](/cli/migrate) — the first three, which work today
+- [Lab 2](/guide/quickstart/existing-docs) — the same journey, one step at a time
+- [Converting existing docs](/guide/converting) — what to expect from a conversion

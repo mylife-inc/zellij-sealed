@@ -1,0 +1,18 @@
+type: team-grid
+heading: Who builds it
+columns: 3
+people:
+  - name: Ada Okonjo
+    role: Engineering
+    bio: Built the section registry twice — once to learn what it should be.
+    photo: assets/example/person-1.png
+    links:
+      - { label: Writing, href: /guide }
+  - name: Idris Bello
+    role: Design
+    bio: Owns the token system, and the argument that ended it.
+    photo: assets/example/person-2.png
+  - name: Noor Haddad
+    role: Documentation
+    bio: Wrote this page, in the engine this page documents.
+    photo: assets/example/person-3.png

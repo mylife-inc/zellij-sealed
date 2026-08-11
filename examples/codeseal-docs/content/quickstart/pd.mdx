@@ -1,0 +1,142 @@
+---
+title: PD · Passphrase + Dispatch
+description: One shared passphrase, held by you, sent sealed with each build you trigger.
+---
+
+**One passphrase, shared by the team and held on your machine. No decryption
+material on GitHub. `sgit push` starts the build and sends the passphrase with
+it, sealed, for that one build.**
+
+The same trigger model as [RD](/quickstart/rd), with the simpler encryption
+mode. Right when you are one person, or a small team that already shares
+secrets and does not need per-person revocation.
+
+## 1 · Create the token
+
+Do this first. `sgit init` uploads the secrets your workflow reads, and without
+a token it sets up everything except the half that makes builds run.
+
+**GitHub → Settings → Developer settings → Fine-grained tokens → Generate new**
+
+| | |
+| --- | --- |
+| Repository access | Only select repositories → **this one** |
+| Contents | **Read and write** — so you can push |
+| Actions | **Read and write** — so `sgit push` can trigger builds |
+| Secrets | **Read and write** — so `init` can upload them |
+
+Metadata: read is added for you.
+
+```bash title="terminal"
+export GITHUB_PAT=github_pat_…
+```
+
+`GH_TOKEN` and `GITHUB_TOKEN` work too. If none is set and you are at a
+terminal, `init` offers to take it and stores it per project.
+
+## 2 · Choose the passphrase, then seal
+
+Passphrase mode does not invent your secret — you pick it:
+
+```bash title="terminal"
+export SGIT_KEY="$(openssl rand -base64 32)"
+sgit init --mode passphrase --ci-mode portal-dispatch
+```
+
+**On your disk:**
+
+```text title="$CODESEAL/<project>/"
+passphrase      # a copy of $SGIT_KEY, so it outlives the shell
+dispatch.key    # unwraps the dispatch token; uploaded to GitHub
+```
+
+The copy matters. A passphrase that exists only as an exported variable is one
+reboot from gone and appears in no backup — and there is no recovering it.
+`sgit encrypt` and `sgit decrypt` read the environment first and fall back to
+this file, so a new terminal just works.
+
+<Callout type="warning" title="Generate it, do not think of it">
+`openssl rand -base64 32` above is not decoration. A passphrase you invented is
+a passphrase someone can guess, and scrypt slows an attacker down rather than
+stopping them.
+</Callout>
+
+**In the repository:** the manifest (naming `SGIT_KEY` as the variable), the
+generated workflow, and a managed `.gitignore` block. No admin key, no
+recipients file — passphrase mode has neither.
+
+## 3 · Check GitHub is ready
+
+`sgit init` uploaded `CODESEAL_DISPATCH_PRIVATE_KEY` as it went — that is what the token in step 1
+was for. Confirm it landed:
+
+```bash title="terminal"
+sgit ci verify
+```
+
+```
+mylife-inc/demo is ready to build.
+```
+
+Note what is **not** uploaded: the passphrase itself never reaches GitHub's secret store. It travels inside each dispatch token, sealed, and is gone when the build ends.
+
+<Callout type="info" title="If init said the secrets were not uploaded">
+Run `sgit ci provision`. Nothing is broken — that step is postponed, not lost,
+and `verify` tells you when it is done.
+</Callout>
+
+## 4 · Protect something
+
+```bash title="terminal"
+sgit add-sensitive src/private
+sgit encrypt
+```
+
+## 5 · The everyday loop
+
+```bash title="terminal"
+sgit add -s src/private/payment.rs
+sgit commit -- -m "protect payments"
+sgit push origin main
+```
+
+Identical to RD. The difference is only what rides inside the token — a
+passphrase rather than a runner key.
+
+## Adding and removing people
+
+This is where the modes part company.
+
+Adding someone means **giving them the passphrase**. There is no per-person
+key, no recipients file, nothing to rewrap.
+
+Removing someone means **changing it** — new passphrase, re-encrypt everything,
+tell everyone who is left, re-provision. Their old copy still opens every blob
+in the history they already have.
+
+```bash title="terminal"
+export SGIT_KEY="$(openssl rand -base64 32)"
+sgit encrypt --force
+sgit ci provision
+```
+
+<Callout type="warning" title="This is the whole reason recipient mode exists">
+If anyone might ever leave, the cost above lands on the day it is least
+convenient. [RD](/quickstart/rd) turns it into `sgit rekey remove-recipient`
+and costs nothing extra today.
+</Callout>
+
+## What you end up with
+
+| | |
+| --- | --- |
+| On GitHub | ciphertext, and one key that decrypts nothing by itself |
+| On your machine | the passphrase and the dispatch key |
+| Adding a teammate | tell them the passphrase |
+| Removing one | rotate everything |
+| To start a build | you, from a terminal |
+
+## See also
+
+- [RD](/quickstart/rd) — same triggering, per-developer keys
+- [PS](/quickstart/ps) — same passphrase, GitHub triggers and holds it

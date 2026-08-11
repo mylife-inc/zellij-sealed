@@ -1,0 +1,167 @@
+---
+title: zel.toml
+description: Say once what every command would otherwise need told.
+---
+
+<Callout type="warning" title="Planned">
+`zel` does not read a configuration file yet. This page is the specification it
+is being written against.
+</Callout>
+
+Optional. Every setting has a flag, and every flag has a default. `zel.toml`
+exists so a repository can state its answers once instead of every command
+carrying them.
+
+## What it is really for
+
+Not saving keystrokes. The value is that **the answers become reviewable**.
+
+`zel deploy netlify docs --site acme-docs` is a decision made at a terminal by
+whoever happened to be there. It is invisible to everyone else, it lives in one
+person's shell history, and when the site is deployed to the wrong project
+nobody can see why.
+
+The same decision in a committed file is a diff. It gets reviewed, it is the
+same for everyone, it is what CI uses, and it answers "how do we ship the docs?"
+without anyone having to remember.
+
+That is also why there is no key for a credential.
+
+```toml title="zel.toml"
+content = "docs/external"
+
+[build]
+target = "static"
+out = "dist"
+features = ["diagrams"]
+
+[deploy]
+provider = "netlify"
+site = "acme-docs"
+```
+
+With that file, the whole workflow is three words:
+
+```bash title="terminal"
+zel check
+zel dev
+zel deploy
+```
+
+## Where it is found
+
+Searched upward from the current directory, stopping at the first one found or
+at a `.git` directory. So the file sits at the root of the repository and works
+from any subdirectory inside it.
+
+Paths inside it are relative **to the file**, not to where you ran the command.
+
+## Precedence
+
+<Steps>
+<Step title="A command-line flag">
+Always wins.
+</Step>
+<Step title="An environment variable">
+`ZEL_CONTENT`, `ZEL_TARGET`, `ZEL_REGISTRY`. For CI, where a flag would have to
+be threaded through a script.
+</Step>
+<Step title="zel.toml">
+</Step>
+<Step title="The built-in default">
+</Step>
+</Steps>
+
+## Keys
+
+### Top level
+
+| | | |
+| --- | --- | --- |
+| `content` | The content folder | `./content`, then discovery |
+| `engine` | Engine image, when you mirror it internally | `ghcr.io/mylife-inc/zellij-base` |
+| `engine_version` | Pin the engine | `latest` |
+
+Pinning `engine_version` is worth doing for anything that has to build the same
+way in a year.
+
+`latest` is right while you are writing — you want fixes as they land. It is
+wrong in CI, where the property you want is that today's build and last month's
+build differ only by what you changed. An unpinned engine turns "the docs broke
+and nobody touched them" into a real sentence.
+
+### `[build]`
+
+| | | |
+| --- | --- | --- |
+| `target` | `static` or `image` | `static` |
+| `out` | Output folder for `static` | `dist` |
+| `tag` | Image tag for `image` | `<site-name>:latest` |
+| `features` | `maths`, `diagrams` | detected from content |
+| `base_path` | Serve under a prefix | none |
+| `site_url` | Absolute origin | `siteUrl` in `site.yaml` |
+| `platform` | Image architectures | the host's |
+
+### `[deploy]`
+
+| | | |
+| --- | --- | --- |
+| `provider` | `netlify`, `cloudflare`, `vercel`, `ghpages`, `s3`, `fly`, `railway` | — |
+| `site` | The site or project on the provider | — |
+| `registry` | For container providers | — |
+
+**No credentials, ever.** There is no key for a token and there will not be
+one.
+
+The reasoning is not that secrets in files are theoretically bad. It is that
+this file exists to be committed — that is its whole purpose — and a format
+which *can* hold a secret will eventually hold one. Somebody adds it locally to
+make something work, forgets, and commits. Leaving the field out entirely is the
+only version of this that stays true.
+
+Credentials come from the environment. See
+[deploy credentials](/cli/deploy#credentials) for which variables each provider
+reads.
+
+### `[check]`
+
+| | | |
+| --- | --- | --- |
+| `strict` | Warnings are errors | `false` |
+
+## A worked example
+
+Documentation living inside a product repository, published to Netlify on every
+push to `main`:
+
+```toml title="zel.toml"
+content = "docs/external"
+engine_version = "0.4"
+
+[build]
+target = "static"
+features = ["diagrams"]
+
+[deploy]
+provider = "netlify"
+site = "acme-docs"
+
+[check]
+strict = true
+```
+
+```yaml title=".github/workflows/docs.yml"
+      - run: zel check
+      - run: zel deploy
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+```
+
+The pipeline carries the secret and nothing else. Everything about *what* is
+built is in the repository, where it can be reviewed.
+
+## See also
+
+- [`zel ci`](/cli/ci) — writes the pipeline above
+- [`zel doctor`](/cli/doctor) — prints the resolved configuration

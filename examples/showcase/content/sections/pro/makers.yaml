@@ -1,0 +1,20 @@
+type: team-grid
+id: makers
+heading: The people who made it
+subhead: A small team, and a lot of prototypes.
+columns: 3
+people:
+  - name: Rowan Ellis
+    role: Industrial design
+    bio: Spent eleven months on the chamfer nobody will consciously notice.
+    photo: assets/people/rowan.png
+    links:
+      - { label: Design notes, href: /guide }
+  - name: Imani Serrano
+    role: Camera
+    bio: Believes a phone camera should decide less and capture more.
+    photo: assets/people/imani.png
+  - name: Tobias Lund
+    role: Silicon
+    bio: Built the L3 Pro around the camera pipeline rather than the other way round.
+    photo: assets/people/tobias.png

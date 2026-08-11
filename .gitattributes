@@ -1,0 +1,4 @@
+# BEGIN SGIT MANAGED BLOCK
+.sgit/store/**/*.sgit merge=sgit
+.sgit/stanzas/**/*.stanza merge=sgit
+# END SGIT MANAGED BLOCK

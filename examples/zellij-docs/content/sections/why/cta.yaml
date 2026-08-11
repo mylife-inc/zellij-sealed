@@ -1,0 +1,7 @@
+type: cta-banner
+id: read
+headline: The content model is the whole idea.
+body: Fifteen minutes to read, and it explains every other decision.
+background: inverted
+cta:
+  - { label: Read the content model, href: /guide/content-model, style: primary }

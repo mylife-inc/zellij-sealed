@@ -1,0 +1,14 @@
+type: feature-grid
+id: security
+heading: Security, environments, and self-hosting
+columns: 3
+items:
+  - icon: lock
+    title: Encrypted at rest
+    body: Provider credentials sealed with AES-256-GCM, secrets hashed, and every inbound and outbound webhook signature-verified.
+  - icon: split
+    title: Test and live, fully separated
+    body: Test data can never leak into a live figure or listing.
+  - icon: server
+    title: One-command self-host
+    body: The same container images run locally via Docker and on Railway, AWS, GCP, or DigitalOcean.

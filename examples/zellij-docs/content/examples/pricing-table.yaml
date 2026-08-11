@@ -1,0 +1,22 @@
+type: pricing-table
+heading: Simple pricing
+subhead: Per seat, per month.
+tiers:
+  - name: Free
+    price: "$0"
+    period: forever
+    description: For trying it out.
+    features: [Up to 3 users, Community support]
+    cta: { label: Start free, href: /guide }
+  - name: Team
+    price: "$12"
+    period: per user / month
+    description: For a team shipping regularly.
+    features: [Unlimited users, SSO, Priority support]
+    cta: { label: Start a trial, href: /guide }
+    highlighted: true
+  - name: Enterprise
+    price: Contact us
+    description: For everything else.
+    features: [Audit log, Custom retention, A person to call]
+    cta: { label: Talk to us, href: /guide }

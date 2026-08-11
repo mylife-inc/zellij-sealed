@@ -1,0 +1,196 @@
+---
+title: Guide folders
+description: Turning any folder into a documentation tree with one file.
+---
+
+Any folder holding a `_sidebar.yaml` is a **guide folder**. It renders as a
+documentation tree — left navigation, breadcrumbs, an on-this-page rail,
+prev/next links — and becomes eligible for the top navigation bar.
+
+A site can have as many as it likes. One per manual, or one per chapter if what
+you are building is a book.
+
+## The sidebar file
+
+<Tabs>
+<Tab label="Bare list">
+
+```yaml title="guide/_sidebar.yaml"
+- label: Getting started
+  items:
+    - quickstart
+    - installation
+- label: Configuration
+  items:
+    - config/overview
+    - label: Data          # groups nest to any depth
+      items: [config/database]
+```
+
+</Tab>
+<Tab label="Mapping">
+
+Use this when the folder needs its own title, ordering or route.
+
+```yaml title="01-guide/_sidebar.yaml"
+title: Guide
+order: 1
+description: Install, configure, operate.
+nav:
+  - label: Getting started
+    items: [quickstart, installation]
+```
+
+</Tab>
+</Tabs>
+
+### The file's own fields
+
+Only the mapping form takes these; a bare list is just `nav`.
+
+| Key | Type | |
+| --- | --- | --- |
+| `title` | string | What the folder is called in menus and breadcrumbs. Defaults to the folder name with its numeric prefix stripped. |
+| `description` | string | Used as the meta description of the folder's index page. |
+| `order` | number | Where this folder sits among others. Lower first. A numeric filename prefix does the same job. |
+| `route` | string | Mount somewhere other than the folder's own name — `route: /docs` serves `01-guide/` at `/docs`. |
+| `nav` | list | The tree. |
+
+### Entries, and how deep they go
+
+An entry is either a **page** — a filename without its extension — or a
+**group**, which is `label` plus `items`. Groups nest to any depth:
+
+```yaml title="guide/_sidebar.yaml"
+title: Guide
+nav:
+  - index
+  - label: Getting started
+    items:
+      - quickstart
+      - installation
+  - label: Configuration
+    items:
+      - config/overview
+      - label: Data
+        items:
+          - config/database
+          - label: Advanced
+            items:
+              - config/sharding
+              - config/replication
+```
+
+That is four levels — a page inside a group inside a group inside a group — and
+nothing stops you going further. Each group is collapsible, and the open state
+is remembered per tree, so two folders that both have an "Overview" group do not
+collapse together.
+
+<Callout type="tip" title="Depth is cheap; navigating it is not">
+The sidebar will render whatever you nest, but a reader four levels in has lost
+track of where they are. Two levels suits most documentation, and a third is
+usually a sign that a group wants to be its own guide folder — which costs one
+`_sidebar.yaml` and gets its own route.
+</Callout>
+
+Entries name files relative to the folder, without an extension: an entry
+`config/database` is `config/database.mdx` and serves at
+`/guide/config/database`. A page that exists on disk but appears in no `nav`
+entry is not part of the site, and `zel check` says so.
+
+## Routes
+
+The folder mounts at its own name, with any numeric prefix stripped:
+
+| File | Route |
+| --- | --- |
+| `01-guide/index.mdx` | `/guide` |
+| `01-guide/quickstart.mdx` | `/guide/quickstart` |
+| `01-guide/config/database.mdx` | `/guide/config/database` |
+
+A tree whose root has no `index.mdx` redirects to the first page in its
+navigation, rather than rendering an empty shell.
+
+## Page frontmatter
+
+```mdx title="01-guide/quickstart.mdx"
+---
+title: Quickstart
+description: A running site in ten minutes.
+---
+
+Content starts here.
+```
+
+All three are optional. The title falls back to the first `#` heading, then to
+the filename. The layout renders the title as the page's `h1` and strips a
+leading `#` from the body, so the title stays authoritative in one place —
+used by `<title>`, the sidebar, breadcrumbs, search and the visible heading
+alike.
+
+## What is checked
+
+| Situation | Result |
+| --- | --- |
+| A sidebar entry with no matching file | Build error |
+| A file not listed in the sidebar | Warning — the page still builds |
+| A folder with `.mdx` but no `_sidebar.yaml` | Warning — the folder is skipped |
+
+The middle one is a warning rather than an error because a page you have not
+linked yet is a normal state to be in. The message tells you it exists and that
+nothing points at it.
+
+## Components available in MDX
+
+No imports needed:
+
+`<Callout>`, `<Steps>` / `<Step>`, `<Tabs>` / `<Tab>`, `<CodeGroup>`,
+`<Card>` / `<CardGrid>`, `<Screenshot>`, `<SectionPreview>`.
+
+### SectionPreview
+
+Shows a section's source and what that source renders to, in two tabs. Put the
+example in a YAML file under `examples/` and name it:
+
+```mdx
+<SectionPreview example="hero" />
+```
+
+```yaml title="content/examples/hero.yaml"
+type: hero
+headline: A folder of content is a website
+cta: [{ label: Get started, href: /guide }]
+```
+
+The preview is the real section, rendered by the same code a page uses, and the
+source tab is the file itself rather than a copy of it. That is the point:
+neither half can drift from the other, and an example that stops validating
+fails the build instead of quietly documenting something that no longer works.
+`zellij check` counts them.
+
+Examples never animate — a reveal that waits for a scroll would leave the frame
+blank until the reader happened to scroll it into view, and an empty preview
+reads as a broken one.
+
+<Callout type="tip" title="Only where a page has sections">
+Any registered section type works, including your own. Files nest, and a file
+at `examples/openers/hero.yaml` is named `openers/hero`.
+</Callout>
+
+Code fences are highlighted at build time by Shiki — no highlighter reaches the
+browser — with a copy button, filename labels and line highlighting:
+
+````md
+```ts title="next.config.js" {2,5-6}
+```
+````
+
+## Search
+
+Guide pages are indexed at build time into a static JSON file. The ⌘K modal
+fetches it and loads the search library **on first open**, so a visitor who
+never searches downloads neither.
+
+Results are split per heading, so a hit lands on the relevant section rather
+than the top of a long page. Sections pages are excluded by design — search
+here is for documentation.

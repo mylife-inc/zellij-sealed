@@ -1,0 +1,29 @@
+type: feature-grid
+id: two-choices
+eyebrow: Before you pick a mode
+heading: A build needs the key. Two separate questions decide which key, and where it lives.
+subhead: >-
+  Compiling means reading the source, and the source is encrypted. Something has
+  to decrypt it. Configuring CodeSeal for CI is answering two questions — and
+  they are independent, which is why there are eight combinations and not four.
+columns: 2
+items:
+  - icon: key
+    title: What is the decryption material?
+    body: >-
+      This is the **encryption mode**, chosen at `sgit init`, and it is about
+      your team rather than your pipeline. Every file gets its own random key
+      either way; what differs is how that key is wrapped. `passphrase` wraps it
+      with one shared secret stretched through scrypt. `recipient` wraps it to
+      every developer's public key, so each person unwraps with a private key
+      only they hold.
+
+  - icon: server
+    title: Who holds it, who builds, who starts it?
+    body: >-
+      This is the **CI mode**. `secrets` keeps the material in GitHub Secrets and
+      builds on GitHub. The other three hand custody to a Portal you run, and
+      differ in what happens next: `portal-key` still builds on GitHub and is
+      still triggered by GitHub, `portal-dispatch` builds on GitHub but is
+      triggered by the Portal, and `portal-build` does the build on the Portal
+      itself.

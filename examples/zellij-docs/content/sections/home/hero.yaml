@@ -1,0 +1,12 @@
+type: hero
+badge: Nineteen sections, fourteen themes
+headline: Plain text in. A site worth showing people out.
+subhead: >-
+  Zellij is a Next.js engine that reads a folder of YAML and Markdown and
+  builds the whole site — marketing pages and documentation, one deployment.
+titleGradient: [accent, fg]
+cta:
+  - { label: Get started, href: /guide/quickstart, style: primary }
+  - { label: See every section, href: /sections, style: ghost }
+visual: assets/hero.png
+visualStyle: floating

@@ -1,0 +1,5 @@
+type: video-embed
+heading: See it in ninety seconds
+src: "https://www.youtube.com/watch?v=aqz-KE-bpKQ"
+poster: assets/example/poster.png
+caption: Nothing loads until you press play.

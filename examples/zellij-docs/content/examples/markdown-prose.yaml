@@ -1,0 +1,10 @@
+type: markdown-prose
+heading: Why we built Zellij
+background: tinted
+body: |
+  Every product site we shipped started the same way: a fresh Next.js app, a
+  fortnight of layout work, and a design that drifted from the last one within
+  a quarter.
+
+  The content was never the hard part. The scaffolding was. So we moved the
+  scaffolding into a package and left the content in a folder.

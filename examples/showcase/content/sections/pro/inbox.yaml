@@ -1,0 +1,24 @@
+type: feature-grid
+id: inbox
+heading: In the box
+subhead: And what you will not find in it.
+columns: 3
+items:
+  - icon: smartphone
+    title: Lumen 3 Pro
+    body: In the finish you chose, with the screen protector already on.
+  - icon: cable
+    title: USB-C cable
+    body: Braided, two metres, and rated for 240W.
+  - icon: file-text
+    title: Almost no paper
+    body: One card with a QR code, printed on recycled stock.
+  - icon: plug-zap
+    title: No power adapter
+    body: Most people have four. Ours is sold separately if you do not.
+  - icon: headphones
+    title: No earbuds
+    body: The Buds pair automatically if you already own a set.
+  - icon: shield-check
+    title: Two years of support
+    body: Included, with a person on the other end.

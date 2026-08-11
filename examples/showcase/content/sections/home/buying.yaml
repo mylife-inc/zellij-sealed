@@ -1,0 +1,31 @@
+type: card-carousel
+id: buying
+heading: Why buy from Lumen
+link: { label: Shop all, href: /lumen-3-pro }
+cardWidth: medium
+items:
+  - eyebrow: Trade in
+    title: Turn the one in your pocket into credit.
+    body: An estimate takes two minutes, and the value comes off at checkout.
+    image: assets/card-trade.png
+    href: "/lumen-3-pro#trade"
+  - eyebrow: Carriers
+    title: Every network, no upsell.
+    body: Bring the number you have, on the plan you already pay for.
+    image: assets/card-carrier.png
+    href: "/lumen-3-pro#buy"
+  - eyebrow: Pay monthly
+    title: Spread it over 24 months, interest free.
+    body: No deposit, no fee, and settle early whenever you like.
+    image: assets/card-pay.png
+    href: "/lumen-3-pro#buy"
+  - eyebrow: Setup
+    title: Everything moves across in one go.
+    body: Photos, messages, apps, and the way you had them arranged.
+    image: assets/card-setup.png
+    href: /guide/quickstart
+  - eyebrow: Support
+    title: A person, not a phone tree.
+    body: Free for two years, by chat or in person, whichever suits.
+    image: assets/card-support.png
+    href: /guide

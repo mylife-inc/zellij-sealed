@@ -1,0 +1,137 @@
+---
+title: The content model
+description: What lives in a content root, how routes come out of it, and why it is shaped this way.
+---
+
+A **content root** is a folder. It can be called anything — `docs`,
+`my-product`, `the-book` — and it describes itself completely, so pointing a
+build at it is all the build needs. That portability is the point: the folder
+can live in another repository, or be cloned on demand, and nothing about the
+site is left behind.
+
+```
+the-book/
+├── site.yaml         # identity, brand, theme, footer      (optional)
+├── menu.yaml         # the top bar                          (optional)
+├── pages.yaml        # pages composed from named sections   (optional)
+├── sections/         # one file per section
+│   ├── hero.yaml
+│   └── why-us.mdx
+├── assets/
+├── 01-first-chapter/
+│   └── _sidebar.yaml # makes this folder a documentation tree
+└── 02-second-chapter/
+    └── _sidebar.yaml
+```
+
+<Callout type="info" title="Every file is optional">
+A folder containing nothing but one guide folder builds a complete site. The
+site's name falls back to the folder's own name, the theme to `paper`, and the
+menu is derived from what is there.
+</Callout>
+
+## The two kinds of page
+
+A **page** is everything below the menubar. There are two kinds, and a menu
+item can point at either without caring which it got.
+
+<Tabs>
+<Tab label="Sections page">
+
+Declared in `pages.yaml` as an ordered list of section names. Renders
+top to bottom, no sidebar.
+
+```yaml title="pages.yaml"
+- name: pricing
+  title: Pricing — Acme
+  description: Simple per-seat pricing.
+  sections:
+    - pricing/hero
+    - pricing/plans
+```
+
+</Tab>
+<Tab label="Guide folder">
+
+Any folder holding a `_sidebar.yaml`. Renders as a documentation tree with
+left navigation, breadcrumbs, on-this-page and prev/next.
+
+```yaml title="01-handbook/_sidebar.yaml"
+title: Handbook
+order: 1
+nav:
+  - introduction
+  - label: Policies
+    items: [leave, expenses]
+```
+
+</Tab>
+</Tabs>
+
+## Routes
+
+| Source | Route |
+| --- | --- |
+| The home destination | `/` |
+| `pages.yaml` → `- name: pricing` | `/pricing` |
+| `pages.yaml` → `- name: solutions/startups` | `/solutions/startups` |
+| `01-guide/index.mdx` | `/guide` |
+| `01-guide/config/database.mdx` | `/guide/config/database` |
+| `assets/logo.svg` | served under the site's asset route |
+
+### Numeric prefixes are stripped
+
+A folder named `01-getting-started` serves `/getting-started` and is labelled
+"Getting started". The prefix is an ordering instruction, not part of the
+site's identity, so it never reaches a URL.
+
+Recognised forms are `01-`, `1.`, `02_` and `10 - `. A folder genuinely named
+`2024` keeps its digits — the prefix must be followed by a separator.
+
+Camel case is split too, so `1.MyFirstChapter` gives `/my-first-chapter`, and
+acronyms survive: `APIReference` becomes `/api-reference`, not
+`/a-p-i-reference`.
+
+### What "/" shows
+
+In order:
+
+1. `home:` in `site.yaml`, if set
+2. a page that declares `route: /`
+3. the first menu item that resolves to a page
+4. the first page, or failing that the first guide folder
+
+A sections page picked this way simply *becomes* `/`. A guide folder cannot
+move — its pages hang below its route — so `/` redirects to it instead. Either
+way the content exists at exactly one URL.
+
+## Ordering
+
+When something is listed explicitly in `menu.yaml` or `pages.yaml`, that order
+wins. Otherwise, for guide folders:
+
+| # | Rule |
+| --- | --- |
+| 1 | Listed in `menu.yaml` or `pages.yaml` |
+| 2 | `order:` inside the folder's own `_sidebar.yaml` |
+| 3 | A numeric folder prefix |
+| 4 | Alphabetical |
+
+## Where config lives
+
+`site.yaml` sits **inside** the content root, because it is part of what the
+site is. Two things do not: where the folder is, and where the app is mounted.
+Those belong to the wrapper.
+
+```tsx title="src/app/[[...slug]]/page.tsx"
+const zellij = createZellijPages({
+  contentDir: '../../docs/external',
+  basePath: '/products/acme/docs',
+});
+```
+
+<Callout type="tip" title="Check before you build">
+`zellij check` loads the whole folder and prints every error and warning
+without starting Next.js. It is the fastest loop for content authors, and it
+needs nothing but the folder.
+</Callout>

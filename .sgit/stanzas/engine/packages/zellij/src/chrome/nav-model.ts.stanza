@@ -1,0 +1,42 @@
+version: 1
+file: engine/packages/zellij/src/chrome/nav-model.ts
+recipients:
+- name: sid-med
+  role: developer
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSAxSFA2RW9rampVMm14SGRv
+    dzJ4R2plMUlheGJRalIvSU5YT3NBU2dsd3l3CjhVcnBFblgwdmZuOGdIVDFPZEM0
+    Y0FmbCtEQ01peFFab0lIaURwRWFjWW8KLT4gQT8rLWdyZWFzZSBaV20/dWssWiAo
+    JkQ1TwpueGFEVWtRLzJWMHExWGtkbXhpZDh3NTdjM2hNNXhROCtRMEVzVmlHU2Jq
+    aEQrdGcxODlUQ1ZKUlJMMHZIelRvCjlndFVla1oyOUQzYlJoN2p3SHpCVkUzWjdr
+    TkxmK05zWm9qc2dLeklpWEtoN203Sm56bwotLS0gSytOdkIvMFQxelhsMllkbEU2
+    UkNHWGY4UVBTOFF2WXVhdUwraTMyWDJYZwqGopRx6R3z3AHfuOGp7+RDnQMajrrI
+    66wgQKqSHU7AXmMcOiBvqRHrC0Js4j+tkyOg/+fC310sSZtNQ2VnoMIi
+    -----END AGE ENCRYPTED FILE-----
+- name: ci-runner
+  role: ci
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA0dUxkTWFneTRCc2Ricy96
+    VlM2dVA3YVhwZkdMZFVxQllkWlJmZXhGKzFnCnY3ZkJTckJHUS9jSmhrNnZ1VmlB
+    UkZ6d1IwT2tiQTNIU3o4dlhnanlQYnMKLT4gNFotZ3JlYXNlIHZgSkt2IFdSeyl2
+    Yz9MIFwiKDpxClNFbFJJYjlRaEt4UHdheVB5bFlTNU9HNWpGQllxeDlDY3M0Z0tG
+    ZDh6a05La1FmKzhtTFVPY0s1U2syTnFWb1IKb3B4SkxjaitHWGd2clEKLS0tIGlE
+    c0d3ZWRyMTcyZlEvUndqL1YwL2VVK1ZBbi91cVBrU2RCOFAya0w3NVkKUJKQMOI1
+    FsCZXnjZnNoGyK/cr+BKEDwGD3dZkLCI8UO5bGnJBNVwKt3nkc8nIO73QabDxJOt
+    +PYoxkik2hypgw==
+    -----END AGE ENCRYPTED FILE-----
+- name: admin-server
+  role: admin
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBvN0xXWWlHdDdabjV3amkx
+    ekxXcWNETDh2WlY1U0dzWjVmSjN1bHZtbmtJCjA1bmVNY1g5MmNCSnMzbzZOZ1Fa
+    ekZsRmdtb2RYTzdaZ2k0TUtCMUtNTE0KLT4gZExDLWdyZWFzZSBGNyB5JFl9IF4z
+    L0cgayJzVjkscEUKUW5MTDU0SWtxcjA4TE11TUVUUGlOWGtpRDBUdFdGeU9OYkVx
+    cUpVRkdiYkxrL2FWZTZ3MHFKblhSRmJqc3dCawp4RGtwTll5a3FrNnIrNEZkekRW
+    dgotLS0gRk10bUovM1U0SFpxWXV1L0FCOWoyd1FSSVVSZFZDanpjZ0Z1QzBkSTUw
+    SQr5ABgsbXG/e9cWEdiufl41DFgfOtB1ZJNAhMHeOGtIMccUxY1pUpaT50V4UWrC
+    L6VxFk3Do7v1LYnBHwvI9tLm
+    -----END AGE ENCRYPTED FILE-----

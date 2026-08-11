@@ -1,0 +1,34 @@
+type: matrix
+id: need
+heading: Half the setups need it. Half do not.
+subhead: >-
+  The Portal is not a component of CodeSeal — it is a component of *four of the
+  eight ways to configure it*. If your CI mode is `secrets` or
+  `portal-dispatch`, everything on this page is optional reading.
+background: tinted
+rowAxis: Encryption
+columnAxis: CI mode
+columns:
+  - { label: secrets }
+  - { label: portal-dispatch }
+  - { label: portal-key }
+  - { label: portal-build }
+rows:
+  - label: passphrase
+    description: One shared secret.
+    cells:
+      - No Portal. GitHub holds the passphrase.
+      - No Portal. Your machine holds it and sends it per build.
+      - "**Portal.** It hands the passphrase to the runner for one build."
+      - "**Portal.** It decrypts and builds; GitHub sees nothing."
+  - label: recipient
+    description: Per-developer keypairs.
+    cells:
+      - No Portal. A runner key sits in GitHub Secrets.
+      - No Portal. Your machine holds the keys.
+      - "**Portal.** It lends the runner key, wrapped, for one build."
+      - "**Portal.** It decrypts with its own recipient keys and builds."
+footnote: >-
+  Read the column, not the row: the encryption mode never decides whether you
+  need a Portal. If [RD](/quickstart/rd) suits you — and for most teams it does
+  — you can close this page.

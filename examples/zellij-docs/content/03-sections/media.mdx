@@ -1,0 +1,61 @@
+---
+title: Media
+description: gallery and video-embed — pictures and film, without the weight.
+---
+
+## gallery
+
+A grid of images, each openable full size.
+
+<SectionPreview example="gallery" />
+
+<Callout type="info" title="The viewer is a native dialog">
+Escape, the focus trap and the inert backdrop come from the platform's
+`<dialog>` element rather than from a library. Arrow keys page between images,
+clicking the backdrop closes, and the whole thing is about a hundred lines.
+</Callout>
+
+`alt` describes the image and is what a screen reader reads; `caption` is shown
+and is editorial. They are different jobs — "Lisbon, 2024" is a caption, not a
+description of a photograph.
+
+## video-embed
+
+A self-hosted file or a YouTube/Vimeo URL.
+
+<SectionPreview example="video-embed" />
+
+Nothing loads until the visitor presses play. A poster image and a play button
+is all that ships — which matters most for third-party embeds, where the
+alternative is loading a player and its trackers on every page view whether or
+not anyone watches.
+
+## Choosing between them
+
+| You want | Use |
+| --- | --- |
+| A video the visitor chooses to watch | `video-embed` |
+| Video as a backdrop with copy over it | [`media-panel`](/sections/openers) with `video:` |
+| Several images to browse | `gallery` |
+| One image supporting an argument | [`zigzag`](/sections/narrative) or [`showcase`](/sections/openers) |
+| Images inside documentation | `<Screenshot>` in MDX |
+
+## Assets
+
+Everything lives under `assets/` in the content root and is referenced by a
+path relative to it:
+
+```yaml
+image: assets/gallery/office.png
+```
+
+`zellij sync-assets` copies the directory into `public/_zellij/assets/`, which
+is what turns that authored path into a served one. Subfolders are yours to
+organise.
+
+<Callout type="warning" title="Plain img and video need the prefix applied">
+`next/image` applies `basePath` itself. A plain `<img>` or `<video>` does not,
+which is why Zellij runs those sources through its own prefixing — the nav logo
+404'd under a path prefix exactly once, and there is an automated check for it
+now.
+</Callout>

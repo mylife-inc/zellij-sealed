@@ -1,0 +1,127 @@
+---
+title: PB · Passphrase + Portal Build
+description: Portal-side builds with one shared passphrase. GitHub never sees plaintext.
+---
+
+**One shared passphrase, held by the Portal, which also does the building.
+GitHub triggers and reports; it never decrypts.**
+
+The same isolation as [RB](/quickstart/rb), with the simpler encryption
+mode.
+
+<Callout type="warning" title="This lab needs a Portal">
+The Portal is a service you run — locally with `seal up`, or deployed. It is
+the piece that holds key material on your behalf, so unlike the first four labs
+there is infrastructure to stand up before anything works.
+
+```bash title="terminal"
+seal up          # the whole stack, locally
+seal help        # deploying it somewhere
+```
+
+If you are evaluating CodeSeal, start with [RD](/quickstart/rd) instead — it
+needs nothing but `sgit`.
+</Callout>
+
+## 1 · Create the token
+
+Do this first. `sgit init` uploads the secrets your workflow reads, and without
+a token it sets up everything except the half that makes builds run.
+
+**GitHub → Settings → Developer settings → Fine-grained tokens → Generate new**
+
+| | |
+| --- | --- |
+| Repository access | Only select repositories → **this one** |
+| Contents | **Read and write** — so you can push |
+| Secrets | **Read and write** — so `init` can upload them |
+
+Metadata: read is added for you.
+
+```bash title="terminal"
+export GITHUB_PAT=github_pat_…
+```
+
+`GH_TOKEN` and `GITHUB_TOKEN` work too. If none is set and you are at a
+terminal, `init` offers to take it and stores it per project.
+
+## 2 · Seal the repository
+
+Passphrase mode does not invent your secret — you pick it:
+
+```bash title="terminal"
+export SGIT_KEY="$(openssl rand -base64 32)"
+```
+
+```bash title="terminal"
+sgit pb
+```
+
+`pb` is the shorthand for this pair, and takes every flag `init` takes.
+Spelled out, it is:
+
+```bash title="the same thing, in full"
+sgit init --mode passphrase --ci-mode portal-build
+```
+
+**On your disk:**
+
+```text title="$CODESEAL/<project>/"
+passphrase      # a copy of $SGIT_KEY, so it outlives the shell
+```
+
+Every key is outside the repository, at `0600`. A key in the working tree is
+one `git add -A` from being published.
+
+## 3 · Check GitHub is ready
+
+`sgit init` uploaded `CODESEAL_TOKEN` as it went — that is what the token in step 1
+was for. Confirm it landed:
+
+```bash title="terminal"
+sgit ci verify
+```
+
+```
+mylife-inc/demo is ready to build.
+```
+
+It decrypts nothing; it authorises asking the Portal for a build.
+
+<Callout type="info" title="If init said the secrets were not uploaded">
+Run `sgit ci provision`. Nothing is broken — that step is postponed, not lost,
+and `verify` tells you when it is done.
+</Callout>
+
+## 4 · Protect something
+
+```bash title="terminal"
+sgit add-sensitive src/private
+sgit encrypt
+```
+
+## 5 · The everyday loop
+
+```bash title="terminal"
+sgit add -s src/private/payment.rs
+sgit commit -- -m "protect payments"
+sgit push origin main
+```
+
+Push, and the workflow posts the commit SHA. A Portal worker clones, decrypts
+with the stored passphrase, builds in an isolated workspace, and scrubs it.
+
+## What you end up with
+
+| | |
+| --- | --- |
+| On GitHub | ciphertext, and a token that only asks for builds |
+| In the Portal | the passphrase, and the only machine that sees plaintext |
+| Adding a teammate | tell them the passphrase |
+| Removing one | rotate everything, and re-provision the Portal |
+| To start a build | nothing — GitHub triggers, the Portal builds |
+
+## See also
+
+- [RB](/quickstart/rb) — the same isolation, per-developer keys
+- [PD](/quickstart/pd) — no Portal at all, if that is the appeal

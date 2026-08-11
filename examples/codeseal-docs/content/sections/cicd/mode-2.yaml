@@ -1,0 +1,89 @@
+type: steps-panel
+id: mode-portal-key
+eyebrow: Mode 2 · portal-key
+heading: Portal-delivered key — short-lived, single-use, double-locked
+subhead: >-
+  The runner never holds a long-lived key. It trades a bootstrap secret for a
+  sixty-second single-use token, redeems that for a *wrapped* runner key, and
+  unwraps it locally — the Portal cannot read the key it stores.
+media: left
+
+diagram: |
+  sequenceDiagram
+      autonumber
+      participant C as CI Runner<br/>GitHub Actions
+      participant P as CodeSeal Portal<br/>API
+      participant R as Redis<br/>ephemeral, TTL
+      participant D as Postgres<br/>durable
+
+      C->>P: POST bootstrap secret
+      P->>D: verify bootstrap hash
+      P->>R: store token hash, TTL 60s
+      P->>C: single-use token
+      C->>P: redeem — Bearer token
+      P->>R: consume token (atomic)
+      P->>D: load wrapped runner key
+      P->>C: wrapped key
+      C->>C: unwrap, then DELETE keys
+      C->>C: run-secure, build, clean
+
+steps:
+  - title: POST bootstrap secret
+    body: >-
+      The workflow reads `CODESEAL_BOOTSTRAP_SECRET` — a GitHub Actions secret —
+      and posts it to the Portal's `/api/ci/token` with the repository id. It was
+      provisioned once, at `sgit init` time.
+
+  - title: verify bootstrap hash
+    body: >-
+      The Portal hashes what was presented and compares it to the hash stored in
+      Postgres. Only the hash is ever stored, so a database leak does not reveal
+      the secret.
+
+  - title: store token hash, TTL 60s
+    body: >-
+      On a match the Portal mints a random single-use token and stores *its*
+      hash in Redis with a sixty-second expiry. An attacker replaying a token
+      from a log has a one-minute, one-shot window at most.
+
+  - title: single-use token
+    body: >-
+      The response body carries the token back. This is the only time it crosses
+      the wire in the clear, inside TLS.
+
+  - title: redeem — Bearer token
+    body: >-
+      The runner calls `/api/ci/runner-key` with the token in an
+      `Authorization: Bearer` header.
+
+  - title: consume token — atomic
+    body: >-
+      The Portal compares and deletes in one operation, so two simultaneous
+      requests carrying the same token cannot both succeed. Single-use is
+      enforced, not trusted.
+
+  - title: load wrapped runner key
+    body: >-
+      The Portal loads the runner's private key from Postgres — stored encrypted
+      to the GitHub wrapper public key, which the Portal does not hold. A fully
+      compromised Portal database yields ciphertext.
+
+  - title: wrapped key
+    body: >-
+      The response carries the still-encrypted key. Anyone intercepting it, or
+      dumping the database, holds something only the GitHub wrapper private key
+      opens.
+
+  - title: unwrap, then delete both
+    body: >-
+      The runner unwraps with `GITHUB_WRAPPER_PRIVATE_KEY` — the second half of
+      the double lock — and immediately deletes both key files, before
+      `build.sh` runs.
+
+  - title: run-secure, build, clean
+    body: >-
+      The same finale as Mode 1: decrypt, build, scrub, whatever the outcome.
+
+caption: >-
+  Two secrets, held by two parties, and neither is enough alone. The Portal
+  stores a key it cannot read.

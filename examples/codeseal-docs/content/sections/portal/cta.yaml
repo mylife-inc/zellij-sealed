@@ -1,0 +1,10 @@
+type: cta-banner
+headline: Start without one
+body: >-
+  Four of the eight setups need no Portal, and the recommended pair is one of
+  them. Seal a repository first; add a Portal when you want central audit,
+  lent keys, or builds your CI provider cannot observe.
+background: tinted
+cta:
+  - { label: The eight setups, href: /quickstart, style: primary }
+  - { label: How CI works, href: /cicd, style: ghost }

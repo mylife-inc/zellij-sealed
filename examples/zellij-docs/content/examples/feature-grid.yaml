@@ -1,0 +1,17 @@
+type: feature-grid
+heading: Everything you need
+subhead: Included in the engine, not bolted on.
+columns: 3
+items:
+  - icon: file-text
+    title: Content model
+    body: YAML for structure, MDX for prose. No database.
+    href: /guide/content-model
+  - icon: layout-grid
+    title: Nineteen sections
+    body: Openers, grids, narrative, proof and media.
+    href: /sections
+  - icon: palette
+    title: Fourteen themes
+    body: Palette, type, geometry and shadow, switched together.
+    href: /guide/themes

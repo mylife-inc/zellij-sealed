@@ -1,0 +1,179 @@
+---
+title: zel image
+description: Build, run and push container images without writing a Dockerfile.
+---
+
+<Callout type="tip" title="Available">
+`build`, `run`, `push` and `dockerfile` all work today. `--platform`,
+`--features` and `--build-arg` are specified and not yet built.
+</Callout>
+
+```bash title="terminal"
+zel image build --tag acme-docs:v2
+zel image run acme-docs:v2
+zel image push acme-docs:v2 --registry ghcr.io/acme
+```
+
+```
+  Engine   ghcr.io/mylife-inc/zellij-base:latest
+  Content  site
+  Tag      acme-docs:v2
+
+  …
+
+✓ acme-docs:v2
+  Run it:   zel image run acme-docs:v2
+  Push it:  zel image push acme-docs:v2 --registry ghcr.io/you
+```
+
+**You do not write a Dockerfile.** `zel` writes the multi-stage build itself,
+because the correct one is not obvious — it involves a base image you did not
+choose, an install step that depends on which features your content uses, and a
+runtime stage that must copy exactly three paths and no others. Getting it
+slightly wrong produces an image four times the size that still works, so
+nothing tells you.
+
+## What "you do not write a Dockerfile" buys you
+
+Three things, and they are worth naming because a generated file is normally a
+smell.
+
+**The base image is not yours to track.** The `FROM` line names an image whose
+tag, layout and contents are Zellij's business. A Dockerfile in your repository
+is correct on the day it is written and silently stale afterwards — the day the
+engine moves from `/opt/zellij` you find out by way of a build failure in a file
+you never touched.
+
+**The install step depends on your content.** Whether maths and diagram support
+get fetched is decided by what your pages use, and the step that decides it has
+to run before `npm install` or it changes nothing. That ordering is not
+something anyone should have to know.
+
+**The runtime stage is easy to get subtly wrong.** It copies exactly three paths.
+Copy a fourth — `node_modules`, say — and you get an image four times the size
+that works perfectly, so nothing tells you.
+
+## `zel image build`
+
+Identical to [`zel build --target image`](/cli/build). The subcommand exists so
+that everything about images is in one place.
+
+| | | |
+| --- | --- | --- |
+| `[dir]` | The content folder | [Resolved](/cli/#how-a-command-finds-your-content) |
+| `--tag <name:version>` | | `<site-name>:latest` |
+| `--platform <list>` | e.g. `linux/amd64,linux/arm64` | the host's |
+| `--features <list>` | `maths`, `diagrams`, `all` | from the content |
+| `--build-arg <k=v>` | Passed through | — |
+
+The result is a Node runtime serving the site on **port 3000** — Alpine, Node,
+and the traced subset of dependencies the site actually reached for. Neither the
+engine nor `node_modules` is in it: what you deploy contains the compiled site
+and nothing that built it.
+
+<Callout type="info" title="On image sizes">
+`docker images` reports around 320 MB for a small documentation site, and
+`docker save` of the same image produces 73 MB. Both are real: the first counts
+unpacked layers on disk, the second is the content itself. What a `docker pull`
+transfers is smaller again, because layers move compressed.
+
+Quoted figures here use `docker images`, so they can be compared with the base
+image on the same terms.
+</Callout>
+
+## `zel image run`
+
+Runs it locally — the last check before it goes anywhere.
+
+```bash title="terminal"
+zel image run acme-docs:v2
+zel image run acme-docs:v2 --port 8080
+```
+
+Publishes the container's port 3000 to `--port` on your machine and streams the
+log until you stop it. With no tag it runs whatever the last `zel image build`
+produced in this folder.
+
+**Do this once before pushing anything.** An image that builds is not an image
+that serves: a missing asset, a runtime that cannot find `server.js`, a page that
+needed something the runtime stage did not copy — all of them build cleanly and
+fail on the first request. Thirty seconds here is the difference between finding
+that out yourself and finding it out from a deployment.
+
+## `zel image push`
+
+```bash title="terminal"
+zel image push acme-docs:v2 --registry ghcr.io/acme
+```
+
+Tags and pushes. Authentication is your registry's own — `docker login`, or
+whatever your CI already did. `zel` does not handle registry credentials.
+
+## `zel image dockerfile`
+
+For when you have an existing pipeline that must own the build, and a tool
+running the build for you is not acceptable.
+
+```bash title="terminal"
+zel image dockerfile > Dockerfile
+```
+
+Prints the Dockerfile `zel image build` would have used, with the arguments
+resolved for your content. It is a normal file after that, and yours to modify —
+with the usual consequence that it stops tracking changes to the base image.
+
+<Callout type="tip" title="Prefer not to">
+This exists because some organisations require a Dockerfile in the repository
+for review. If that is not your situation, `zel image build` stays correct when
+the base image changes and a vendored Dockerfile does not.
+</Callout>
+
+## The base image
+
+`ghcr.io/mylife-inc/zellij-base` is public, even though Zellij's source is not.
+It is a Next.js wrapper with the engine at `/opt/zellij` and **nothing
+installed** — around 237 MB.
+
+Nothing installed is deliberate. The image people pull is a quarter of a
+gigabyte rather than a whole one, and a site build resolves its own dependencies
+regardless; the cost moved rather than appeared. It also means the same image
+serves a site that wants maths, a site that wants diagrams, and a site that
+wants neither.
+
+Four variants exist for pipelines that would rather name an image than pass a
+flag:
+
+| | |
+| --- | --- |
+| `zellij-base:latest` | Nothing |
+| `zellij-base:latest-maths` | LaTeX |
+| `zellij-base:latest-diagrams` | Mermaid and mindmaps |
+| `zellij-base:latest-all` | Both |
+
+Every published version carries the same four, so `0.1.0`, `0.1.0-maths` and so
+on exist alongside them. Pin a version for anything that has to build the same
+way in a year.
+
+`zel` uses the plain image and passes the feature list, so all four cost the
+same.
+
+### Getting the wrapper app out of it
+
+The wrapper inside the image is generated by the same scaffold
+[`zel new app`](/cli/new#zel-new-app-dir) uses, so it cannot drift from what you
+would get locally. If you want the app itself rather than a site built from it,
+`zel new app` is the answer.
+
+Extracting it from the image is possible and is not the supported path:
+
+```bash title="terminal"
+docker create --name tmp ghcr.io/mylife-inc/zellij-base
+docker cp tmp:/app ./wrapper
+docker rm tmp
+```
+
+## See also
+
+- [`zel build`](/cli/build) — the two things a site can be
+- [`zel deploy`](/cli/deploy) — build and push in one step
+- [Containers](/guide/containers) — what the base image is, conceptually

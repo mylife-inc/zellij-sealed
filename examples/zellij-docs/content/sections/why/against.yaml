@@ -1,0 +1,25 @@
+type: timeline
+id: shape
+heading: How a site usually goes wrong
+subhead: Each of these is a decision Zellij makes for you.
+items:
+  - date: Week 1
+    title: The landing page is beautiful
+    body: Someone good spent a fortnight on it. It is hand-written and unique.
+    icon: sparkles
+  - date: Month 3
+    title: A second page appears
+    body: >-
+      It reuses two thirds of the first page, copied. The two now differ in
+      spacing and nobody knows which is right.
+    icon: copy
+  - date: Month 6
+    title: The docs move to another tool
+    body: Different navigation, different fonts, a different idea of a link.
+    icon: split
+  - date: Year 2
+    title: Nobody edits either
+    body: >-
+      Changing copy means touching code, so marketing files a ticket and the
+      page stays wrong.
+    icon: circle-slash

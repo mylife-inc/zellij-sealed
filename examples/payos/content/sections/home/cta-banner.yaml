@@ -1,0 +1,10 @@
+type: cta-banner
+headline: Run it end to end in a couple of minutes
+body: Clone, start the stack, and complete a real purchase — no payment provider account required.
+cta:
+  - label: Get started
+    href: /guide/getting-started
+    style: primary
+  - label: Read the setup guide
+    href: /guide/setup
+    style: ghost

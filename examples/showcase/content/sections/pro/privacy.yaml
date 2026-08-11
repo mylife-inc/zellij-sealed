@@ -1,0 +1,10 @@
+type: showcase
+id: privacy
+eyebrow: Privacy
+headline: What happens on Lumen stays on Lumen
+body: >-
+  Face data, location history and health readings are processed on the device
+  and never leave it. **Not encrypted in transit — never sent.**
+visual: assets/showcase-privacy.png
+background: inverted
+cta: { label: Read the privacy note, href: "#footnotes" }

@@ -1,0 +1,28 @@
+- name: home
+  title: Zellij — turn a folder of plain text into a website worth showing people
+  description: >-
+    A Next.js engine that reads a folder of YAML and Markdown and builds the
+    whole site: marketing pages and documentation, one theme, one deployment.
+  layout: landing
+  sections:
+    - home/hero
+    - home/what
+    - home/pieces
+    - home/authoring
+    - home/numbers
+    - home/themes-panel
+    - home/faq
+    - home/cta
+
+- name: why
+  title: Why Zellij — the case for one folder
+  description: >-
+    Documentation tools make manuals and site builders make landing pages.
+    Zellij's premise is that a product's site is one thing, not two.
+  layout: stack
+  sections:
+    - why/hero
+    - why/problem
+    - why/beliefs
+    - why/against
+    - why/cta

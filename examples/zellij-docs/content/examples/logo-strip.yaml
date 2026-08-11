@@ -1,0 +1,7 @@
+type: logo-strip
+heading: Built with Zellij
+logos:
+  - assets/example/mark-1.png
+  - assets/example/mark-2.png
+  - assets/example/mark-3.png
+  - assets/example/mark-4.png

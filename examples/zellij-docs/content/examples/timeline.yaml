@@ -1,0 +1,17 @@
+type: timeline
+heading: The story so far
+subhead: A layout copied between three products, and then finally extracted.
+items:
+  - date: 2024
+    title: The third copy-paste
+    body: Same header, same footer, same section stack, diverging by the week.
+    icon: sprout
+  - date: Q1 2026
+    title: One package, three sites
+    body: The layout moved into an engine and the products kept only their content.
+    icon: package
+    image: assets/example/wide-2.png
+  - date: Q3 2026
+    title: Documented by itself
+    body: This page renders through the engine it documents.
+    icon: book-open

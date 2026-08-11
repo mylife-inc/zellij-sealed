@@ -1,0 +1,27 @@
+type: faq
+id: faq
+heading: Reasonable questions
+items:
+  - question: Is this a static site generator?
+    answer: >-
+      No — it is a package your Next.js app imports. There is no scaffolding
+      step and nothing is generated into your repo, so upgrading is a version
+      bump rather than a merge.
+  - question: Do I have to write React?
+    answer: >-
+      No. A wrapper app is three files and under thirty lines, and none of it
+      changes as your site grows. Everything after that is YAML and Markdown.
+  - question: What if I already have MkDocs content?
+    answer: >-
+      Markdown is Markdown. Point a guide folder at it, add a `_sidebar.yaml`,
+      and it renders. The PayOS site in this repo was converted from MkDocs
+      sources with a script that only translates admonition syntax.
+  - question: Can I add my own section type?
+    answer: >-
+      Yes — `registerSection` takes a schema and a component. Built-ins use the
+      same registry, so a custom section is not a second-class one.
+  - question: What happens when content is wrong?
+    answer: >-
+      The build fails, loudly, naming the file, the path inside it, and what
+      was expected. A broken nav link or a missing section file is a build
+      error, not something a visitor discovers.

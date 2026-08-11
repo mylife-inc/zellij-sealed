@@ -1,0 +1,23 @@
+type: markdown-prose
+id: problem
+heading: The problem
+body: |
+  You have a product to sell. Before a single dollar arrives, you have to build:
+
+  - a **pricing page**, and keep it in sync with your plans;
+  - a **checkout** that handles cards, wallets, bank methods, and maybe crypto;
+  - an **integration with each payment provider** — different API, different
+    webhooks, different quirks, for *every* provider you want to accept;
+  - **webhook verification, deduplication, and retries**, because a browser
+    redirect is never proof of payment;
+  - a **license server** if you sell downloadable software and don't want it pirated;
+  - a **customer portal** so buyers can find their receipts and license keys
+    without emailing you;
+  - **refunds, subscription management, dunning**, and
+  - **analytics** to know whether any of it is working.
+
+  Then you finish, ship your second product, and **build it all again**. And
+  every provider you add later is another integration project.
+
+  That is weeks-to-months of undifferentiated engineering per product — none
+  of it the thing your customers actually pay you for.

@@ -1,0 +1,213 @@
+---
+title: zel build
+description: Two things a Zellij site can be — a folder of files, or a container that serves itself.
+---
+
+<Callout type="tip" title="Available">
+Works today. `--base-path`, `--site-url`, `--features` and `--platform` are
+specified and not yet built.
+</Callout>
+
+```bash title="terminal"
+zel build                        # a static site, into ./dist
+zel build --target image         # a container image
+zel build ./docs --out ./public  # a different content folder, a different output
+```
+
+## There are two products, not four
+
+A Zellij site can be one of two things, and the choice is about **where the HTML
+is produced**:
+
+| `--target static` *(default)* | A folder of HTML, CSS and JS | Netlify, Cloudflare Pages, GitHub Pages, S3, any CDN |
+| `--target image` | A container image running the site on port 3000 | Railway, Fly.io, Cloud Run, ECS, any registry |
+
+Everything else is a detail of those two.
+
+### `static` — the HTML already exists
+
+Every route is rendered to a file at build time.
+
+```
+dist/
+├── index.html
+├── guide/
+│   ├── index.html
+│   └── quickstart/index.html
+├── _next/static/…            # CSS and JS
+└── _zellij/assets/…          # your images
+```
+
+A visitor requesting `/guide/quickstart` gets `guide/quickstart/index.html`
+straight from a CDN edge. No server runs. No process is warm or cold. Hosting is
+free nearly everywhere, and it cannot fall over under load, because there is
+nothing to fall over.
+
+**The one thing it gives up** is `next/image` optimisation — images are served
+at the size and format you authored them in, because there is no server to
+resize them on request. For documentation that is almost always the right trade.
+For a marketing site built on large photography it is the wrong one.
+
+### `image` — a server produces the HTML
+
+A Docker image containing the Next.js application and a Node runtime, running
+`next start` and listening on **port 3000**.
+
+```bash title="terminal"
+zel build --target image --tag acme-docs:v2
+docker run -p 3000:3000 acme-docs:v2
+```
+
+Pages are still statically generated — the server is mostly handing over
+pre-rendered HTML. What the server adds is `next/image` on demand, response
+headers you control, and the ability to put the site behind whatever your
+platform does with a container.
+
+<Callout type="info" title="Neither one is a single-page app">
+This is worth stating plainly, because "static site" and "SPA" are often used as
+if they meant the same thing.
+
+Zellij never produces a Vite-style single-page application — there is no empty
+`<div id="root">` filled in by JavaScript, and no client-side router that owns
+navigation. Both targets ship **real HTML for every route**, with React
+rehydrating only the interactive parts: the theme toggle, search, the mobile
+menu, a carousel.
+
+The difference between the two targets is when that HTML is written to disk, not
+whether it exists. A search engine, a text browser, or a visitor with JavaScript
+disabled sees a complete page either way.
+</Callout>
+
+## Which one you want
+
+<CardGrid>
+  <Card title="Choose static" icon="cloud">
+    You are shipping documentation or a marketing site, you want it to cost
+    nothing, and your images are already the right size. This is nearly
+    everyone.
+  </Card>
+  <Card title="Choose image" icon="container">
+    You need image optimisation, your platform deploys containers, you have to
+    sit behind a corporate proxy or an existing ingress, or the site must live
+    where your other services live.
+  </Card>
+</CardGrid>
+
+If you cannot decide, build `static`. Moving to `image` later is a flag, and the
+content does not change.
+
+### What happened to `node` and `image:static`
+
+Earlier drafts of this documentation listed four targets. Two of them were not
+products:
+
+- **`node`** — a traced Node server, uncontainerised. That is an artefact for a
+  platform to consume, not something you choose. Vercel builds it for you; on
+  any other host you would put it in a container, which is `image`.
+- **`image:static`** — nginx serving the static folder from a container. That is
+  the static site in a box: a packaging preference, not a different site. If you
+  want it, build `static` and copy `dist/` into whatever base image your
+  organisation requires.
+
+Offering four choices where there are two made the decision look harder than it
+is.
+
+## Options
+
+| | | |
+| --- | --- | --- |
+| `[dir]` | The content folder | [Resolved](/cli/#how-a-command-finds-your-content) |
+| `--target <static\|image>` | What to produce | `static` |
+| `--out <path>` | Output folder — `static` only | `./dist` |
+| `--tag <name:version>` | Image tag — `image` only | `<site-name>:latest` |
+| `--base-path <path>` | Serve under a prefix, e.g. `/docs` | none |
+| `--site-url <url>` | Absolute origin, for canonicals and the sitemap | `siteUrl` in `site.yaml` |
+| `--features <list>` | `maths`, `diagrams`, `all` | from the content |
+| `--platform <list>` | Image architectures | the host's |
+| `--no-check` | Skip validation. Not recommended | off |
+
+## What you get
+
+```
+  Engine   ghcr.io/mylife-inc/zellij-base:latest
+  Content  ./content
+  Target   static → dist
+
+  …
+
+✓ dist  (19 entries)
+
+  Serve it from any static host.
+```
+
+```
+dist/
+├── index.html          one file per route
+├── guide.html
+├── guide/
+│   └── setup.html
+├── 404.html
+├── sitemap.xml
+├── robots.txt
+├── _next/static/…      CSS and JS, content-hashed
+└── _zellij/assets/…    your images
+```
+
+<Callout type="warning" title="An empty sitemap is a silent failure">
+A sitemap lists **absolute** URLs, so it needs to know the site's origin. Without
+`siteUrl` in `site.yaml` the engine has nothing to write and produces valid,
+empty XML — the site ships, search engines index nothing, and nobody finds out
+for months.
+
+`zel build` says so when it happens:
+
+```
+! dist/sitemap.xml is empty.
+  A sitemap lists absolute URLs, so it needs the site's origin.
+  Set siteUrl in site.yaml:
+
+    siteUrl: https://docs.example.com
+```
+
+A scaffolded folder carries a commented `siteUrl` for exactly this reason.
+</Callout>
+
+## What it actually does
+
+<Steps>
+<Step title="Resolves the content folder">
+And fails immediately if it cannot find one.
+</Step>
+<Step title="Validates it">
+The same pass as [`zel check`](/cli/check), inside the same container. A build
+that is going to fail on a broken link fails here, in a second, rather than
+after a four-minute compile.
+
+This is not a convenience. A site with a dead internal link is a site that
+should not have been built, and catching it at the end — or not at all — is how
+one gets published.
+</Step>
+<Step title="Starts the engine container">
+Pulling `ghcr.io/mylife-inc/zellij-base` if it is not already local, mounting
+your content folder read-only.
+</Step>
+<Step title="Installs what this site needs">
+The base image ships with nothing installed. Maths and diagram support are
+fetched only if your content uses them.
+</Step>
+<Step title="Builds">
+`next build`, with static export when the target is `static`.
+</Step>
+<Step title="Writes the artefact">
+The folder into `--out`, or the image into your local Docker daemon.
+</Step>
+</Steps>
+
+Steps 3 to 5 need a container runtime. `zel doctor` reports whether you have
+one.
+
+## See also
+
+- [`zel deploy`](/cli/deploy) — build and put it online in one step
+- [`zel image`](/cli/image) — building, running and pushing images in detail
+- [`zel serve`](/cli/serve) — check a `static` build before it goes anywhere

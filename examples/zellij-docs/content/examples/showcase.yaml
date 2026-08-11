@@ -1,0 +1,7 @@
+type: showcase
+eyebrow: Themes
+headline: Fourteen themes, one content folder
+body: A theme changes palette, type, geometry and shadow together. Nothing in your content mentions any of them.
+visual: assets/panel-themes.png
+background: inverted
+cta: { label: Read more, href: /guide/themes }

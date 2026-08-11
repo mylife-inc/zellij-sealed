@@ -1,0 +1,503 @@
+---
+title: Lab 1 — Start from nothing
+description: An empty folder to a published site, with the browser open the whole time.
+---
+
+**You have:** nothing. **You will have:** a site you wrote, running locally,
+then published.
+
+**Needs:** `zel`, and a container runtime from step 2 onward. Check with
+`zel doctor`.
+
+<Callout type="warning" title="What runs today">
+Steps 1 to 5 work now, and so does most of step 6. The one gap is
+`zel deploy`, which is still landing; step 6 says what to do instead.
+
+The whole loop works: create a folder, serve it, edit, validate, and build
+either a static site or a container image. The one thing missing is uploading
+it in a single command. [The reference](/cli) tracks the state of each.
+</Callout>
+
+<Steps>
+
+<Step title="Create a content folder">
+
+```bash title="terminal"
+zel new docs my-docs
+```
+
+```
+✓ my-docs
+  site.yaml
+  pages.yaml
+  sections/home/hero.yaml
+  sections/home/features.yaml
+  menu.yaml
+  01-guide/_sidebar.yaml
+  01-guide/index.mdx
+  assets/.gitkeep
+
+  Next: zel dev my-docs
+```
+
+**What just happened.** You have a small site that is complete and correct — not
+a template with `TODO` in it. Every field written is a field the schema accepts,
+so each file is a working example of its own format. `zel check my-docs` passes
+right now.
+
+No `package.json`, no `node_modules`, nothing to install. This folder is
+**only** the words and the structure.
+
+<Callout type="info" title="Nothing ran but a file writer">
+`zel new docs` is native code. It wrote eight files and exited — **no container
+started, no image pulled, no Docker needed**. If your `docker pull` is still
+going, it did not wait for it.
+
+That changes at the next step. `zel dev` is the first command that needs a
+container: it starts one, mounts this folder into it, and runs the engine. The
+two commands have nothing in common except the folder they both care about.
+
+| | | |
+| --- | --- | --- |
+| `zel new docs` | Writes files | No container |
+| `zel dev` | Serves them | Starts one |
+| `zel check` | Validates them | Starts one |
+| `zel build` | Compiles them | Starts one |
+</Callout>
+
+<Callout type="tip" title="What about the Next.js app?">
+There isn't one, and you do not need one. The application that renders your site
+lives inside the container image, so it is never in your repository and never
+something you upgrade.
+
+If you *do* want it on disk — because you deploy to Vercel, or you want your own
+React pages alongside — `zel new app my-site --with-docs` writes the wrapper
+*and* a `content/` folder inside it, already wired together. Everything below
+works the same; you run `npm run dev` instead of `zel dev`.
+</Callout>
+
+</Step>
+
+<Step title="Watch it while you write">
+
+```bash title="terminal"
+zel dev my-docs
+```
+
+<Callout type="warning" title="--open is not built yet">
+It is in the specification — it would open a browser at the URL — and `zel` will
+reject it today. Open `http://localhost:3000` yourself.
+</Callout>
+
+```
+  Engine   ghcr.io/mylife-inc/zellij-base:latest
+  Content  my-docs
+  Serving  http://localhost:3000
+
+  Edit anything under my-docs and reload. Ctrl-C to stop.
+
+✓ /app/content
+  site        Acme · theme paper
+  pages       1
+  guides      1 (1 page) · /guide
+```
+
+It validates first, installs what the site needs, then serves. **The first run
+takes a couple of minutes** — it pulls a 237 MB image and installs Next.js into
+a named volume. Later runs reuse both and start in seconds.
+
+<Callout type="info" title="Reload rather than watch">
+Save a file and reload the page. There is no websocket pushing content changes
+at the browser yet: your folder lives outside the application, so Next never
+learns a YAML file moved. Reloading picks it up.
+</Callout>
+
+**Leave this running.** Open `my-docs/sections/home/hero.yaml` in your editor:
+
+```yaml title="my-docs/sections/home/hero.yaml"
+type: hero
+headline: Your product, explained
+subhead: Change this line and watch the browser.
+cta:
+  - { label: Read the guide, href: /guide, style: primary }
+```
+
+Save. The browser updates before you get back to it.
+
+Now break something on purpose — change `type: hero` to `type: heroo` — and
+save. The terminal and the browser both say:
+
+```
+my-docs/sections/home/hero.yaml
+  unknown section type "heroo"
+  did you mean "hero"?
+```
+
+That is the loop. You are never guessing whether a change was valid.
+
+</Step>
+
+<Step title="Add a page">
+
+```bash title="terminal"
+zel new page pricing --sections hero,pricing-table,faq
+```
+
+Three section files appear, and `pages.yaml` gains a route. The browser picks up
+`/pricing` without a restart.
+
+Not sure what a section type takes?
+
+```bash title="terminal"
+zel list sections          # all nineteen
+zel explain pricing-table  # one of them, in full
+```
+
+`explain` prints every field, which are required, the allowed values, and the
+shape of anything nested. It is generated from the same schemas that validate
+your content, so it describes exactly what will be accepted.
+
+</Step>
+
+<Step title="Add a guide">
+
+A landing page is sections. Documentation is Markdown.
+
+```bash title="terminal"
+zel new guide docs --title "Documentation"
+```
+
+```
+✓ 01-docs/_sidebar.yaml
+✓ 01-docs/index.mdx
+```
+
+Add pages by creating files. `01-docs/install.mdx`:
+
+```mdx title="my-docs/01-docs/install.mdx"
+---
+title: Installing
+description: Get it running in two minutes.
+---
+
+## Requirements
+
+Anything that runs a container.
+
+<Callout type="tip" title="On a Mac">
+`brew install colima && colima start`
+</Callout>
+```
+
+Then list it in the sidebar:
+
+```yaml title="my-docs/01-docs/_sidebar.yaml"
+title: Documentation
+order: 1
+
+nav:
+  - index
+  - install
+```
+
+It appears at `/docs/install`, in the sidebar, in the table of contents, and in
+⌘K search.
+
+</Step>
+
+<Step title="Validate before you ship">
+
+```bash title="terminal"
+zel check my-docs
+```
+
+```
+✓ my-docs
+  site        Acme · theme paper
+  pages       1
+  guides      1 (1 page) · /guide
+  menu        Guide
+  home        /
+  routes      2
+```
+
+Every internal link is resolved, every section type checked, every sidebar entry
+matched to a file that exists. It exits non-zero when something is wrong, so it
+works as a pre-commit hook.
+
+This runs the engine in a container with your folder mounted read-only, so it
+needs a container runtime — and about a second.
+
+<Callout type="warning" title="If your folder is outside your home directory">
+Container runtimes only share part of your filesystem with the virtual machine
+they run in. Colima shares `$HOME` and not `/tmp`. A bind mount of a path it
+cannot reach does not fail — it mounts an empty directory.
+
+`zel check` detects that and says so:
+
+```
+error: my-docs is not shared with the container runtime
+```
+
+Work under your home directory, or share the path:
+
+```bash title="terminal"
+colima stop && colima start --mount '/tmp:w'
+```
+
+On Docker Desktop it is Settings → Resources → File sharing.
+</Callout>
+
+</Step>
+
+<Step title="Ship it">
+
+<Callout type="warning" title="One half runs, one does not">
+**B works today** — `zel build` and `zel image` produce a static folder and a
+container image, and the image serves.
+
+**A is not finished**: `zel deploy netlify` exits with `not implemented yet`.
+Everything else in it is real and worth reading — the account, the project, the
+CNAME and the certificate are the same whichever tool uploads the folder. Until
+`deploy` lands, build with `zel build` and upload the `dist` folder with
+Netlify's own CLI: `netlify deploy --prod --dir dist`.
+</Callout>
+
+Two ways, and they produce genuinely different things. Pick one.
+
+## A · A static site on Netlify
+
+Free, fast, and nothing runs. Right for almost every documentation site.
+
+**Get a Netlify account and its CLI.** The CLI is the only npm thing in this
+lab, and only because Netlify's upload protocol is theirs:
+
+```bash title="terminal"
+npm install -g netlify-cli
+netlify login
+```
+
+A browser opens; authorise it.
+
+**Create a project.**
+
+```bash title="terminal"
+netlify sites:create --name my-docs
+```
+
+```
+Site Created
+
+Admin URL: https://app.netlify.com/projects/my-docs
+URL:       https://my-docs.netlify.app
+Project ID: 91774174-d4c2-41b5-aa4b-ac61eeadbf51
+```
+
+<Callout type="tip" title="Project ID is the site ID">
+Netlify's UI calls it **Project ID** and its API calls it the site ID. Same
+value.
+</Callout>
+
+**Build and upload.**
+
+```bash title="terminal"
+zel build my-docs --out dist
+netlify deploy --prod --dir dist
+```
+
+```
+✓ dist  (19 entries)
+
+Deploy path:    /Users/you/dist
+Website URL:    https://my-docs.netlify.app
+```
+
+<Callout type="info" title="No tokens needed for this">
+`netlify login` already stored your credentials and `netlify deploy` uses them,
+so nothing above needs an environment variable.
+
+You need them for **CI**, where nobody can open a browser to log in — and for
+that you have to get them out of Netlify and into your repository's secrets.
+That is the next section.
+</Callout>
+
+### Getting the two values CI needs
+
+**The site ID.** `sites:create` printed it as **Project ID**; Netlify's API calls
+the same value the site ID. If you have lost it:
+
+```bash title="terminal"
+netlify sites:list --json | jq -r '.[] | select(.name=="my-docs") | .site_id'
+```
+
+**The auth token.** `netlify login` wrote one into netlify-cli's config, and you
+can read it back rather than making a second one:
+
+```bash title="terminal"
+# macOS
+NETLIFY_CONFIG="$HOME/Library/Preferences/netlify/config.json"
+# Linux
+[ -f "$NETLIFY_CONFIG" ] || NETLIFY_CONFIG="$HOME/.config/netlify/config.json"
+
+export NETLIFY_SITE_ID=91774174-d4c2-41b5-aa4b-ac61eeadbf51
+export NETLIFY_AUTH_TOKEN=$(jq -r '.users[.userId].auth.token' "$NETLIFY_CONFIG")
+```
+
+Check it worked without printing the token:
+
+```bash title="terminal"
+echo "${#NETLIFY_AUTH_TOKEN} characters"    # 40, starting nfc_
+```
+
+<Callout type="warning" title="The path is not ~/.netlify">
+netlify-cli stores its config where the operating system puts application
+preferences, not in your home directory:
+
+| | |
+| --- | --- |
+| macOS | `~/Library/Preferences/netlify/config.json` |
+| Linux | `~/.config/netlify/config.json` |
+| Windows | `%APPDATA%\netlify\Config\config.json` |
+
+And the token is nested at `users.<userId>.auth.token` — there is no top-level
+`auth_token` key. Both of those are easy to get wrong in a way that produces an
+empty string rather than an error, which then fails in CI as a 401 that looks
+like a permissions problem.
+</Callout>
+
+**A personal access token works too**, and is the better choice for a shared
+pipeline: **User settings → Applications → New access token**. It can be revoked
+on its own without logging your laptop out, and it is not tied to your CLI
+session.
+
+Put both into the repository: **Settings → Secrets and variables → Actions →
+New repository secret**, as `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID`. That is
+what [Lab 3](/guide/quickstart/new-project) and
+[Lab 4](/guide/quickstart/existing-repo) expect.
+
+Once [`zel deploy`](/cli/deploy) lands, those two commands become one:
+
+```bash title="terminal"
+zel deploy netlify my-docs
+```
+
+### A custom domain
+
+Say you own `example.com` and want the site at `docs.example.com`.
+
+<Steps>
+<Step title="Find who actually serves your DNS">
+
+```bash title="terminal"
+dig +short NS example.com
+```
+
+This is the step people skip, and it is the one that costs an afternoon. Where
+you *bought* the domain is often not where its DNS is *served*. A record added
+in the registrar's panel while the nameservers point elsewhere is inert — it
+publishes nothing, and `dig` keeps returning nothing however long you wait.
+
+Whatever that command prints is where the next step happens.
+
+</Step>
+<Step title="Add one CNAME, there">
+
+| Field | Value |
+| --- | --- |
+| Type | `CNAME` |
+| Name / Host | `docs` |
+| Points to | `my-docs.netlify.app` |
+| TTL | whatever it offers |
+
+Use the exact `*.netlify.app` hostname from `sites:create`. A CNAME to a
+hostname that does not exist fails silently.
+
+<Callout type="warning" title="Do not repoint your nameservers">
+Netlify offers to host your whole DNS zone. That means recreating **every**
+record — including `mail`. For one subdomain, a CNAME touches nothing else.
+</Callout>
+
+</Step>
+<Step title="Tell Netlify the name is yours">
+
+**Project → Domain management → Add a domain** → `docs.example.com`.
+
+Netlify verifies the CNAME it can already see, then issues a Let's Encrypt
+certificate. Until you do this, the request arrives at Netlify and gets a 404 —
+it has no way to know which project the hostname belongs to.
+
+</Step>
+<Step title="Confirm">
+
+```bash title="terminal"
+dig +short docs.example.com && curl -sI https://docs.example.com | head -1
+```
+
+```
+my-docs.netlify.app.
+13.52.188.95
+HTTP/2 200
+```
+
+</Step>
+</Steps>
+
+## B · A container, running locally
+
+Right when you need image optimisation, or when the site has to live wherever
+your other services live.
+
+```bash title="terminal"
+zel build my-docs --target image --tag my-docs:dev
+zel image run my-docs:dev
+```
+
+```
+✓ Built my-docs:dev — 148 MB
+✓ Serving http://localhost:3000
+```
+
+That is a Node runtime serving your site on port 3000 — the same artefact you
+would push to Railway, Fly.io, Cloud Run or ECS.
+
+```bash title="terminal"
+zel image push my-docs:dev --registry ghcr.io/you
+```
+
+You never wrote a Dockerfile. If your organisation requires one in the
+repository, [`zel image dockerfile`](/cli/image#zel-image-dockerfile) prints the
+one `zel` would have used.
+
+</Step>
+
+</Steps>
+
+## What you have
+
+```
+my-docs/
+├── site.yaml
+├── pages.yaml
+├── menu.yaml
+├── sections/home/
+├── 01-docs/
+└── assets/
+```
+
+A folder of text under version control, and a published site. No lockfile, no
+framework upgrade waiting for you, nothing that stops working because a
+dependency moved.
+
+## Next
+
+<CardGrid>
+  <Card title="Make it yours" href="/guide/themes" icon="palette">
+    Fourteen themes, one line in `site.yaml`.
+  </Card>
+  <Card title="Learn the sections" href="/sections" icon="layout-grid">
+    All nineteen, with rendered previews.
+  </Card>
+  <Card title="Publish on every push" href="/guide/quickstart/existing-repo" icon="git-branch">
+    Put this folder in a repository and let CI do the deploying.
+  </Card>
+</CardGrid>

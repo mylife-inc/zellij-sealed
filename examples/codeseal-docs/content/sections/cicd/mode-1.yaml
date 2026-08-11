@@ -1,0 +1,62 @@
+type: steps-panel
+id: mode-secrets
+eyebrow: Mode 1 · secrets
+heading: Direct secrets — everything happens on the runner
+subhead: >-
+  No Portal involved. GitHub injects the shared passphrase as an environment
+  variable; the runner decrypts, builds, and scrubs.
+media: left
+
+diagram: |
+  sequenceDiagram
+      autonumber
+      participant R as GitHub Repo<br/>ciphertext at rest
+      participant C as CI Runner<br/>ubuntu-latest
+      participant S as GitHub Secrets<br/>encrypted store
+
+      C->>R: actions/checkout
+      C->>C: install sgit (SGIT_ONLY=1)
+      S->>C: inject SGIT_KEY
+      C->>C: run-secure: decrypt
+      C->>C: ./build.sh
+      C->>C: sgit clean (always)
+
+steps:
+  - title: actions/checkout
+    body: >-
+      The first step clones the repository onto the runner. The clone holds the
+      encrypted blobs under `.sgit/store/`, the stanzas and the manifest — and
+      zero plaintext, because plaintext was never committed.
+
+  - title: install sgit (SGIT_ONLY=1)
+    body: >-
+      `install.sh` with `SGIT_ONLY=1` downloads just the `sgit` binary from the
+      GitHub release and verifies its SHA-256. No `$CODESEAL` home, no deploy
+      assets — CI needs none of it.
+
+  - title: inject SGIT_KEY
+    body: >-
+      GitHub decrypts the `SGIT_KEY` repository secret and injects it into the
+      job as an environment variable. It never appears in logs; GitHub masks it.
+
+  - title: run-secure — decrypt
+    body: >-
+      `sgit run-secure` reads `SGIT_KEY` from the environment, derives the
+      decryption key with scrypt, and decrypts every manifest-listed blob into
+      the workspace.
+
+  - title: ./build.sh
+    body: >-
+      Your build script runs with the plaintext present. This is the window in
+      which the runner can see your sensitive files, and it is the Mode 1
+      trade-off stated plainly.
+
+  - title: sgit clean — always
+    body: >-
+      Whether the build passed or failed, `run-secure` deletes every
+      manifest-listed plaintext file and preserves `build.sh`'s exit code.
+      Plaintext existed on the runner only between steps four and six.
+
+caption: >-
+  Nothing leaves the runner. The trade is that the runner sees everything, for
+  the length of one build.

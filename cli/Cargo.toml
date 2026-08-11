@@ -1,0 +1,47 @@
+# The Zellij CLI: one native binary for everything a person does with Zellij.
+#
+# A workspace rather than one crate, so adding a converter means adding a file
+# to `zellij-convert` and touching nothing else — see specs/zellij-cli-spec.md.
+[workspace]
+resolver = "3"
+members = [
+  "crates/zellij-cli",
+  "crates/zellij-core",
+  "crates/zellij-convert",
+  "crates/zellij-scaffold",
+  "crates/zellij-engine",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "UNLICENSED"
+authors = ["Shebka LLC"]
+repository = "https://github.com/mylife-inc/Zellij"
+
+[workspace.dependencies]
+zellij-core = { path = "crates/zellij-core" }
+zellij-convert = { path = "crates/zellij-convert" }
+zellij-scaffold = { path = "crates/zellij-scaffold" }
+zellij-engine = { path = "crates/zellij-engine" }
+
+anyhow = "1"
+camino = "1"
+clap = { version = "4", features = ["derive", "env", "wrap_help"] }
+inventory = "0.3"
+miette = { version = "7", features = ["fancy"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml_ng = "0.10"
+json5 = "0.4"
+thiserror = "2"
+walkdir = "2"
+
+[profile.release]
+# A CLI people download from a release page: smaller is better, and the build
+# time it costs is paid once in CI rather than by everyone using it.
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true

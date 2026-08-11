@@ -1,0 +1,10 @@
+type: hero
+badge: New
+headline: Lumen 3 Pro
+subhead: Titanium. Featherweight. Relentless.
+titleGradient: [accent, fg]
+cta:
+  - { label: Buy, href: "#buy", style: primary }
+  - { label: Watch the film, href: "#design", style: ghost }
+visual: assets/pro-hero.png
+visualStyle: floating

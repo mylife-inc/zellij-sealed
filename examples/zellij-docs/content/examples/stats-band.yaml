@@ -1,0 +1,7 @@
+type: stats-band
+heading: By the numbers
+stats:
+  - { value: 19, label: Section types }
+  - { value: 10, label: Themes }
+  - { value: 30, label: Lines in a wrapper app, prefix: "<" }
+  - { value: 0, label: Runtime dependencies you add }

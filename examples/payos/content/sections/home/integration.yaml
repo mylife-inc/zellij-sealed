@@ -1,0 +1,10 @@
+type: showcase
+id: integration
+eyebrow: The whole integration
+headline: Your website's only job is a redirect link
+body: Every product gets a public, vendor-branded pricing page and checkout at a stable URL. No SDKs, no card fields, and no PCI DSS audit scope beyond SAQ-A. Buyers land back on your success URL when they're done.
+background: inverted
+cta:
+  label: See the capabilities
+  href: /capabilities
+  style: secondary

@@ -1,0 +1,32 @@
+type: card-carousel
+id: pieces
+heading: The pieces
+subhead: Everything below is documented, typed, and validated at build time.
+link: { label: Read the guide, href: /guide }
+cardWidth: medium
+items:
+  - eyebrow: Content
+    title: One folder, any name
+    body: Nothing about the site lives outside it, so it travels.
+    image: assets/card-content.png
+    href: /guide/content-model
+  - eyebrow: Sections
+    title: Nineteen ways to say something
+    body: Heroes, carousels, timelines, galleries, pricing, proof.
+    image: assets/card-sections.png
+    href: /sections
+  - eyebrow: Themes
+    title: Fourteen glazes
+    body: A token system deep enough that themes never touch a component.
+    image: assets/card-themes.png
+    href: /guide/themes
+  - eyebrow: Docs
+    title: Any folder can be a manual
+    body: A sidebar file turns a directory into a documentation tree.
+    image: assets/card-guides.png
+    href: /guide/guide-folders
+  - eyebrow: Tooling
+    title: Validate before you build
+    body: "`zellij check` reads the folder and reports everything wrong with it."
+    image: assets/card-cli.png
+    href: /cli

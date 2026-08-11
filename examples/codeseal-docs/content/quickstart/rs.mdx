@@ -1,0 +1,133 @@
+---
+title: RS · Recipient + Secrets
+description: Per-developer keys, with a CI runner key parked in GitHub Secrets. Builds start on their own.
+---
+
+**Every developer has their own keypair. The CI runner is just another
+recipient — and its private key sits permanently in GitHub Secrets, so builds
+start on push with nothing running locally.**
+
+Choose this when builds must fire on their own: a team where not everyone runs
+`sgit`, a scheduled build, a merge queue.
+
+## 1 · Create the token
+
+Do this first. `sgit init` uploads the secrets your workflow reads, and without
+a token it sets up everything except the half that makes builds run.
+
+**GitHub → Settings → Developer settings → Fine-grained tokens → Generate new**
+
+| | |
+| --- | --- |
+| Repository access | Only select repositories → **this one** |
+| Contents | **Read and write** — so you can push |
+| Secrets | **Read and write** — so `init` can upload them |
+
+Metadata: read is added for you.
+
+```bash title="terminal"
+export GITHUB_PAT=github_pat_…
+```
+
+`GH_TOKEN` and `GITHUB_TOKEN` work too. If none is set and you are at a
+terminal, `init` offers to take it and stores it per project.
+
+## 2 · Seal the repository
+
+```bash title="terminal"
+sgit rs
+```
+
+`rs` is the shorthand for this pair, and takes every flag `init` takes.
+Spelled out, it is:
+
+```bash title="the same thing, in full"
+sgit init --mode recipient --ci-mode secrets
+```
+
+**On your disk:**
+
+```text title="$CODESEAL/<project>/"
+admin.key       # adds and removes recipients
+identity.age    # yours
+```
+
+**In the repository:** the manifest, `recipients.yaml`, and an ordinary
+`on: push` workflow.
+
+<Callout type="info" title="No dispatch keypair here">
+The runner needs no token to open, because its key is already on GitHub. That
+is the trade this mode makes.
+</Callout>
+
+## 3 · Check GitHub is ready
+
+`sgit init` minted the CI runner's keypair, registered it as a recipient, and
+uploaded the private half as `CI_RUNNER_PRIVATE_KEY_B64` — that is what the
+token in step 1 was for. Confirm it landed:
+
+```bash title="terminal"
+sgit ci verify
+```
+
+```
+mylife-inc/demo is ready to build.
+```
+
+<Callout type="warning" title="This key decrypts everything, and it lives on GitHub">
+Unlike [RD](/quickstart/rd), where the secret on GitHub only unwraps a token,
+here GitHub holds a key that opens your source directly, for as long as you
+leave it there.
+
+That is the price of builds that start by themselves. It is what every CI
+system does with its secrets — but it should be a decision rather than a
+surprise.
+</Callout>
+
+<Callout type="info" title="If init said the secrets were not uploaded">
+Run `sgit ci provision`. Nothing is broken — that step is postponed, not lost.
+</Callout>
+
+## 4 · Protect something
+
+```bash title="terminal"
+sgit add-sensitive src/private
+sgit encrypt
+```
+
+## 5 · The everyday loop
+
+```bash title="terminal"
+sgit add -s src/private/payment.rs
+sgit commit -- -m "protect payments"
+sgit push origin main
+```
+
+No dispatch line this time. GitHub sees the push, starts the workflow itself,
+and the runner decrypts with the key it already has.
+
+## 6 · Add someone
+
+```bash title="terminal"
+export SGIT_ADMIN_IDENTITY=$(cat $CODESEAL/<project>/admin.key)
+sgit rekey add-recipient alice age1… developer
+```
+
+Removing someone is the same in reverse — and unlike passphrase mode, it does
+not disturb the runner or anyone else.
+
+## What you end up with
+
+| | |
+| --- | --- |
+| On GitHub | ciphertext, **and a key that decrypts it** |
+| On your machine | the admin key and your identity |
+| Adding a teammate | a rewrap |
+| Removing one | a rewrap |
+| To start a build | nothing — GitHub does it |
+
+## See also
+
+- [RD](/quickstart/rd) — same keys, nothing decrypting on GitHub
+- [PS](/quickstart/ps) — the simpler encryption mode, same trade
+- [RK](/quickstart/rk) — a Portal lends the key instead of GitHub keeping it

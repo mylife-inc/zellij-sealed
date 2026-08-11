@@ -1,0 +1,25 @@
+type: card-carousel
+id: tour
+heading: Get to know Lumen 3 Pro
+cardWidth: narrow
+items:
+  - eyebrow: Design
+    title: Titanium, and 12 grams lighter.
+    image: assets/pro-design.png
+    href: "#design"
+  - eyebrow: Camera
+    title: Four lenses. One button.
+    image: assets/pro-camera.png
+    href: "#camera"
+  - eyebrow: Display
+    title: 2,600 nits, outdoors.
+    image: assets/pro-display.png
+    href: "#display"
+  - eyebrow: Chip
+    title: L3 Pro, and nothing else close.
+    image: assets/pro-chip.png
+    href: "#chip"
+  - eyebrow: Battery
+    title: Thirty-one hours of video.
+    image: assets/pro-battery.png
+    href: "#battery"

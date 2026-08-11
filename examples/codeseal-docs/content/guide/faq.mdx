@@ -1,0 +1,121 @@
+---
+title: FAQ
+description: Narrower questions, shorter answers.
+---
+
+## Does CodeSeal replace Git?
+
+No. It wraps Git and stores encrypted blobs in ordinary Git storage. Your
+hosting provider, branches, pull requests and tooling are unchanged.
+
+## Are the encrypted files committed?
+
+Yes. Everything under `.sgit/store/` is committed and pushed. The plaintext
+originals stay on your machine, ignored through a managed `.gitignore` block.
+
+## Can I add CodeSeal to a project that already exists?
+
+Yes — `sgit init --wizard` is the easiest route.
+
+The caveat is worth reading twice: **anything already pushed in plaintext stays
+in Git history.** `sgit history-rewrite` re-encrypts historical revisions, but
+it cannot reach a clone someone already took. If a credential was in one of
+those files, rotate it.
+
+## Passphrase mode or recipient mode?
+
+Passphrase mode is one shared secret and is right when you are alone.
+Recipient mode gives every person their own keypair, which is the only way to
+remove one person's access without re-encrypting for everyone.
+
+Switch when a second human needs access you might later want to withdraw.
+[Teams](/guide/teams) has the mechanics.
+
+## What do `-s` and `-r` do during init?
+
+`-s` (`--sensitive`) takes files or folders to protect, expanding folders into
+individual manifest entries. `-r` (`--remote`) sets the Git `origin` if it is
+missing — it refuses to overwrite a different existing origin.
+
+## What does CodeSeal create in my repository?
+
+`.sgit/manifest.yaml`, `.sgit/store/`, `.sgit/tmp/`, managed `.gitignore` and
+`.gitattributes` blocks, Git hooks, a merge driver, and a GitHub Actions
+workflow matching your CI mode plus a `build.sh` stub to fill in. In recipient
+mode also `.sgit/recipients.yaml` and `.sgit/stanzas/`.
+
+[Reference](/guide/reference#the-repository-model) lays out which are committed.
+
+## How do I add non-sensitive files?
+
+`sgit add <file>` — it sorts them itself. Files in the manifest are encrypted;
+everything else goes to `git add`. Use `sgit add -s <file>` to adopt a *new*
+sensitive file.
+
+## Should `git add` run before `sgit encrypt`?
+
+Either order, as long as both are before `sgit commit`. The clearest habit is to
+stage normal files first, then run `sgit doctor`.
+
+## Do I need `doctor` or `clean` before pushing?
+
+`sgit push` runs `doctor` for you. Run it by hand when you want an explicit
+check. `clean` is optional — it removes manifest-listed plaintext after
+encryption and is not required before every push.
+
+## Can my CI still build?
+
+Yes, in [four modes](/guide/ci) of decreasing runner trust — from handing the
+runner key material outright, to the Portal building so the runner never sees
+plaintext.
+
+## Can the build provider see plaintext?
+
+In three of the four modes, yes: the runner decrypts, so it can read what it
+decrypted. In `portal-build` your CI provider never sees plaintext but the
+Portal worker does. Pick the mode matching who you are willing to trust with the
+build.
+
+## `git push` or `sgit push`?
+
+`sgit push` on a protected repository. A raw `git push` still fires the pre-push
+hook, so it is not unprotected — but it skips the explicit wrapper, and a hook
+is easier to lose than a habit.
+
+## What encryption is used?
+
+Passphrase mode: authenticated symmetric encryption keyed from `SGIT_KEY`.
+
+Recipient mode: a fresh random 256-bit key per file, the file encrypted with
+**AES-256-GCM**, and that key wrapped to each recipient with **age X25519**.
+
+Keys come from environment variables or identity files, never from command-line
+arguments, and `sgit` never prints a private key or plaintext to stdout.
+
+## Is `.securegit/` still a thing?
+
+No. The v1 layout (`.securegit/manifest.yaml`, `.sgit-store/`) is read-only
+legacy. Run `sgit migrate` once to lift it to the current layout — every blob is
+preserved bit-for-bit, and it never runs silently.
+
+## Is the binary I downloaded really yours?
+
+Every release ships a `SHA256SUMS` file for integrity and a sigstore signature
+pair bound to this project's GitHub Actions identity. A passing `cosign` check
+means the archive came from that workflow.
+
+The commands are in [Install](/guide/install#verifying-what-you-downloaded).
+
+## What if I lose my admin private key?
+
+You lose the ability to change the recipient list — `sgit rekey` stops working.
+Existing recipients keep decrypting and their day-to-day is unaffected.
+
+Recovery: any remaining recipient runs `sgit rekey full`, which mints a fresh
+admin keypair and re-encrypts. If *every* key is lost and no recipient remains,
+the files are unrecoverable — which is the property you asked for.
+
+## How do I remove plaintext after encrypting?
+
+`sgit clean`. It deletes only manifest-listed plaintext that has been
+encrypted, and never touches anything else.

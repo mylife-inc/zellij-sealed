@@ -1,0 +1,104 @@
+---
+title: Converting existing docs
+description: Bring a MkDocs or Docusaurus tree across, and know what does not come with it.
+---
+
+```bash
+zel detect ./docs
+zel convert ./docs --out ./content
+zel check ./content
+```
+
+The output goes in a **new folder**. The original is never touched, so a
+conversion you dislike costs nothing but the folder you delete.
+
+## What is recognised
+
+| Format | Read from | |
+| --- | --- | --- |
+| MkDocs | `mkdocs.yml` | The `nav` tree, `site_name`, `site_description`, `docs_dir`. |
+| Docusaurus | `sidebars.js` | Categories, doc entries, links and nesting — when the file is declarative. |
+
+`zel detect` says which, and how sure it is. A folder with the format's own
+config file is certain; one that merely looks like the default layout is not,
+and an ambiguous tree asks rather than guessing. Guessing between two plausible
+formats produces a conversion that is wrong in ways nobody notices for a month.
+
+## What does not come across
+
+**A landing page.** Every one of these tools describes a documentation tree.
+Zellij has that *and* marketing pages built from nineteen section types with no
+equivalent in the source. So a conversion writes a faithful guide folder, a
+`site.yaml` carrying whatever identity it could find, and a `pages.yaml` with
+one hero to build on — and says so in the report, every time.
+
+**Links out of the sidebar.** A sidebar holds pages; an external link belongs in
+`menu.yaml`. They are reported rather than dropped.
+
+**Pages the navigation never mentioned.** A page hidden from its own navigation
+may have been hidden deliberately, so it is listed rather than silently
+published.
+
+```
+2 thing(s) could not be carried over:
+  https://blog.acme.dev: "Blog" is an external link; sidebars hold pages. Add it to menu.yaml.
+  draft.md: on disk but absent from the navigation; not converted
+```
+
+## When Docusaurus computes its sidebar
+
+`sidebars.js` is a JavaScript module, not a data file. Most are data wearing
+JavaScript's clothes and read fine. Some are not:
+
+```js
+module.exports = require('./generated').map((item) => ({ ...item }));
+```
+
+That is not read at all. The converter falls back to the folder and names the
+construct that stopped it:
+
+> `sidebars.js` contains a require() call, so it was not read: this converter
+> parses declarative sidebars and will not guess at ones that compute their
+> exports. The pages below came from the folder instead, and their order is
+> alphabetical rather than yours.
+
+Declining is the point. A sidebar half-read from a file the converter did not
+understand would look finished and be wrong.
+
+## Markdown that is not MDX
+
+Zellij compiles guide pages as MDX, which is Markdown plus JSX. That addition is
+not free: `{` opens an expression and `<` opens a tag. Prose written for MkDocs
+has never had to care, so `set {timeout} to <n> seconds` is good Markdown and a
+syntax error here.
+
+The converter escapes both where they would be read as code, and leaves fenced
+blocks and inline spans alone — a backslash inside a command someone is going to
+copy and run is worse than the problem it solves.
+
+| In the source | Becomes | |
+| --- | --- | --- |
+| `{timeout}` | `\{timeout\}` | In prose only. |
+| `a < b` | `a &lt; b` | Unless it opens a real tag. |
+| `<https://x.com>` | `[https://x.com](https://x.com)` | MDX has no autolinks. |
+| ` ```sh {x} < y ``` ` | unchanged | Code is quoted by definition. |
+
+<Callout type="warning" title="check does not compile MDX">
+`zel check` validates the content model — links, section types, sidebar
+entries. It does not compile your Markdown. A converted folder can pass `check`
+and still fail to build, so build it once before you throw the original away.
+</Callout>
+
+## When nothing is recognised
+
+A folder of plain Markdown with no configuration has no structure to convert
+from — no order, no grouping, no titles beyond the first heading. Rather than
+invent one, the command says so and points at the other route:
+
+```bash
+zel context zellij.md
+```
+
+That writes the whole content model as one file. Give it to an AI agent with
+your Markdown and ask for a content folder; the agent has the structure it needs
+and you have `zel check` to hold it to account.

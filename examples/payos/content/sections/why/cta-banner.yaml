@@ -1,0 +1,10 @@
+type: cta-banner
+headline: See it run
+body: The fast path takes a couple of minutes and needs no provider account.
+cta:
+  - label: Getting started
+    href: /guide/getting-started
+    style: primary
+  - label: Every capability
+    href: /capabilities
+    style: ghost

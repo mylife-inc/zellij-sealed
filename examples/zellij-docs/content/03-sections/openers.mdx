@@ -1,0 +1,140 @@
+---
+title: Openers
+description: hero, showcase, media-panel and cta-banner — the sections that start and end a page.
+---
+
+## hero
+
+The top of a page. One per page, and it renders an `h1`.
+
+<SectionPreview example="hero" />
+
+| field | |
+| --- | --- |
+| `badge` | Optional pill above the headline. |
+| `cta` | Up to two. `style` is `primary` or `ghost`. |
+| `visualStyle` | `floating`, `framed` or `full-bleed`. |
+| `titleGradient` | Two or three token names, clipped to the glyphs. |
+
+The hero image is the LCP element on most landing pages, so it loads with
+priority. Everything below it is lazy. Under `motion: expressive` the visual
+takes a gentle parallax.
+
+## hero-split
+
+The same job as `hero`, arranged as two columns: the copy on one side and
+something to look at on the other. Also renders the page's `h1`.
+
+<SectionPreview example="hero-split" />
+
+| field | |
+| --- | --- |
+| `badge`, `badgeIcon` | Pill above the headline, with an optional lucide icon. |
+| `highlights` | Up to four short qualifiers under the buttons. |
+| `media` | `left` or `right` — which side the visual takes. |
+| `visual` | An image. |
+| `terminal` | A transcript instead of an image. Exactly one of the two. |
+
+### Which opener
+
+`hero` when the headline is the whole message and a visual, if any, is
+supporting evidence below it. `hero-split` when the thing you are showing
+argues alongside the words rather than after them — a product shot, an
+interface, a session at a prompt.
+
+Its own type rather than a `visualStyle` on `hero`, deliberately. The two
+sections do not carry the same content: this one has qualifiers under the
+buttons and a transcript where the other has neither, and folding them
+together would have meant one schema where half the fields are inert
+depending on the value of another. That is the shape that stops a section
+being able to change later.
+
+### The terminal
+
+```yaml
+terminal:
+  title: terminal
+  body: |
+    $ zel new docs my-site
+    ✓ Wrote 8 files
+```
+
+Text, not a screenshot — so it can be selected, copied and read aloud, costs
+no download, and does not go stale the day the output changes. Lines starting
+`$` are set as commands and `✓` / `✗` as outcomes, which is the convention the
+transcript already uses for a human reader. Nothing else is interpreted.
+
+It stays dark under light themes on purpose: a terminal that follows the page
+into white stops reading as a terminal. Long lines scroll inside the panel
+rather than widening the page.
+
+### Emphasising part of a headline
+
+Wrap a run in asterisks and only that run takes the `titleGradient`:
+
+```yaml
+headline: Plain text in. *A site worth showing people out.*
+titleGradient: [accent, fg]
+```
+
+A headline of two sentences with both in gradient has no emphasis in it, only
+decoration. Marking one is what makes it land. Without `titleGradient` a marked
+run takes the accent colour, and a headline with no markers behaves exactly as
+it always did — so this changes nothing for content already written.
+
+## showcase
+
+One large panel: eyebrow, headline, body, visual. The "learn more" building
+block.
+
+<SectionPreview example="showcase" />
+
+Under `motion: expressive` the panel pins and its visual ramps as the page
+scrolls past. With no `visual` the pinning is skipped — there would be nothing
+to ramp, and the reserved scroll distance would just be empty space.
+
+## media-panel
+
+A rounded panel filled edge to edge with one image *or* video, with the copy
+laid over it.
+
+<SectionPreview example="media-panel" />
+
+<Callout type="info" title="tone is not a guess the engine can make">
+Zellij cannot see the artwork, so it cannot know whether white or black copy
+will be legible over it. `tone` is how you say. `auto` keeps the theme's own
+foreground, which is right for light, flat imagery.
+</Callout>
+
+`ratio` sets the panel's shape, but it is a floor rather than a cage: the panel
+grows past it when the copy needs more room, so a long title is never clipped.
+On a phone the copy takes the full width and the frame turns portrait.
+
+Setting `href` makes the whole panel a link, and the CTAs are dropped — a link
+inside a link is not a thing.
+
+## cta-banner
+
+The end of a page.
+
+<SectionPreview example="cta-banner" />
+
+`cta` accepts a single object or a list of up to two.
+
+`command` puts one line and a copy button above the buttons, for the install
+one-liner somebody is about to paste into a terminal. It belongs here rather
+than in a section of its own: an install line is a call to action that happens
+to be executable, and it should sit beside the buttons offering the same thing
+by other routes.
+
+It is a single line, deliberately. To show what a session *looks like* — several
+commands and their output — use `terminal` on [`hero-split`](#hero-split) or
+[`steps-panel`](/sections/narrative#steps-panel) instead.
+
+<Callout type="tip" title="The copy button is an accelerator, not the only route">
+The command is real text, so selecting it and pressing ⌘C works whether or not
+the browser grants clipboard access — and it does not over plain HTTP. If the
+write is refused the button stays idle rather than claiming a copy that did not
+happen, since the cost of lying here is somebody pasting whatever was on their
+clipboard before into a shell.
+</Callout>

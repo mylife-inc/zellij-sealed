@@ -1,0 +1,368 @@
+---
+title: zel new
+description: Create a content folder, a wrapper app, a page, a guide, or one section.
+---
+
+Six things can be created, and they are different in kind. `docs`, `app` and
+`project` start something; `page`, `guide` and `section` add to one that exists.
+
+| | Creates | Default location | |
+| --- | --- | --- | --- |
+| `zel new docs [dir]` | A content folder | `./content` | **Available** |
+| `zel new section <type>` | One section file | `--out`, or stdout | **Available** |
+| `zel new page <name>` | One page, and the section files it references | inside the content folder | **Available** |
+| `zel new guide <name>` | A guide folder with a sidebar and an index | inside the content folder | **Available** |
+| `zel new app [dir]` | A Next.js wrapper around a content folder | `.` | Planned |
+| `zel new project <name>` | A repository with docs and product as siblings | `./<name>` | Planned |
+
+The available ones are pure Rust with the schema compiled in — **no container
+runtime, no Node**. Writing content should not need Docker. `zel new app`
+produces a Node application, and will.
+
+## Which one you want
+
+<CardGrid>
+  <Card title="Nothing yet" icon="sparkles">
+    `zel new docs` — a content folder, and the only thing most people ever need.
+  </Card>
+  <Card title="A whole repository" icon="folder-tree">
+    `zel new project` — docs and product as siblings, with a pipeline.
+  </Card>
+  <Card title="Adding to a folder you have" icon="file-plus">
+    `zel new page`, `zel new guide`, `zel new section`.
+  </Card>
+  <Card title="You need the Next.js app" icon="package">
+    `zel new app` — for Vercel, or your own React pages alongside.
+  </Card>
+</CardGrid>
+
+If you are unsure, it is `zel new docs`. `zel dev`, `zel build` and `zel deploy`
+run the application in a container, so a content folder is a complete project —
+the app is for the cases where you specifically need it on disk.
+
+## What every one of them refuses to do
+
+**Write into a directory that already has something in it.** Without `--force`,
+a non-empty target is an error rather than a merge.
+
+Merging is how a scaffold quietly overwrites a file somebody spent an afternoon
+on. The check ignores dotfiles, so `git init` followed by `zel new docs` works —
+a directory containing only `.git` is empty as far as anyone is concerned.
+
+---
+
+## `zel new docs [dir]`
+
+Creates **the folder you write in** — the content root. No JavaScript, no
+`package.json`, nothing to install. Just the YAML and MDX that describe a site.
+
+```bash title="terminal"
+zel new docs
+zel new docs ./product-docs
+zel new docs --name "Acme" --theme cupertino --guide
+```
+
+### What it writes
+
+```
+content/
+├── site.yaml            # name, theme, nav bar, footer
+├── pages.yaml           # one landing page, built from two sections
+├── menu.yaml            # the top bar
+├── sections/
+│   └── home/
+│       ├── hero.yaml
+│       └── features.yaml
+├── 01-guide/            # only with --guide
+│   ├── _sidebar.yaml
+│   └── index.mdx
+└── assets/
+    └── .gitkeep
+```
+
+### Why "a folder that already validates" was not an explanation
+
+The folder is not a set of empty templates with `TODO` in them. It is a small
+site that is complete and correct on the day it is created:
+
+- `zel check` passes with no warnings.
+- `zel dev` serves a landing page with a hero and a feature grid, with real
+  placeholder copy.
+- Every field written is a field the schema accepts, so the file is a working
+  example of its own format.
+
+That matters because the alternative — a skeleton with `TODO` in it — makes your
+first experience of Zellij a validation error you did not cause. You start from
+something that works and edit it into something you want, and at no point are
+you debugging the thing that was supposed to get you started.
+
+It is also why the generated `site.yaml` carries commented keys rather than a
+minimal file. A key you can see and uncomment is discoverable; a key you have to
+look up is not:
+
+```yaml title="content/site.yaml"
+theme: paper          # zel list themes — there are fourteen
+
+# The absolute origin. Canonical URLs, Open Graph tags and the sitemap
+# all need it, and without it the sitemap is generated empty.
+# siteUrl: https://example.com
+```
+
+### Options
+
+| | | |
+| --- | --- | --- |
+| `--name <name>` | The site name | The directory's name |
+| `--theme <theme>` | One of the fourteen | `paper` |
+| `--guide` | Also create a guide folder | off |
+| `--minimal` | `site.yaml` and one page, nothing else | off |
+| `--force` | Write into a directory that is not empty | off |
+
+Without `--force`, a non-empty target is an error rather than a merge. Merging
+into an existing folder is how a scaffold quietly overwrites something you
+wrote.
+
+---
+
+## `zel new app [dir]`
+
+<Callout type="warning" title="Planned">
+Exits with `not implemented yet`.
+</Callout>
+
+Creates **the Next.js application that renders a content folder**. This is the
+part with a `package.json`, and it is roughly forty lines of code you would
+otherwise copy from the documentation.
+
+```bash title="terminal"
+zel new app
+zel new app ./site
+zel new app ./site --with-docs
+```
+
+### What it writes
+
+```
+site/
+├── package.json          # depends on @shebka/zellij and next
+├── next.config.mjs       # withZellij()
+├── postcss.config.mjs
+├── .npmrc
+├── src/app/
+│   ├── [[...slug]]/page.tsx    # the one file that points at your content
+│   ├── layout.tsx
+│   ├── sitemap.ts
+│   └── robots.ts
+└── node_modules/         # empty until you install
+```
+
+The single line that matters is in `page.tsx`:
+
+```tsx title="src/app/[[...slug]]/page.tsx"
+const zellij = createZellijPages({
+  contentDir: '../content',
+});
+```
+
+That path is the wrapper's only opinion about where your writing lives.
+
+### `--with-docs`, and both together
+
+`--with-docs` runs `zel new docs` inside the app and points `contentDir` at the
+result. It is the answer to "I have nothing yet and want to see a site."
+
+```bash title="terminal"
+zel new app ./site --with-docs
+```
+
+```
+site/                      # the wrapper
+├── package.json
+├── src/app/…
+└── content/               # the content folder, created and wired
+    ├── site.yaml
+    └── …
+```
+
+So to answer the question directly: **`[dir]` says where the app goes, and
+`--with-docs` says whether a content folder is created inside it.** They are not
+in competition. `zel new app ./site --with-docs` produces the wrapper at
+`./site` and the content at `./site/content`, with `contentDir: './content'`
+already written into `page.tsx`.
+
+Without `--with-docs`, the app is created with `contentDir: '../content'` and
+nothing at that path yet. `zel check` will tell you so.
+
+### When you need an app at all
+
+Not always — and this is worth being clear about, because generating one by
+reflex is the most common way to end up maintaining JavaScript you never wanted.
+
+| | |
+| --- | --- |
+| `zel dev`, `zel build`, `zel deploy` | Run the app **in a container**. You never create one. |
+| Hosting on Vercel, or a platform that builds Next.js itself | You need the app in your repository. |
+| Adding Zellij pages to an application you already have | You need the app, and probably want to write it by hand rather than generate it. |
+
+If you are writing documentation and shipping it as a site, you do not need
+`zel new app`. Start with `zel new docs`.
+
+### Options
+
+| | | |
+| --- | --- | --- |
+| `--with-docs` | Also create a content folder inside, and wire it | off |
+| `--content <path>` | What `contentDir` should point at | `../content` |
+| `--features <list>` | `maths`, `diagrams`, `all`, or `none` | `none` |
+| `--package-manager <pm>` | `npm`, `pnpm`, `yarn`, `bun` | `npm` |
+| `--force` | Write into a directory that is not empty | off |
+
+---
+
+## `zel new section <type>`
+
+Writes one section file, with its required fields filled in and its optional
+ones present as commented defaults.
+
+```bash title="terminal"
+zel new section pricing-table --out sections/home/plans.yaml
+zel new section pricing-table                      # to stdout
+```
+
+Without `--out` it prints, so it composes:
+
+```bash title="terminal"
+zel new section faq >> sections/home/faq.yaml
+```
+
+A type that does not exist is an error naming it, and `--out` never overwrites
+a file that already exists — there is no flag for that, because a section
+somebody has filled in is not recoverable. Write elsewhere and move it.
+
+The generated file:
+
+```yaml title="sections/home/plans.yaml"
+type: pricing-table
+tiers:
+  - { name: TODO, price: TODO }
+
+# Uncomment what you need.
+# heading: TODO
+# subhead: TODO
+```
+
+Commented rather than omitted, because a field you can see and uncomment is
+discoverable and a field you have to look up is not.
+
+---
+
+## `zel new page <name>`
+
+Adds an entry to `pages.yaml` and creates the section files it references.
+
+```bash title="terminal"
+zel new page pricing --sections hero,pricing-table,faq
+```
+
+```
+✓ sections/pricing/hero.yaml
+✓ sections/pricing/pricing-table.yaml
+✓ sections/pricing/faq.yaml
+
+  Add this to pages.yaml:
+
+    - name: pricing
+      title: Pricing
+      description: TODO
+      sections:
+        - pricing/hero
+        - pricing/pricing-table
+        - pricing/faq
+```
+
+Without `--sections` it creates the page with a single hero.
+
+<Callout type="info" title="Why it does not edit pages.yaml for you">
+Parsing that file and writing it back would lose the comments and the ordering
+you chose. Four lines to paste is a better trade than a tool that silently
+reformats a file you maintain.
+</Callout>
+
+---
+
+## `zel new guide <name>`
+
+Adds a guide folder — a numbered directory with a `_sidebar.yaml` and an
+`index.mdx`.
+
+```bash title="terminal"
+zel new guide api --title "API reference"
+```
+
+```
+✓ 02-api/_sidebar.yaml
+✓ 02-api/index.mdx
+```
+
+The number is one past the highest already in the folder, so guides keep the
+order you created them in until you renumber them yourself. Two guides sharing
+a prefix is a build error, and this is where it is prevented.
+
+## `zel new project <name>`
+
+A whole repository: documentation and a product as siblings, with a pipeline
+that validates the first on every pull request and publishes it on every push.
+
+```bash title="terminal"
+zel new project acme --product-lang rust
+```
+
+```
+✓ acme
+  docs/                    the documentation, as Zellij content
+  product/                 yours
+  .github/workflows/docs.yml validates on every pull request, image on main
+  12 files
+
+  Write:  zel dev acme/docs
+  Code:   cd acme/product && cargo init
+```
+
+| | | |
+| --- | --- | --- |
+| `--product-lang <lang>` | Which starting command to suggest | `none` |
+| `--docs-dir <name>` | | `docs` |
+| `--product-dir <name>` | | `product` |
+| `--force` | Write into a directory that is not empty | off |
+
+<Callout type="info" title="The product folder is empty on purpose">
+An earlier draft of this page said `--product-lang` would write "a minimal,
+buildable starting point" into `product/`. It does not, and it should not.
+
+`cargo init`, `go mod init` and `npm init` exist, are better than anything a
+documentation tool would write in their place, and are what you were going to
+run anyway. Worse, the languages differ in how much opinion is required —
+Rust needs two files, a JVM project needs a build system chosen for you — so
+the useful cases would have been useful and the rest would have been wrong.
+
+So `--product-lang` prints the command for your language, with your project's
+name already in it, and writes nothing. `none` skips even that.
+</Callout>
+
+Notice what is absent: no `package.json`, no wrapper. The pipeline builds the
+documentation inside a container from a public image, so the repository stays a
+repository about your product.
+
+The `docs/` half is exactly what [`zel new docs`](/cli/new#zel-new-docs-dir)
+produces — the same scaffold, so the two cannot drift — and the pipeline is
+exactly what [`zel ci init github --target image`](/cli/ci) writes.
+
+[Lab 3](/guide/quickstart/new-project) walks this end to end.
+
+---
+
+## See also
+
+- [`zel explain`](/cli/explain) — what fields a section type takes, before you create one
+- [`zel check`](/cli/check) — validate what you wrote
+- [The content model](/guide/content-model) — what these files are, conceptually

@@ -1,0 +1,10 @@
+title: Using PayOS
+order: 2
+description: What each role does, day to day.
+
+nav:
+  - label: By role
+    items:
+      - vendor
+      - customer
+      - platform-admin

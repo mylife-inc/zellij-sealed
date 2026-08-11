@@ -1,0 +1,54 @@
+type: steps-panel
+id: trust
+eyebrow: Architecture
+heading: Five zones, and a contract at every crossing
+subhead: >-
+  Everything inside a box may talk to everything else inside it. Crossing a
+  boundary costs a cookie, a bearer token, or a single-use internal token —
+  never an assumption.
+media: right
+diagram: |
+  flowchart LR
+      Browser["Browser<br/>developer / admin"]
+      Portal["Portal<br/>route handlers"]
+      Postgres[("PostgreSQL<br/>durable")]
+      Redis[("Redis<br/>ephemeral, TTL")]
+      Worker["Workers<br/>rekey · build · rotation"]
+      GitHub["GitHub<br/>Actions runner"]
+      Build["Build container<br/>CI Mode 3"]
+
+      Browser -- "session cookie<br/>httpOnly Secure Lax" --> Portal
+      GitHub -- "bootstrap secret<br/>→ single-use token" --> Portal
+      Build -- "internal token<br/>60s, single use" --> Portal
+      Portal --> Postgres
+      Portal --> Redis
+      Worker --> Postgres
+      Worker --> Redis
+steps:
+  - title: The browser gets a cookie, and nothing else
+    body: >-
+      `httpOnly`, `Secure`, `SameSite=Lax`. No key material, no admin key, no
+      token value ever reaches client JavaScript — every sensitive operation is
+      a server action.
+  - title: The runner gets sixty seconds
+    body: >-
+      A bootstrap secret buys a single-use token whose *hash* lives in Redis
+      with a one-minute expiry. Redemption compares and deletes atomically, so
+      two requests carrying the same token cannot both win.
+  - title: The build container gets less
+    body: >-
+      An internal token, single-use, valid for a minute, on a namespace never
+      exposed to the public network. It buys exactly one key handoff.
+  - title: Postgres holds what must survive
+    body: >-
+      Fourteen models — repositories, recipients, builds, audit entries. Every
+      secret in it is hashed or wrapped; a full database dump yields ciphertext
+      and Argon2id digests.
+  - title: Redis holds what must not
+    body: >-
+      Unlocked admin keys, single-use tokens, rate-limit counters, per-repo
+      build locks. All TTL'd. A restart loses exactly the things that should
+      not outlive it.
+caption: >-
+  The admin key is the sharpest edge: AES-256-GCM at rest, Argon2id to unlock,
+  and the unlocked form lives only in Redis under a TTL — never on disk.

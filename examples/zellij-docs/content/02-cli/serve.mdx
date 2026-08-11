@@ -1,0 +1,84 @@
+---
+title: zel serve
+description: Serve what build produced, with nothing watching and nothing rebuilding.
+---
+
+<Callout type="warning" title="Planned">
+`zel serve` exits with `not implemented yet`. Until it lands, any static file
+server does the same job — see [below](#until-it-lands).
+</Callout>
+
+```bash title="terminal"
+zel build
+zel serve ./dist
+```
+
+## Why not just use `zel dev`
+
+Because they answer different questions.
+
+[`zel dev`](/cli/dev) runs the application. It resolves routes, renders on
+demand, and is forgiving in ways the finished site is not. `serve` hands over
+files from a folder exactly as a CDN would, and nothing else.
+
+**A static build can differ from the development server**, and the differences
+are the kind that reach production:
+
+| | |
+| --- | --- |
+| Trailing slashes | `/guide` and `/guide/` are the same route in dev, and two different files on a CDN |
+| Missing assets | Something the export did not copy is served from memory in dev |
+| Absolute paths | A link that works from the root breaks under a `basePath` |
+| A page needing a server | Anything dynamic silently became a 404 during export |
+
+Seeing the export in a browser once, before it goes anywhere, catches all four
+in about a minute. It is the cheapest step in the whole pipeline and the one
+most often skipped.
+
+## What it does
+
+Serves `--out` from `zel build` over HTTP, with the same route-to-file mapping
+a static host uses:
+
+```
+/            → index.html
+/guide       → guide.html
+/guide/setup → guide/setup.html
+anything else → 404.html
+```
+
+No watching, no rebuilding, no cache-busting. Change a file and the browser
+shows the change on reload, because it is reading the file.
+
+## Options
+
+| | | |
+| --- | --- | --- |
+| `[dir]` | The folder to serve | `dist` |
+| `--port <n>` | | `3000` |
+
+## Until it lands
+
+Any static server behaves the same way. From the folder:
+
+```bash title="terminal"
+python3 -m http.server 3000 --directory dist
+```
+
+<Callout type="warning" title="One difference worth knowing">
+`http.server` does not map `/guide` to `guide.html` — it will 404 where Netlify
+would serve the page. So it proves your assets and your absolute paths, and it
+cannot prove your routes.
+
+`npx serve dist` does the extensionless mapping and is closer to what a CDN
+does.
+</Callout>
+
+For a container image, [`zel image run`](/cli/image#zel-image-run) is the
+equivalent and works today.
+
+## See also
+
+- [`zel build`](/cli/build) — what you are serving
+- [`zel image run`](/cli/image#zel-image-run) — the same check, for an image
+- [`zel dev`](/cli/dev) — the writing loop, which is a different thing

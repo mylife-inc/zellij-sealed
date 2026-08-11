@@ -1,0 +1,62 @@
+## `steps-panel`, not `timeline`.
+##
+## These four are an order of operations, not a history — you do them in this
+## sequence, they did not happen in it. The giveaway was `date: "01"`: a field
+## meaning "when" carrying a number meaning "which", and four hand-written
+## numbers that a fifth step inserted anywhere but the end would have made
+## wrong. The list renumbers itself now.
+##
+## The panel is the point of the pairing: the steps say what you do, the tree
+## says what Git ends up holding, and a reader checks one against the other
+## without leaving the section.
+type: steps-panel
+id: how
+eyebrow: How it works
+heading: A thin, careful layer over Git.
+subhead: >-
+  CodeSeal does not replace Git or your hosting provider. It encrypts the files
+  you nominate, manages the ignore rules and hooks for you, and stays out of the
+  way the rest of the time.
+
+steps:
+  - title: Mark sensitive paths
+    body: >-
+      Tell CodeSeal which files or folders hold your secrets. A directory is
+      expanded into individual file entries in a versioned manifest, so what is
+      protected is always explicit.
+
+  - title: Encrypt locally
+    body: >-
+      Plaintext never leaves your machine. Encrypted blobs go to `.sgit/store/`,
+      and that is what Git sees.
+
+  - title: Commit and push safely
+    body: >-
+      `sgit commit` encrypts and checks before delegating to Git. `sgit push`
+      repeats the safety checks before sending ciphertext and manifest.
+
+  - title: Decrypt where authorised
+    body: >-
+      Teammates and CI runners holding a key decrypt on demand through
+      `sgit run-secure`.
+
+## Paths collapsed and annotations shortened so the widest line fits the panel.
+##
+## The terminal scrolls sideways, so nothing was unreachable — but a panel whose
+## whole job is to show a shape should not need dragging to read. Two levels of
+## nesting bought nothing here; the folder names already say where things are.
+terminal:
+  title: repository layout
+  body: |
+    my-app/
+    ├── src/private/
+    │   └── payment_engine.py      ← plaintext, ignored
+    ├── .sgit/store/src/private/
+    │   └── payment_engine.py.sgit ← encrypted
+    ├── .sgit/manifest.yaml        ← path map
+    ├── .gitignore                 ← managed
+    └── .gitattributes             ← managed
+
+caption: >-
+  Your host only ever sees the encrypted blob and the manifest. The real source
+  never touches the wire.

@@ -1,0 +1,36 @@
+- name: Why PayOS
+  page: why
+
+- name: Capabilities
+  page: capabilities
+
+# Two guide folders, each referenced by its directory name. The numeric prefix
+# is an ordering instruction and never appears in a route (design §9).
+- name: Using PayOS
+  page: 02-using-payos
+
+- name: Docs
+  items:
+    - name: Start here
+      items:
+        - name: Getting started
+          url: /guide/getting-started
+          description: "Run the stack and make a real sale."
+          icon: rocket
+        - name: Setup
+          url: /guide/setup
+          description: "The operator's local guide."
+          icon: terminal
+    - name: Operate
+      items:
+        - name: Configuration
+          url: /guide/configuration
+          description: "Every environment variable."
+          icon: sliders-horizontal
+        - name: Deploy
+          url: /guide/deploy
+          description: "Railway, AWS, GCP, DigitalOcean."
+          icon: cloud
+
+- name: Security
+  url: /capabilities#security

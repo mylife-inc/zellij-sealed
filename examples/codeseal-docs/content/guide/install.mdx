@@ -1,0 +1,119 @@
+---
+title: Install
+description: One static binary, no runtime, on macOS, Linux, WSL or Windows.
+---
+
+`sgit` is a single statically linked binary with no runtime dependencies.
+Nothing to install alongside it, nothing to keep updated, and removing it is
+deleting a file.
+
+Every release is published to GitHub with a SHA-256 checksum and a
+[sigstore](https://www.sigstore.dev/) signature tied to the project's release
+workflow — so you can verify that what you downloaded is what that workflow
+built.
+
+## The one-liner
+
+<Tabs>
+<Tab title="macOS, Linux and WSL">
+
+```bash title="terminal"
+curl -fsSL https://raw.githubusercontent.com/mylife-inc/releases/main/codeseal/install.sh | sh
+```
+
+```
+✓ Installed sgit v1.0.0 to /usr/local/bin/sgit
+```
+
+It detects your operating system and architecture, fetches the newest release
+built for it, **verifies the SHA-256 before unpacking**, and installs to
+`/usr/local/bin` — or `~/.local/bin` when that is not writable.
+
+<Callout type="tip" title="Read it first if you would rather">
+It is a short shell script and piping a stranger's script into `sh` is a habit
+worth being uncomfortable with. Download it, read it, then run it:
+
+```bash title="terminal"
+curl -fsSL -o install.sh https://raw.githubusercontent.com/mylife-inc/releases/main/codeseal/install.sh
+less install.sh
+sh install.sh
+```
+</Callout>
+
+</Tab>
+<Tab title="Windows">
+
+The installer is POSIX shell. On Windows, either run it **inside WSL** — which
+is the simpler path if you already have WSL — or take the archive directly:
+
+1. Open [the releases page](https://github.com/mylife-inc/releases/releases?q=codeseal)
+2. Download `sgit-<version>-x86_64-pc-windows-msvc.zip`
+3. Verify it against the published checksum:
+
+```powershell title="PowerShell"
+Get-FileHash .\sgit-v1.0.0-x86_64-pc-windows-msvc.zip -Algorithm SHA256
+```
+
+4. Extract `sgit.exe` somewhere on your `PATH`
+
+</Tab>
+</Tabs>
+
+## Or take the archive yourself
+
+Five targets are published for every release:
+
+| platform | target | archive |
+| --- | --- | --- |
+| macOS, Apple Silicon | `aarch64-apple-darwin` | `.tar.gz` |
+| macOS, Intel | `x86_64-apple-darwin` | `.tar.gz` |
+| Linux, x86-64 | `x86_64-unknown-linux-gnu` | `.tar.gz` |
+| Linux, arm64 | `aarch64-unknown-linux-gnu` | `.tar.gz` |
+| Windows | `x86_64-pc-windows-msvc` | `.zip` |
+
+Download the one matching your machine from
+[the latest `codeseal-*` release](https://github.com/mylife-inc/releases/releases?q=codeseal),
+check it, unpack it, and put `sgit` on your `PATH`.
+
+## Verifying what you downloaded
+
+Two independent checks, and they answer different questions.
+
+**The checksum** answers *did this arrive intact*:
+
+```bash title="terminal"
+shasum -a 256 -c sgit-v1.0.0-aarch64-apple-darwin.tar.gz.sha256
+```
+
+**The signature** answers *did this come from the CodeSeal release workflow*,
+which is the one that matters if you are worried about the download rather than
+the network:
+
+```bash title="terminal"
+cosign verify-blob \
+  --certificate sgit-v1.0.0-aarch64-apple-darwin.tar.gz.pem \
+  --signature sgit-v1.0.0-aarch64-apple-darwin.tar.gz.sig \
+  --certificate-identity-regexp 'https://github.com/mylife-inc/CodeSeal/.*' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  sgit-v1.0.0-aarch64-apple-darwin.tar.gz
+```
+
+There is no key to fetch or trust: sigstore ties the signature to the GitHub
+Actions identity that produced it.
+
+## Check it works
+
+```bash title="terminal"
+sgit --version
+sgit doctor
+```
+
+`doctor` is worth running now, before there is a repository to worry about. It
+reports what it can see — the binary, your Git installation, whether a key is
+present in the environment — and it is the first thing to run whenever
+something later behaves oddly.
+
+## Next
+
+[The quickstart](/quickstart) takes a repository you already have and
+seals something in it.

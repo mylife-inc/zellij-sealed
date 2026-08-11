@@ -1,0 +1,10 @@
+type: stats-band
+stats:
+  - value: "12"
+    label: Payment providers behind one interface
+  - value: "4"
+    label: Clouds deployed by one command
+  - value: "0"
+    label: Payment code on your website
+  - value: "0"
+    label: Funds ever held by PayOS

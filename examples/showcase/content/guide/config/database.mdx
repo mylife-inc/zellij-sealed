@@ -1,0 +1,38 @@
+---
+title: Database
+description: Connecting Lumen to Postgres, running migrations, and using read replicas.
+---
+
+# Database
+
+Lumen requires Postgres 15 or newer.
+
+## Connection
+
+```bash
+export LUMEN_DATABASE_URL="postgres://lumen:secret@db.internal:5432/lumen?sslmode=require"
+```
+
+<Callout type="info">
+Always use `sslmode=require` outside local development.
+</Callout>
+
+## Migrations
+
+Migrations run automatically at startup. To run them manually:
+
+```bash
+lumen db migrate
+```
+
+## Read replicas
+
+Point reporting queries at a replica to keep dashboards off the primary:
+
+```yaml title="lumen.yaml"
+database:
+  primary: postgres://lumen:secret@db-primary:5432/lumen
+  replica: postgres://lumen:secret@db-replica:5432/lumen
+```
+
+<Screenshot src="assets/shot-reporting.png" caption="Reporting reads from the replica when one is configured." />

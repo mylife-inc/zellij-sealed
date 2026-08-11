@@ -1,0 +1,150 @@
+---
+title: site.yaml
+description: Every key the site file takes — identity, theme, navigation chrome, footer.
+---
+
+`site.yaml` is the one file about the site rather than about a page. Every key
+is optional; a content folder with no `site.yaml` at all still builds, taking
+its name from the folder.
+
+```yaml title="content/site.yaml"
+name: Acme
+tagline: Operations that run themselves
+
+theme: cupertino
+mode: system
+motion: subtle
+
+home: home
+siteUrl: https://acme.example.com
+```
+
+## Identity
+
+| Key | Type | |
+| --- | --- | --- |
+| `name` | string | **Required in practice** — used as the brand text, the OG site name, and the fallback `<title>`. Defaults to the folder's name. |
+| `tagline` | string | Shown under the brand in some themes; used as the default meta description. |
+| `brand` | object | Logo and title. See below. |
+| `siteUrl` | string | The absolute origin. Canonical URLs, OG tags and the sitemap need it; without it they are relative and worth less. |
+| `ogImage` | string | Path under `assets/`, used for social previews. |
+| `basePath` | string | A prefix when the site is not at the root of its domain. Set it in **both** here and `next.config.js`. |
+| `home` | string | Which page or guide `/` shows. Defaults to a page called `home`. |
+
+### `brand`
+
+```yaml
+brand:
+  logo:
+    src: assets/logo.svg
+    dark: assets/logo-dark.svg   # swapped in dark mode
+    alt: Acme
+  title: Acme                     # text beside the logo, or instead of it
+```
+
+<Callout type="tip" title="Give a dark variant or none">
+A single logo is left alone in both modes. Supply `dark:` and the two are
+swapped — but a logo that only reads on a light background, with no dark
+variant, will be shown on a dark one unchanged.
+</Callout>
+
+## Look and feel
+
+| Key | Type | Default | |
+| --- | --- | --- | --- |
+| `theme` | one of fourteen | `paper` | See [Themes](/guide/themes). |
+| `mode` | `light` \| `dark` \| `system` | `system` | The starting mode. A visitor's choice wins and persists. |
+| `motion` | `none` \| `subtle` \| `expressive` | `subtle` | See [Motion](/guide/motion). A page may override it. |
+| `overrides` | object | — | `accent`, `accentForeground`, `radius`, `fontHeading`, `fontBody`. Escape hatches; prefer picking a theme. |
+| `menuOverflowAfter` | integer | `7` | Past this many top-level menu items, the rest collapse into "More". |
+
+## `nav` — the top bar
+
+Everything in the bar that is not the menu. The menu itself lives in
+[`menu.yaml`](/guide/menu).
+
+```yaml
+nav:
+  sticky: true
+  align: center
+  transparentOverHero: true
+  scrollThreshold: 60
+  themeToggle: true
+  themeSwitcher: true
+  search: true
+  cta:
+    - { label: Get started, href: /guide, style: primary }
+  social:
+    github: https://github.com/acme/acme
+  announcement:
+    text: "Acme 2.0 is here —"
+    link: { label: see what changed, href: /changelog }
+    dismissible: true
+```
+
+| Key | Type | Default | |
+| --- | --- | --- | --- |
+| `sticky` | boolean | `true` | The bar stays at the top while scrolling. |
+| `align` | `left` \| `center` | `left` | Where the menu sits. |
+| `hideOnScrollDown` | boolean | `false` | Hide when scrolling down, show when scrolling up. |
+| `transparentOverHero` | boolean | `true` | Transparent over a landing page's hero, solid once scrolled. Non-landing layouts are always solid. |
+| `scrollThreshold` | integer | `80` | Pixels of scroll before the bar turns solid. |
+| `themeToggle` | boolean | `false` | The light/dark button. |
+| `themeSwitcher` | boolean | `false` | The full theme picker. |
+| `search` | boolean | `false` | ⌘K search. Only useful with a guide folder — it indexes guide pages. |
+| `cta` | list | `[]` | Up to two buttons at the right of the bar. `style` is `primary` or `ghost`. |
+| `social` | object | — | `github`, `x`, `linkedin`, `youtube`, `discord`. Each is a URL; the icon is supplied. |
+| `announcement` | object | — | A dismissible strip above the bar. See below. |
+
+### `announcement`
+
+```yaml
+announcement:
+  text: "Acme 2.0 is here —"
+  link: { label: see what changed, href: /changelog }
+  dismissible: true
+```
+
+Dismissal is remembered, so a visitor who closes it does not meet it again on
+the next page.
+
+## `footer`
+
+```yaml
+footer:
+  columns:
+    - heading: Product
+      links:
+        - { label: Features, page: features }
+        - { label: Changelog, href: /changelog }
+    - heading: Company
+      links:
+        - { label: Careers, href: "https://acme.example.com/careers" }
+  legal: "© 2026 Acme"
+  social: true
+```
+
+A link takes `page:` — a page name, resolved to its route — or `href:` for
+anything else. Every internal one is validated at build time, so a footer link
+to a page that no longer exists fails the build rather than shipping a 404.
+
+## `analytics`
+
+```yaml
+analytics:
+  provider: plausible      # none | plausible | umami
+  domain: acme.example.com
+```
+
+`none` is the default, and nothing is loaded.
+
+## What is checked
+
+`zel check` reads this file the way the build does, so anything it accepts the
+build accepts.
+
+- An unknown top-level key **warns** rather than failing — a folder written for
+  a newer Zellij still builds on an older one.
+- An unknown value for a known key **fails**, naming the key and what it
+  accepts. `theme: cupertno` is a typo, not forward compatibility.
+- Every internal link in `nav` and `footer` is resolved and must exist.

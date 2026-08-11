@@ -1,0 +1,207 @@
+---
+title: Lab 4 — A repository you already have
+description: Migrate the documentation already in your repo, and publish it on every push.
+---
+
+**You have:** code on GitHub, and documentation somewhere in it — a `docs/`
+folder, a wiki you exported, a `README.md` that grew. **You will have:** that
+documentation as a Zellij folder, in the same repository, published by CI.
+
+**Needs:** `zel`, push access to the repository. A container runtime for the
+local steps.
+
+This is [Lab 3](/guide/quickstart/new-project) with an awkward first half: the
+repository exists, so nothing can be scaffolded around you.
+
+<Callout type="info" title="What runs today">
+Every command in this lab runs.
+</Callout>
+
+<Steps>
+
+<Step title="Work on a branch">
+
+```bash title="terminal"
+git switch -c docs/zellij
+```
+
+Everything below writes new files beside the old ones. Nothing is deleted until
+you decide, and the branch means a conversion you dislike is
+`git switch main` away.
+
+</Step>
+
+<Step title="See what you have">
+
+```bash title="terminal"
+zel detect docs
+```
+
+If it names MkDocs or Docusaurus, [Lab 2, step 2](/guide/quickstart/existing-docs)
+is your next move — convert, then come back here at step 4.
+
+If it recognises nothing, that is the usual answer for documentation that grew
+inside a code repository. [Lab 2, step 3](/guide/quickstart/existing-docs) is
+the AI route: `zel context` writes the reference, an agent does the conversion,
+`zel check` holds it to account.
+
+Either way, write into a **new folder**:
+
+```bash title="terminal"
+zel migrate docs --out docs-site
+```
+
+`detect` → `convert` → `check`, stopping at the first failure. It does nothing
+the three commands cannot; it exists because forgetting to validate after a
+conversion is the mistake everybody makes once.
+
+Read what the conversion could not carry over before going further — external
+links belong in `menu.yaml`, and a page absent from the navigation was listed
+rather than published.
+
+</Step>
+
+<Step title="Decide where it lives">
+
+Three arrangements, and this is a decision worth making deliberately because
+moving later means updating the pipeline and every relative link.
+
+| Layout | When |
+| --- | --- |
+| `docs/` at the root | One product, one set of docs. The default. |
+| `docs/external/` and `docs/internal/` | Public documentation and things that stay in the repository. Zellij only reads the folder you point it at. |
+| `packages/*/docs/` | A monorepo where each package publishes its own site. One pipeline per package, or one with a matrix. |
+
+Once you have chosen:
+
+```bash title="terminal"
+git rm -r --cached docs && rm -rf docs
+mv docs-site docs
+```
+
+Or keep both for a while — `zel` only reads the path you give it, so the old
+folder can sit there until you trust the new one.
+
+</Step>
+
+<Step title="Build it once, before you delete the original">
+
+<Callout type="warning" title="check does not compile MDX">
+`zel check` validates the content model. It does not compile your Markdown, and
+MDX treats `{` and `<` as syntax. A converted folder can pass `check` and still
+fail to build.
+</Callout>
+
+```bash title="terminal"
+zel dev docs --open      # read a few pages
+zel build docs           # and prove it compiles
+```
+
+</Step>
+
+<Step title="Add the pipeline">
+
+```bash title="terminal"
+zel ci init github --content docs --target image
+```
+
+<Callout type="tip" title="A separate workflow, not a step in yours">
+It writes `.github/workflows/docs.yml` scoped to `paths: ['docs/**']` and
+leaves your existing pipelines alone — your test suite should not run because
+somebody fixed a typo, and your documentation should not wait for it.
+
+It refuses to overwrite a workflow that is already there, and prints whatever
+you still have to do that a file cannot: the workflow permission, or the
+secrets.
+</Callout>
+
+</Step>
+
+<Step title="Add the check to pull requests">
+
+Already done — the workflow above runs `zel check` on every pull request and
+publishes only on `main`.
+
+This is the part with the best return, and it costs nothing — no credentials, no
+registry, about fifteen seconds per run. From now on, a pull request that breaks
+a documentation link fails before review.
+
+</Step>
+
+<Step title="Open the pull request">
+
+```bash title="terminal"
+git add . && git commit -m "docs: migrate to Zellij"
+git push -u origin docs/zellij
+gh pr create --fill
+```
+
+Your own new pipeline runs against the pull request. If `zel check` passes on
+the branch that introduced it, the migration is sound.
+
+</Step>
+
+<Step title="Turn on package writing">
+
+Only for the image pipeline. **Settings → Actions → General → Workflow
+permissions → Read and write permissions.**
+
+Without it the push fails with a 403 that reads like an authentication problem
+and is a permissions problem.
+
+</Step>
+
+</Steps>
+
+## Keeping the old site up during the switch
+
+You probably have documentation published somewhere already, and taking it down
+to try something is not a real option.
+
+<Steps>
+<Step title="Publish the new one somewhere temporary">
+
+```bash title="terminal"
+netlify sites:create --name acme-docs-preview
+zel build docs --out dist
+netlify deploy --prod --dir dist
+```
+
+`zel deploy netlify docs` will collapse those last two once it lands.
+
+</Step>
+<Step title="Circulate it">
+Let people who read the documentation read this one for a week. They find the
+things a validator cannot: a page that lost its ordering, a diagram that was an
+image, a link that pointed somewhere clever.
+</Step>
+<Step title="Move the domain">
+Repoint the CNAME at the new site — [Lab 1, step 6](/guide/quickstart/from-scratch)
+has the whole DNS sequence — and delete the old deployment once traffic has
+moved.
+</Step>
+</Steps>
+
+## What this buys you
+
+A build that fails when documentation is wrong. Before this, a stale link was
+discovered by a reader; now it is discovered by the pull request that created
+it.
+
+That is the entire argument for documentation living in the repository, and it
+only works if the check runs on pull requests. If you do one step from this lab,
+do step 6.
+
+## Next
+
+<CardGrid>
+  <Card title="The pipeline command" href="/cli/ci" icon="workflow">
+    Every option `zel ci init` takes.
+  </Card>
+  <Card title="Settle the repeated arguments" href="/cli/config" icon="settings">
+    `zel.toml`, so it is `zel check` rather than `zel check docs`.
+  </Card>
+  <Card title="Build the landing page" href="/sections" icon="layout-grid">
+    A converted folder has one placeholder hero. There are eighteen others.
+  </Card>
+</CardGrid>

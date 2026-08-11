@@ -1,0 +1,59 @@
+- name: home
+  title: CodeSeal — source-at-rest encryption for Git
+  description: >-
+    CodeSeal encrypts your most sensitive source files before they leave your
+    machine, so what is committed to Git is unreadable to everyone but you.
+  layout: landing
+  sections:
+    - home/hero
+    - home/problem
+    - home/how
+    - home/security
+    - home/faq
+    - home/cta
+
+## The CI/CD page.
+##
+## A page of sections rather than a guide page, and the reason is the layout
+## rather than the words. Four cards comparing workflow snippets, then four
+## blocks each pairing a sequence diagram with a numbered legend — none of that
+## is prose, and putting it in MDX would have meant bespoke CSS serving exactly
+## one page.
+##
+## The guide keeps its own `/guide/ci`, which is the reference: every flag, every
+## command, in the layout built for reading. This one is for deciding which mode
+## you want.
+- name: cicd
+  title: CI/CD — build pipelines, sealed
+  description: >-
+    Four CI modes for CodeSeal, from a shared passphrase on the runner to builds
+    that GitHub can trigger but never observe.
+  layout: stack
+  sections:
+    - cicd/two-choices
+    - cicd/intro
+    - cicd/matrix
+    - cicd/mode-1
+    - cicd/mode-2
+    - cicd/mode-3
+    - cicd/mode-4
+
+## The Portal page.
+##
+## Sections rather than a guide page: the argument it has to make is "you
+## probably do not need this", and that is a matrix and a diagram, not prose.
+## The guide keeps the reference under /guide/portal.
+- name: portal
+  title: The Portal — self-hosted key custody and builds
+  description: >-
+    An optional service you host. It holds the keys for four of CodeSeal's
+    eight setups, lends them one build at a time, and can run the build itself
+    so your CI provider never sees plaintext.
+  layout: stack
+  sections:
+    - portal/hero
+    - portal/need
+    - portal/capabilities
+    - portal/trust
+    - portal/run
+    - portal/cta

@@ -1,0 +1,52 @@
+---
+title: Installation
+description: Production deployment options for Lumen, hosted and self-managed.
+---
+
+# Installation
+
+Lumen runs as a managed service or entirely inside your own cloud account.
+
+## Hosted
+
+Nothing to install. Create an account and the platform is ready.
+
+## Self-hosted
+
+<Callout type="warning">
+Self-hosting requires an Enterprise plan and a Postgres 15+ instance you control.
+</Callout>
+
+<CodeGroup>
+```bash title="docker"
+docker run -d \
+  --name lumen \
+  -e LUMEN_DATABASE_URL="postgres://user:pass@host:5432/lumen" \
+  -p 8080:8080 \
+  ghcr.io/lumen/platform:2.0
+```
+
+```yaml title="kubernetes"
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lumen
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: lumen
+          image: ghcr.io/lumen/platform:2.0
+          ports:
+            - containerPort: 8080
+```
+</CodeGroup>
+
+## Verifying
+
+```bash
+curl -fsS http://localhost:8080/healthz
+```
+
+A healthy instance returns `{"status":"ok"}`.

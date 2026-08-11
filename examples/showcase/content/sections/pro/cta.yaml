@@ -1,0 +1,8 @@
+type: cta-banner
+id: order
+headline: Lumen 3 Pro. From £999.
+body: Free delivery, and two years of support with a person on the other end.
+background: { gradient: [accent, inverted-bg] }
+cta:
+  - { label: Buy, href: "#buy", style: primary }
+  - { label: Compare models, href: "#buy", style: ghost }

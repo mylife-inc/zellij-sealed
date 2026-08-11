@@ -1,0 +1,85 @@
+---
+title: All nineteen sections
+description: The section vocabulary, grouped by what each family is for.
+---
+
+A section is one band of content. Pages are ordered lists of them, and the set
+is fixed on purpose — a small vocabulary is what keeps every page on a site
+looking like it belongs there.
+
+## Fields every section has
+
+```yaml
+type: hero              # required — picks the renderer
+id: top                 # anchor target, so /page#top works
+motion: subtle          # none | subtle | expressive
+background: tinted      # default | tinted | inverted | accent | { gradient: [...] }
+padding: loose          # none | tight | normal | loose
+titleGradient: [accent, fg]
+```
+
+These are exactly the fields a page may override when it references a section —
+presentation, never content. See
+[pages and sections](/guide/pages-and-sections).
+
+### Backgrounds
+
+Named surfaces are `default`, `tinted`, `inverted` and `accent`. A gradient
+takes two or three stops:
+
+```yaml
+background: { gradient: [accent, inverted-bg] }
+background: { gradient: [surface, accent, "#101018"] }
+```
+
+Stops naming a palette token follow the active theme. Literal CSS colours do
+not — use them only where the colour must not change with the theme.
+
+`titleGradient` takes the same stops and paints the section's leading heading.
+
+## The families
+
+<CardGrid>
+  <Card title="Openers" href="/sections/openers" icon="flag">
+    hero, showcase, media-panel, cta-banner
+  </Card>
+  <Card title="Grids" href="/sections/grids" icon="grid-3x3">
+    feature-grid, bento-grid, card-carousel, pricing-table
+  </Card>
+  <Card title="Narrative" href="/sections/narrative" icon="align-left">
+    zigzag, markdown-prose, timeline, faq
+  </Card>
+  <Card title="Proof" href="/sections/proof" icon="badge-check">
+    logo-strip, stats-band, testimonial, team-grid
+  </Card>
+  <Card title="Media" href="/sections/media" icon="image">
+    gallery, video-embed
+  </Card>
+</CardGrid>
+
+## Adding your own
+
+The registry is public, and the built-ins use it too:
+
+```ts
+import { registerSection, baseSectionSchema } from '@shebka/zellij';
+import { z } from 'zod';
+
+registerSection({
+  type: 'org-chart',
+  schema: baseSectionSchema.extend({
+    type: z.literal('org-chart'),
+    heading: z.string().optional(),
+    people: z.array(z.object({ name: z.string(), reportsTo: z.string().optional() })),
+  }),
+});
+```
+
+A custom section gets the same schema validation, the same error messages and
+the same presentation overrides as anything shipped in the box.
+
+<Callout type="tip" title="Write list items in block style">
+An unquoted comma ends an entry inside a YAML flow mapping, so
+`{ caption: Lisbon, 2024 }` quietly becomes `caption: Lisbon`. Block style has
+no such trap, and every example here uses it.
+</Callout>

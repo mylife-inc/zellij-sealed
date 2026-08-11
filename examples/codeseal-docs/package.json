@@ -1,0 +1,32 @@
+{
+  "name": "@shebka/codeseal-site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "predev": "zellij prepare",
+    "dev": "next dev --port 4330",
+    "prebuild": "zellij prepare",
+    "build": "next build",
+    "start": "next start --port 4330",
+    "check": "zellij check",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@shebka/zellij": "file:/Users/hamid/Dev/MyLife/Zellij/engine/packages/zellij",
+    "next": "^16.2.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "tailwindcss": "^4.3.3",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "typescript": "^5.9.3"
+  }
+}

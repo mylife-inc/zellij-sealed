@@ -1,0 +1,138 @@
+---
+title: Grids
+description: feature-grid, bento-grid, card-carousel and pricing-table — laying several things out at once.
+---
+
+## feature-grid
+
+Equal-weight cards. The workhorse.
+
+<SectionPreview example="feature-grid" />
+
+`icon` is a [lucide](https://lucide.dev) name in kebab-case. Icons resolve on
+the server, so none of the icon library reaches the browser, and an unknown
+name fails the build naming the export it looked for.
+
+## bento-grid
+
+Asymmetric tiles. Use it where a few things genuinely matter more than the
+others — that is the difference from `feature-grid`, which weights everything
+equally.
+
+<SectionPreview example="bento-grid" />
+
+Spans are cells on a four-column grid: `normal` is 1×1, `wide` 2×1, `tall` 1×2,
+`large` 2×2. On a tablet the grid drops to two columns and `large` becomes
+`wide`; on a phone everything is one column.
+
+A tile with an `image` puts it at the foot and lets it fill the remaining
+height, which is what makes a `large` tile read as one composition rather than
+a card with a picture stuck under it.
+
+## card-carousel
+
+A horizontally scrolling row, snapped, with the next card peeking past the
+container edge so the row reads as scrollable before anything moves.
+
+<SectionPreview example="card-carousel" />
+
+<Callout type="info" title="The browser does the scrolling">
+`scroll-snap` on a plain overflow container, so a trackpad, a touch drag,
+shift+wheel and keyboard scrolling all work before any JavaScript runs. The
+prev/next buttons are a convenience on top, they disable at each end, and they
+hide entirely when the row fits.
+</Callout>
+
+The track is focusable so it can be scrolled by keyboard even when the cards
+inside are not links.
+
+## promo-grid
+
+Large linked tiles, each carrying its own artwork and its own destination. This
+is the landing-page format a consumer product site uses: the tiles *are* the
+navigation, and the page has almost no prose of its own.
+
+<SectionPreview example="promo-grid" />
+
+Widths are `full` or `half`, and two `half` tiles pair up on a wide viewport and
+stack below it. `height` picks `short`, `tall` or `full` — `full` is a tile that
+fills the viewport, which is what makes a page of them read as a sequence of
+screens rather than a list.
+
+A tile links in one of two ways, and they are exclusive: give it `links` for up
+to two labelled links laid over the artwork, or give it `href` to make the whole
+tile one big target. A link inside a link is not a thing.
+
+<Callout type="info" title="scrim earns its place here">
+Artwork that a title has to sit on top of is rarely uniform enough for the title
+to stay legible across it. `scrim` darkens the image behind the copy — `0` for
+flat artwork you chose to be quiet, up to about `0.4` for a photograph.
+</Callout>
+
+## pricing-table
+
+One to four tiers.
+
+<SectionPreview example="pricing-table" />
+
+Exactly one tier may be `highlighted`. A single "Contact us" tier renders
+gracefully — the layout does not assume three.
+
+`price` is free text, so `$12`, `From €9` and `Contact us` all belong. A bare
+number is accepted too and stringified, since YAML would otherwise hand it over
+as a number.
+
+## code-cards
+
+A row of cards whose snippets are the point. For comparing options that differ
+mainly in what you have to write down — CI modes, deployment targets, auth
+strategies.
+
+<SectionPreview example="code-cards" />
+
+Two to four cards. One is not a comparison, and a fifth pushes every card below
+the width at which its snippet still makes sense wrapped.
+
+`featured: true` marks the one you recommend, with the accent rather than a
+badge — a badge needs a word, and the word is already in the card.
+
+The snippets are `<pre>` elements, so they can be selected, copied and read
+aloud. They are **not** syntax-highlighted: Shiki runs at build time over MDX,
+and reaching it from a YAML section would mean either shipping a highlighter to
+the browser or threading a build step through the content loader — for snippets
+that are mostly keys and paths.
+
+<Callout type="tip" title="Not feature-grid with a code block bolted on">
+`feature-grid` cards take an icon and a sentence. The moment one holds twelve
+lines of YAML the row stops being a grid of equals — a card sized by a code
+block cannot sit beside a card sized by a sentence. This section makes the code
+the reason the cards exist and lines every snippet up at the same height.
+</Callout>
+
+## matrix
+
+Two axes crossed, with a sentence in every cell. For the page whose real claim
+is that the grid is **full** — that every combination of the two choices is
+legal.
+
+<SectionPreview example="matrix" />
+
+A list of the six combinations makes the same claim, and a reader has to count
+to check it. A grid makes it visible at a glance, which is the whole reason to
+spend the width.
+
+It renders a real `<table>`: column names are `<th scope="col">`, each row's
+name is `<th scope="row">`. That is not markup pedantry — it is what makes a
+screen reader announce "passphrase, portal-key" before reading a cell, and the
+cell means nothing without it. A grid of `div`s looks identical and says, to
+anyone not looking at it, eight unrelated sentences.
+
+Below 60rem the same table restacks into one block per row, each cell labelled
+by its column. Only the CSS changes; the markup and the header associations do
+not, so the reading order survives the layout.
+
+<Callout type="tip" title="Two to five columns, two to six rows">
+Past that it is a spreadsheet, and a spreadsheet wants a page of its own rather
+than a section in the middle of an argument. `zel check` rejects a row whose
+cell count does not match the columns, so a matrix cannot go quietly crooked.
+</Callout>

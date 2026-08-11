@@ -1,0 +1,8 @@
+type: stats-band
+id: numbers
+heading: Built in
+stats:
+  - { value: 18, label: Section types }
+  - { value: 14, label: Built-in themes }
+  - { value: 100, label: Lighthouse, suffix: "/100" }
+  - { value: 0, label: Runtime dependencies to configure }

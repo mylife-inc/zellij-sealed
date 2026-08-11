@@ -1,0 +1,127 @@
+---
+title: zel
+description: One binary. Everything you do to a Zellij site, you do with it.
+---
+
+`zel` is the interface to Zellij. Creating a content folder, converting one from
+another tool, checking it, running it, building it and putting it online are all
+subcommands of the same binary.
+
+It is a native executable with **no Node dependency**. The commands that
+describe the content model read a schema compiled into the binary. The commands
+that build a site run the engine in a container, so nothing on your machine
+needs npm, a Node version, or a lockfile.
+
+<Callout type="info" title="Not the terminal multiplexer">
+There is a well-known terminal multiplexer called Zellij whose binary is
+`zellij`. This one is `zel`. Both can sit on the same PATH.
+</Callout>
+
+## Installing
+
+Binaries are published on the repository's releases page — Linux, macOS and
+Windows, x86-64 and arm64, each with a `.sha256` beside it.
+
+```bash title="terminal"
+curl -fsSL https://raw.githubusercontent.com/mylife-inc/releases/main/zellij/install.sh | sh
+```
+
+Or download the archive for your platform, verify it against its `.sha256`, and
+put `zel` on your PATH. See [the Quickstart](/guide/quickstart) for the detail.
+
+## What it does
+
+<CardGrid>
+  <Card title="Write" icon="pencil">
+    Create a content folder, or a page, or one section — with the fields already
+    filled in. Ask what any section type takes.
+  </Card>
+  <Card title="Convert" icon="arrow-right-left">
+    Read an existing MkDocs or Docusaurus tree and write the Zellij equivalent
+    beside it.
+  </Card>
+  <Card title="Check and run" icon="circle-check">
+    Validate the folder, and serve it locally while you write.
+  </Card>
+  <Card title="Ship" icon="rocket">
+    Produce a static site or a container image, and put either one online.
+  </Card>
+</CardGrid>
+
+## The whole surface
+
+| Command | | Status |
+| --- | --- | --- |
+| [`zel new`](/cli/new) | A content folder, a section, a page, a guide, a project | **Available** |
+| [`zel explain`](/cli/explain) | What a section type takes | **Available** |
+| [`zel list`](/cli/list) | Section types, themes, formats, targets | **Available** |
+| [`zel context`](/cli/context) | The whole content model as one file, for an AI agent | **Available** |
+| [`zel detect`](/cli/detect) | What tool a folder was written for | **Available** |
+| [`zel convert`](/cli/convert) | That folder, as Zellij content | **Available** |
+| [`zel migrate`](/cli/migrate) | detect, convert and check in one step | **Available** |
+| [`zel check`](/cli/check) | Validate a content folder | **Available** |
+| [`zel fmt`](/cli/fmt) | Canonical formatting for the YAML | Planned |
+| [`zel dev`](/cli/dev) | Development server | **Available** |
+| [`zel serve`](/cli/serve) | Serve what `build` produced | Planned |
+| [`zel build`](/cli/build) | A static site, or a container image | **Available** |
+| [`zel deploy`](/cli/deploy) | Build and put it online | Planned |
+| [`zel image`](/cli/image) | Build, run and push container images | **Available** |
+| [`zel ci`](/cli/ci) | Write a pipeline that does all of it on push | **Available** |
+| [`zel publish`](/cli/publish) | check, build and deploy in one step | Planned |
+| [`zel ship`](/cli/ship) | Somebody else's docs to a published site, in one line | Planned |
+| [`zel doctor`](/cli/doctor) | What is installed, what is missing | **Available** |
+
+<Callout type="warning" title="Planned means planned">
+Zellij is pre-1.0, and the commands marked **Planned** exist in the binary but
+exit with `not implemented yet`. Their pages here describe the agreed behaviour
+— they are the specification the implementation is being written against, not a
+description of something you can run today.
+
+The commands marked **Available** work now, and their pages describe what they
+actually do.
+</Callout>
+
+## How a command finds your content
+
+Every command that reads or writes content takes an optional directory:
+
+```bash
+zel check              # figure it out
+zel check ./docs       # this one
+```
+
+With no argument, `zel` looks for, in order:
+
+<Steps>
+<Step title="A zel.toml">
+Searching upward from the current directory. Its `content` key wins over
+everything else. See [Configuration](/cli/config).
+</Step>
+<Step title="A ./content folder">
+The conventional name, and what `zel new docs` creates.
+</Step>
+<Step title="The current directory">
+If it holds a `site.yaml` or a `pages.yaml`, it is the content root.
+</Step>
+</Steps>
+
+If none of those match, the command says so and stops. It never guesses at a
+folder that merely contains Markdown — a wrong guess produces a conversion or a
+build that looks finished and is not.
+
+## Where Docker comes in
+
+Commands that only read the content model — `explain`, `list`, `context`,
+`detect`, `convert`, `new` — are pure Rust and need nothing installed.
+
+Commands that produce a site — `check`, `dev`, `build`, `deploy` — run the
+engine, and the engine is a Next.js application. Rather than require Node,
+`zel` runs it in a container from a public image.
+
+```bash title="terminal"
+zel doctor
+```
+
+tells you whether a container runtime is present and which image it would use.
+You never write a Dockerfile, and you never see one unless you ask for it with
+[`zel image dockerfile`](/cli/image#zel-image-dockerfile).

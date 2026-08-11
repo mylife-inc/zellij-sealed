@@ -1,0 +1,117 @@
+---
+title: Security model
+description: What CodeSeal protects, what it does not, and where the line is.
+---
+
+CodeSeal protects source **at rest, in remote Git storage**. Every word there
+is load-bearing, and the rest of this page is that sentence expanded.
+
+Read it before you rely on this. A tool whose limits you do not know is worse
+than no tool, because you will act as though it covers things it does not.
+
+## What it protects against
+
+**Storage exposure at your Git host.** A private repository is hidden from the
+public, not from the platform. Engineers and administrators at GitHub, GitLab
+or Bitbucket have backend access to repository storage. If that storage is
+breached, subpoenaed, or read by someone who should not, protected files are
+ciphertext.
+
+**Accidental plaintext pushes.** `sgit doctor` runs from the commit and push
+wrappers and from both hooks, and fails when a protected file is staged in the
+clear.
+
+**Any reader without a key.** Someone who clones the repository — legitimately
+or otherwise — gets blobs. Without a key they are noise.
+
+## What it does not protect against
+
+Stated as plainly as the list above, because this is the half people skip.
+
+**A CI provider you gave a key to.** In three of the four [CI
+modes](/guide/ci), the runner decrypts. It can read what it decrypted. That is
+not a flaw; it is what "the build needs plaintext" means.
+
+**A deployment platform decrypting at build time.** Same reasoning.
+
+**A developer who already holds a valid key.** CodeSeal controls *who has a
+key*. It does not control what someone does once they hold one.
+
+**A compromised machine.** If your laptop is owned, plaintext is on it. There
+is no mode where this is otherwise.
+
+**Plaintext already in history.** Adopting CodeSeal today does not reach what
+you pushed last year. `sgit history-rewrite` re-encrypts historical revisions,
+but it cannot reach a clone someone already has.
+
+<Callout type="danger" title="Anything ever pushed in plaintext is compromised">
+Not "probably fine". Assume it was cloned, mirrored, cached and indexed.
+Rewriting history changes your copy, not theirs.
+
+If a credential was in one of those files, **rotate the credential**. That is
+the only remedy that works.
+</Callout>
+
+## The cryptography
+
+**Passphrase mode.** Authenticated symmetric encryption, keyed from `SGIT_KEY`
+in the environment.
+
+**Recipient mode.** A fresh random 256-bit key per file. The file is encrypted
+with **AES-256-GCM** — authenticated, so tampering fails closed rather than
+producing garbage. That per-file key is then wrapped to each authorised
+recipient with **age X25519**.
+
+There is no shared secret in recipient mode. Access is individual, which is why
+it is revocable individually.
+
+## How keys are handled
+
+Three rules, and they are absolute.
+
+**Never from the command line.** `sgit` does not accept key material as an
+argument. Arguments appear in shell history and in the process table, where any
+other user on the machine can read them. Environment variables or identity
+files only.
+
+**Never printed.** `sgit` does not write private keys or plaintext to stdout.
+Nothing you can accidentally pipe into a log.
+
+**Identity files are `0600`.** Written under `$CODESEAL/<alias>/`, readable only
+by you.
+
+## Revocation, precisely
+
+This is where intuition misleads people, so it is worth being exact.
+
+**Soft removal** drops someone's stanza. They cannot decrypt anything
+**changed after** that point. Instant, header-only.
+
+**Full removal** (`--full`) re-encrypts every blob with fresh keys. They cannot
+decrypt anything **from then on, including files they already hold blobs for**.
+Slow, and rewrites the repository.
+
+Neither reaches plaintext someone already decrypted and saved. Revocation is
+about future access. If a departure means the past matters too, the answer is
+the same as it always is: rotate whatever was in those files.
+
+## Choosing a CI mode against this
+
+A build reads plaintext. The [CI modes](/guide/ci) differ only in who does the
+reading:
+
+| you are worried about | the mode that helps |
+| --- | --- |
+| your Git host | any of them |
+| a long-lived key in CI config | `portal-key`, `portal-dispatch` |
+| your CI provider | `portal-build` |
+| not knowing what was built from what | `portal-dispatch` |
+
+If only the first row applies, `secrets` is the right choice and the rest are
+complexity you are not being paid for.
+
+## See also
+
+- [CI and CD](/guide/ci) — the four modes in full
+- [Teams](/guide/teams) — the mechanics of adding and removing people
+- [FAQ](/guide/faq) — shorter answers to narrower questions

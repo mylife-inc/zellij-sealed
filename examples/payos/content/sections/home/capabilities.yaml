@@ -1,0 +1,24 @@
+type: feature-grid
+id: capabilities
+heading: What you get, in one line each
+subhead: Describe a product once. Everything below comes with it — for that product and every future one.
+columns: 3
+items:
+  - icon: credit-card
+    title: 12 providers, one dashboard
+    body: Stripe, PayPal, Square, Braintree, Adyen, Mollie, Authorize.net, Paddle, Lemon Squeezy, Coinbase Commerce, BTCPay, NOWPayments — plus Apple Pay and Google Pay as wallet methods.
+  - icon: layout-template
+    title: Hosted pricing & checkout
+    body: Vendor-branded pages at a stable URL. PCI scope stays with the processor; your site just links to them.
+  - icon: key-round
+    title: Licensing & anti-piracy
+    body: Key issuance on confirmed payment, online validation, machine-activation caps, signed offline-grace receipts, and revoke-on-refund.
+  - icon: repeat
+    title: Subscriptions, refunds, crypto
+    body: Recurring billing and cancellation, refunds initiated *and* observed, and a manual-review path for crypto under- and over-payments.
+  - icon: mail
+    title: Magic-link customer portal
+    body: Buyers view purchases, reveal keys, manage machines, and cancel subscriptions themselves. No passwords to store, reset, or leak.
+  - icon: webhook
+    title: Server-to-server integration
+    body: Signed outbound webhooks, a scoped query API, and entitlement checks keep your backend in sync without polling.

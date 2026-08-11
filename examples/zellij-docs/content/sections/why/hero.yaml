@@ -1,0 +1,5 @@
+type: hero
+headline: Why Zellij exists
+subhead: >-
+  Documentation tools make documentation. Site builders make sites. A product
+  needs both, and keeping them in two systems is how they drift apart.

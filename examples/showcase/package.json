@@ -1,0 +1,36 @@
+{
+  "name": "@shebka/zellij-showcase",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Apple-idiom product page for a fictional device \u2014 the visual test bed and the proof that Zellij builds beautiful marketing sites.",
+  "type": "module",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "assets": "node scripts/make-assets.mjs",
+    "predev": "npm run assets && zellij prepare",
+    "dev": "next dev --port 4300",
+    "prebuild": "npm run assets && zellij prepare",
+    "build": "next build",
+    "start": "next start --port 4300",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
+    "verify:basepath": "node scripts/verify-basepath.mjs"
+  },
+  "dependencies": {
+    "@shebka/zellij": "*",
+    "next": "16.2.12",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3"
+  }
+}

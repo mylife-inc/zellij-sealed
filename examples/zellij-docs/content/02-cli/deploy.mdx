@@ -1,0 +1,168 @@
+---
+title: zel deploy
+description: Build and put it online, on a CDN or a container host.
+---
+
+<Callout type="warning" title="Planned">
+`zel deploy` exits with `not implemented yet`. This page is the specification it
+is being written against.
+</Callout>
+
+```bash title="terminal"
+zel deploy netlify
+zel deploy fly --tag v2.1.0
+zel deploy netlify ./docs --site acme-docs
+```
+
+## The provider decides the artefact
+
+This was the missing piece in an earlier draft, which listed providers with no
+explanation of what got built or where the content came from.
+
+| Provider | Builds | Because |
+| --- | --- | --- |
+| `netlify` | `static` | Hosts files |
+| `cloudflare` | `static` | Hosts files |
+| `ghpages` | `static` | Hosts files |
+| `s3` | `static` | Hosts files |
+| `vercel` | `static` | Vercel can run Next.js, but a Zellij site has nothing to run |
+| `fly` | `image` | Runs containers |
+| `railway` | `image` | Runs containers |
+
+You do not pass `--target`. A CDN cannot run a container and a container host
+has nothing to do with a folder of HTML, so the provider settles it. Passing
+`--target` anyway is an error naming the conflict, rather than a silent
+override.
+
+## Where the content comes from
+
+The same resolution every command uses, and the optional `[dir]` argument:
+
+```bash title="terminal"
+zel deploy netlify              # resolved: zel.toml, then ./content, then here
+zel deploy netlify ./docs       # this folder
+```
+
+See [how a command finds your content](/cli/#how-a-command-finds-your-content).
+For a repository where the answer is always the same, put it in
+[`zel.toml`](/cli/config) once:
+
+```toml title="zel.toml"
+content = "docs/external"
+
+[deploy]
+provider = "netlify"
+site = "acme-docs"
+```
+
+Then the command is `zel deploy`.
+
+## What it does
+
+<Steps>
+<Step title="Checks">
+[`zel check`](/cli/check) against the resolved content folder. A broken internal
+link stops the deploy here rather than shipping a 404.
+</Step>
+<Step title="Builds">
+[`zel build`](/cli/build) with the target the provider requires.
+</Step>
+<Step title="Authenticates">
+Reads the provider's own credential, from the environment or its CLI's stored
+login. `zel` never asks you for a token and never stores one.
+</Step>
+<Step title="Uploads">
+The folder, or the image followed by a release on the platform.
+</Step>
+<Step title="Prints the URL">
+And the deploy id, so it can be rolled back with the provider's own tooling.
+</Step>
+</Steps>
+
+```
+$ zel deploy netlify
+✓ Content valid — 34 pages, 2 guides
+✓ Built static — 34 routes, 4.1 MB
+✓ Uploaded to acme-docs
+  https://acme-docs.netlify.app
+  deploy 66f2c1a8e5b40a0009c2d1e4
+```
+
+## Credentials
+
+Read from the environment. Nothing is written to disk by `zel`.
+
+| Provider | Reads |
+| --- | --- |
+| `netlify` | `NETLIFY_AUTH_TOKEN`, `NETLIFY_SITE_ID` |
+| `cloudflare` | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` |
+| `vercel` | `VERCEL_TOKEN` |
+| `ghpages` | `GITHUB_TOKEN`, or the local git remote |
+| `s3` | The AWS SDK's usual chain |
+| `fly` | `FLY_API_TOKEN` |
+| `railway` | `RAILWAY_TOKEN` |
+
+If a credential is missing, the command says which variable and stops **before**
+building. Discovering a missing token after a four-minute build is a waste of
+four minutes.
+
+<Callout type="info" title="On your own machine you may need none of them">
+Every one of these providers has a CLI that stores a login. If `netlify login`
+or `gh auth login` has already happened, `zel deploy` uses what they stored and
+asks for nothing.
+
+The environment variables are for CI, where nobody can open a browser.
+</Callout>
+
+## What it deliberately will not do for you
+
+A reasonable question: since `zel deploy netlify` knows it needs a Netlify
+project, why not log you in and create one?
+
+**Logging in — no.** `netlify login` is an OAuth flow that opens a browser and
+waits. Reimplementing it means either a worse version of somebody else's
+authentication, or asking you to paste a token into a prompt — and a tool that
+asks for credentials is a tool you have to trust with them. Reading what the
+provider's own CLI already stored costs nothing and requires no such trust.
+
+**Creating a project — not silently.** `netlify sites:create` claims a name on
+somebody's account and is not obviously reversible. A deploy command that
+quietly creates infrastructure is one typo away from a second project nobody
+meant to make, on the wrong account, with a name now taken.
+
+**Exporting a token into your shell — never.** `zel` reads credentials and does
+not write them, anywhere. A tool that edits your environment or your shell
+profile is doing something you cannot see and did not ask for.
+
+<Callout type="tip" title="What would be reasonable">
+An explicit `--create` — *make the project if it does not exist, and say so* —
+is a fair thing to want, and is on the list. The distinction is that you asked
+for it.
+</Callout>
+
+Which leaves one command to run once, by hand, per site:
+
+```bash title="terminal"
+netlify login
+netlify sites:create --name acme-docs
+```
+
+And then `zel deploy netlify` for the rest of the project's life.
+
+## Options
+
+| | | |
+| --- | --- | --- |
+| `<provider>` | Required. One of the table above | — |
+| `[dir]` | The content folder | [Resolved](/cli/#how-a-command-finds-your-content) |
+| `--site <name>` | The site or project on the provider | from `zel.toml` |
+| `--tag <name:version>` | Image tag — container providers only | `<site-name>:latest` |
+| `--message <text>` | Deploy message, where the provider has one | the git subject |
+| `--preview` | A preview deploy rather than production | off |
+| `--dry-run` | Build and report, upload nothing | off |
+
+## See also
+
+- [`zel build`](/cli/build) — the two things a site can be
+- [`zel image`](/cli/image) — when you want the image but not the deploy
+- [`zel ci`](/cli/ci) — doing this on every push instead of by hand

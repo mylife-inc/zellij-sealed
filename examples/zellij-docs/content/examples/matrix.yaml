@@ -1,0 +1,27 @@
+type: matrix
+heading: Every target, every build mode
+subhead: >-
+  The two choices are independent, which is the point a list of six bullets
+  cannot make.
+rowAxis: Target
+columnAxis: Runs on
+columns:
+  - { label: Local }
+  - { label: CI }
+  - { label: Container }
+rows:
+  - label: static
+    description: A directory of files.
+    cells:
+      - "`zel build docs --out dist`"
+      - Committed workflow runs the same command.
+      - Served by any web server image.
+  - label: image
+    description: A container that serves itself.
+    cells:
+      - "Needs a runtime — `zel doctor` says which."
+      - Built and pushed by the pipeline.
+      - "The output *is* the container."
+footnote: >-
+  Both rows read the same content folder. Nothing about the content changes
+  when the target does.

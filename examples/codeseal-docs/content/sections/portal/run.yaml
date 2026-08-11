@@ -1,0 +1,51 @@
+type: code-cards
+id: run
+eyebrow: Running one
+heading: Three ways to have a Portal
+subhead: >-
+  All three read the same `$CODESEAL/.env`, which `install.sh` generated with
+  random secrets at install time. Open it before you start anything.
+cards:
+  - eyebrow: Local
+    title: On your machine
+    featured: true
+    body: >-
+      Postgres, Redis, the Portal and the workers, from the compose file the
+      installer put in `$CODESEAL`. Right for trying it, and for a Portal only
+      you use.
+    code:
+      title: terminal
+      body: |
+        seal up          # start
+        seal logs -f     # follow
+        seal down        # stop
+  - eyebrow: Managed
+    title: On a platform
+    body: >-
+      Railway, Fly, Render, Vercel, Cloud Run, App Runner or DigitalOcean. The
+      deployer pushes the image, runs migrations and wires the managed Postgres
+      and Redis.
+    code:
+      title: terminal
+      body: |
+        seal deploy railway acme
+        seal deploy fly
+        seal deploy cloudrun
+  - eyebrow: Your own
+    title: On infrastructure you have
+    body: >-
+      A Terraform scaffold, or the standalone compose file against Postgres and
+      Redis you already run. Nothing about the Portal assumes a particular
+      host.
+    code:
+      title: terminal
+      body: |
+        seal deploy aws     # terraform scaffold
+        # or, directly:
+        docker compose -f \
+          $CODESEAL/compose.standalone.yml up -d
+footnote: >-
+  **A Portal in `portal-dispatch` mode needs no public address at all.** It
+  calls GitHub; GitHub never calls it. That is the one arrangement where a
+  laptop behind a home router is a legitimate production Portal — see
+  [RD](/quickstart/rd).

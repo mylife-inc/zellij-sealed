@@ -1,0 +1,53 @@
+type: hero-split
+badge: Source-at-rest encryption for Git
+badgeIcon: shield-check
+
+# Only the second sentence is painted. Both of them gradient would be
+# decoration; one of them is emphasis.
+headline: Seal your code. *Protect what matters.*
+titleGradient: [accent, fg]
+
+subhead: >-
+  Your private repositories are hidden from the public, not from the platform.
+  CodeSeal encrypts your most sensitive files before they ever leave your
+  machine — so what is committed is unreadable to everyone but you.
+
+cta:
+  - { label: Install CodeSeal, href: /guide/install, style: primary }
+  - { label: See how it works, href: "#how", style: ghost }
+
+highlights:
+  - { icon: lock, label: Local-only plaintext }
+  - { icon: git-branch, label: Git-native workflow }
+  - { icon: shield-check, label: Built in Rust }
+
+media: right
+# Keep every line under about forty characters.
+#
+# The panel is the narrower column of a 7/5 split, and a transcript wider than
+# it scrolls — which the panel supports and a hero should never need. A visitor
+# who has to drag a terminal sideways to read the pitch has been given a puzzle
+# instead of an argument. The first version ran to fifty-four characters and
+# lost the end of four lines mid-word.
+terminal:
+  title: terminal
+  body: |
+    $ curl -fsSL https://codeseal.sh | sh
+    ✓ sgit v1.0.0 → /usr/local/bin/sgit
+
+    $ sgit init --wizard
+    ? Encryption mode  › recipient
+    ? CI mode          › secrets
+    ? Sensitive paths  › src/secrets
+    ✓ Wrote .sgit/manifest.yaml
+    ✓ Managed .gitignore + hooks
+    ✓ Encrypted 7 files → .sgit/store/
+
+    $ sgit add -s src/secrets/payment.env
+    ✓ Adopted, encrypted, stanza written
+
+    $ sgit commit -m "protect payments"
+    [main 1a2b3c4] protect payments
+
+    $ sgit push origin main
+    ✓ doctor pass · delegated to git push

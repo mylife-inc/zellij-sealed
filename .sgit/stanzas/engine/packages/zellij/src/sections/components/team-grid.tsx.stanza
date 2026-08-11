@@ -1,0 +1,37 @@
+version: 1
+file: engine/packages/zellij/src/sections/components/team-grid.tsx
+recipients:
+- name: sid-med
+  role: developer
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBOa3B3NTc4d1NhNkoxY2hS
+    amRYSldESHBoMzVCbmVUY1luTTI5SVBnQ0U0Cnova2VXaGZjNzFrbVpFY0lUREpI
+    dXJ2TnNIMFlSOGZGQTFrQTFjaWtkcEEKLT4gOl44Qi1ncmVhc2UgMkUsdiBBKyAl
+    fHRlSmw2IGVobSc0CnI0K0QxOWxuME0xOAotLS0gWkViT3QzWG1DNDgrOGR6Nk4r
+    UTRCMklGWk9yQWhFZW9tUzFBNE55UjUwRQq3cFLho+ub0yxDzzbypB6eXdiRl4Od
+    uMmqMT+qSLe2CUem9ZDaiDnXgE0sqI0FaED/usOB7tcaaZLvw4zB7kWL
+    -----END AGE ENCRYPTED FILE-----
+- name: ci-runner
+  role: ci
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA1dFFaeVpsWnAzNnVRTHpL
+    emxFdncrcE9xRzdpaTNNbWFGZTR1cU4yVWd3CmcvWlBaN1BQeWVyS1hrZ2ZUVHMy
+    T1k4S0lvbDV1bWJUei9DRkQrdkE2UHMKLT4gXnF6V3FFOC1ncmVhc2UKalptMmlq
+    VXlSWFlvMGIrQVdOYVBzMjI1d3drTlYweUVtVEpteGk5cAotLS0gVVErcDBIMWJt
+    YURJeHFPdnpKZTFsdSsvYktZMXA5WityVmZCeHh0OFludwpkMXNM011C/IgO3ZrQ
+    H5x4uLnpdIzQ3Bkbnw3lmb+jCT7F/HTr0uSjG6iLYWT3OEir2i4pSz7H0IYUXoGy
+    NNK2
+    -----END AGE ENCRYPTED FILE-----
+- name: admin-server
+  role: admin
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA0ck1Bbis5QnZxNGxMRjZ4
+    eklGNDZDQ1JrU0w3Wk5iL2ZxcmQ0QjBRUHpRCnBOZlgraHpvemVybzE4RG1IMUtY
+    SXhtWURPQklLNjVTbzR6ZFN6WEcwMncKLT4gKi1ncmVhc2UgP1ZLS285TiBkIE1C
+    YApQUlE0bWZSNTN1VlR4b3NNd1VBSHQvRQotLS0gTGFPT0xvN2dXdFZmUVJROGNv
+    a0NJOVlSekgvdU5hQ0lmc0hGUFJocXFRYwqUHCCOPuMI+yy3yj205JCeZpCa1VY7
+    RlsnuCbTFk8a8gCXboUioIhq/vBKf5jXLd+dVFlDDPSg+zcCDY2jjkDY
+    -----END AGE ENCRYPTED FILE-----

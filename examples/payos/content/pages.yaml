@@ -1,0 +1,39 @@
+- name: home
+  title: PayOS — Sell your software anywhere, without building a payments team
+  description: Hosted pricing and checkout across 12 payment providers, software license keys with anti-piracy enforcement, and a self-service customer portal — with zero payment code on your own website.
+  layout: landing
+  sections:
+    - home/hero
+    - home/custody
+    - home/capabilities
+    - home/stats-band
+    - home/integration
+    - home/comparison
+    - home/faq
+    - home/cta-banner
+- name: capabilities
+  title: Capabilities — PayOS
+  description: Providers, hosted pages, licensing, subscriptions, the customer portal, vendor integration, analytics, and the security posture behind them.
+  layout: stack-sidebar
+  navHighlight: capabilities
+  sections:
+    - capabilities/hero
+    - capabilities/providers
+    - capabilities/hosted
+    - capabilities/licensing
+    - capabilities/portal
+    - capabilities/analytics
+    - capabilities/security
+    - capabilities/cta-banner
+- name: why
+  title: Why PayOS
+  description: The problem, the pitch, and the honest boundaries — why payments, licensing, and customer plumbing should be built once rather than once per product.
+  layout: stack-narrow
+  navHighlight: why-payos
+  sections:
+    - why/hero
+    - why/problem
+    - why/how
+    - why/honest
+    - why/stats-band
+    - why/cta-banner

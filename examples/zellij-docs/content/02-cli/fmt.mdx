@@ -1,0 +1,94 @@
+---
+title: zel fmt
+description: Canonical formatting for the YAML, so a diff is about what changed.
+---
+
+<Callout type="warning" title="Planned">
+`zel fmt` exits with `not implemented yet`. This page is the specification it is
+being written against.
+</Callout>
+
+```bash title="terminal"
+zel fmt              # rewrite in place
+zel fmt --check      # exit 1 if anything would change
+```
+
+## What it is for
+
+A content folder is YAML written by several people, and sometimes by an AI
+agent. YAML permits a great deal of variation that means nothing:
+
+```yaml
+cta:
+  - label: "Get started"
+    href: "/guide"
+    style: "primary"
+```
+
+```yaml
+cta: [{ label: Get started, href: /guide, style: primary }]
+```
+
+Those are the same section. A reviewer looking at a diff between them learns
+nothing and has to read both carefully to confirm it.
+
+`fmt` picks one and applies it everywhere, so that **a diff is about what
+changed**. That is the whole value, and it is worth more in a documentation
+repository than in a code one: documentation changes are reviewed by people who
+are reading for meaning, not for syntax, and a reformatting diff buries the
+sentence somebody actually rewrote.
+
+## What it decides
+
+| | |
+| --- | --- |
+| Key order | Schema order — `type` first, then required fields, then optional |
+| Indentation | Two spaces, no tabs |
+| Quoting | Only where YAML needs it |
+| Short entries | Inline: `{ label: Docs, href: /guide }` |
+| Long entries | Block form, one key per line |
+| Lists of scalars | Inline when they fit, block when they do not |
+| Trailing whitespace | Removed |
+| File ending | One newline |
+
+Key order following the schema is the interesting one. It means `type` is always
+the first line of a section file, required fields come before optional ones, and
+two files of the same section type read the same way — so a reader comparing
+`hero.yaml` across two pages is comparing content rather than layout.
+
+## `--check` in CI
+
+```yaml
+      - run: zel fmt --check
+```
+
+Exits non-zero if anything would change, and prints what. Adding this once a
+folder is clean ends the class of pull request that is entirely whitespace.
+
+<Callout type="tip" title="Run it before you turn on --check">
+Otherwise the first pull request after adding it is the enormous one. Format
+everything in a single commit that touches nothing else, then add the check.
+</Callout>
+
+## What it will not touch
+
+**MDX.** Guide pages are prose, and prose is not a format anyone should have
+opinions about on your behalf. If you want Markdown formatted, Prettier does
+that and does it well.
+
+**Comments.** YAML comments are attached to whatever follows them, and moving
+them is how a comment ends up describing the wrong key. `fmt` keeps them where
+they are, which occasionally means the output is less tidy than it could be.
+That is the correct trade.
+
+## Options
+
+| | | |
+| --- | --- | --- |
+| `[dir]` | The content folder | [Resolved](/cli/#how-a-command-finds-your-content) |
+| `--check` | Change nothing; exit 1 if anything would | off |
+
+## See also
+
+- [`zel check`](/cli/check) — validity, which is a different question
+- [The content model](/guide/content-model) — what these files are

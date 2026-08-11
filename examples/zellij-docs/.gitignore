@@ -1,0 +1,5 @@
+# Everything under public/ is produced by `npm run assets`: the derived brand
+# images, the search index, and a copy of scripts/install.sh. Committing a copy
+# would give install.sh two sources of truth, and the one served would be the
+# stale one.
+public/

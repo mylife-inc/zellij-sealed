@@ -1,0 +1,181 @@
+---
+title: zel check
+description: Validate a content folder against the schemas the build uses.
+---
+
+<Callout type="tip" title="Available">
+Works today. Runs the engine in a container with your folder mounted read-only,
+so it needs a container runtime and about a second.
+</Callout>
+
+```bash title="terminal"
+zel check
+zel check ./docs
+```
+
+```
+✓ ./content
+  site        Acme · theme cupertino
+  pages       6
+  guides      1 (5 pages) · /guide
+  menu        Features · Pricing · Solutions · Resources
+  home        /
+  routes      11
+```
+
+And when something is wrong:
+
+```
+✗ ./content
+
+  pages.yaml:14
+    section "sections/home/pricing.yaml" does not exist
+
+  01-guide/_sidebar.yaml:9
+    "installation" is not a page in this guide
+    did you mean "install"?
+
+  01-guide/quickstart.mdx:31
+    link to /guide/themes/nord — no such page
+
+3 problems
+```
+
+## The one thing worth understanding
+
+**`check` runs the engine's own schemas, not a reimplementation of them.**
+
+That is why it needs a container, and it is the reason to trust it. The
+alternative — parsing YAML in Rust and checking it against rules written a
+second time — would produce a validator that agrees with the build on the day it
+is written and disagrees with it a month later. Every field added to a section
+type would need adding twice, and the failure mode is the worst kind: `check`
+passes, the build fails, and the two disagree about the same file.
+
+So the CLI does not know what a `hero` is. It mounts your folder read-only,
+starts the engine, and asks.
+
+The cost is a container runtime. The benefit is that anything `check` accepts,
+the build accepts — by construction, not by diligence.
+
+## What it validates
+
+| | |
+| --- | --- |
+| Every YAML file | Against its schema. Unknown values fail, naming what is accepted |
+| Every section | The type exists, required fields are present, values are in range |
+| Every internal link | In `menu.yaml`, `site.yaml`'s footer, `pages.yaml`, and inside MDX prose |
+| Every sidebar entry | Names a page that exists in that guide |
+| Every asset reference | Resolves under `assets/` |
+| The home page | `home:` names a page that exists |
+
+### Errors against warnings
+
+An **unknown top-level key warns**. A content folder written for a newer Zellij
+still builds on an older one, which is what lets a team upgrade the engine and
+the content separately.
+
+An **unknown value for a known key fails**, naming the key and listing what it
+accepts. `theme: cupertno` is a typo, not forward compatibility, and treating it
+as one would render the wrong theme silently.
+
+<Callout type="tip" title="Unknown keys inside a section file are accepted silently">
+Sections gain fields far more often than the top-level schema does, so a folder
+written for a newer engine still builds. The cost is that a typo in a section
+file is not reported — which is one more reason to read what `check` says about
+files no page references.
+</Callout>
+
+## What it does not do
+
+**It does not compile your MDX.**
+
+`check` validates the content model. Guide pages are compiled as MDX — Markdown
+plus JSX — and that is a separate pass with its own failure modes. `{` opens an
+expression and `<` opens a tag, so:
+
+```
+set {timeout} to <n> seconds
+```
+
+is good Markdown, valid as far as `check` is concerned, and a syntax error when
+the site builds.
+
+This matters most after a [conversion](/cli/convert), where prose written for a
+tool that never had to care meets a compiler that does. **Build the folder once
+before you throw the original away:**
+
+```bash title="terminal"
+zel build ./content
+```
+
+## Where it belongs
+
+**As a pre-commit hook.** It exits non-zero, takes a second, and catches the
+class of mistake that is invisible in a diff — a renamed page that three
+sidebars still point at.
+
+**As the first job in a pipeline.** [`zel ci init`](/cli/ci) writes exactly that:
+a check on every pull request, needing no credentials and no registry. A link to
+a page somebody deleted gets caught before review rather than after deploy.
+
+**Before every build.** [`zel build`](/cli/build), [`zel dev`](/cli/dev) and
+[`zel deploy`](/cli/deploy) all run it first, so a broken link fails in a second
+rather than after a four-minute compile.
+
+## When the folder is somewhere the runtime cannot see
+
+```
+error: my-docs is not shared with the container runtime
+```
+
+A bind mount of an unreachable path does not fail — it mounts an empty
+directory, and the checker faithfully reports a site with no pages. True of what
+it was shown, and a lie about what you asked.
+
+Colima shares `$HOME` and not `/tmp`:
+
+```bash title="terminal"
+colima stop && colima start --mount '/tmp:w'
+```
+
+## Options
+
+| | | |
+| --- | --- | --- |
+| `[dir]` | The content folder | [Resolved](/cli/#how-a-command-finds-your-content) |
+
+<Callout type="warning" title="Planned">
+`--json`, `--quiet` and `--strict` are specified and not yet built. `--json` is
+currently accepted and ignored — the output is the human report either way.
+
+`--strict` is the one worth waiting for in CI: once a folder is clean it stops
+an unknown key accumulating quietly until an upgrade turns it into a failure.
+</Callout>
+
+### The intended `--json`
+
+```json
+{
+  "ok": false,
+  "root": "./content",
+  "problems": [
+    {
+      "file": "pages.yaml",
+      "line": 14,
+      "severity": "error",
+      "message": "section \"sections/home/pricing.yaml\" does not exist"
+    }
+  ]
+}
+```
+
+The intent is that every command supports `--json`, because a tool only a human
+can read cannot be used by a pipeline. None of them do yet.
+
+## See also
+
+- [`zel dev`](/cli/dev) — the same validation, plus a browser
+- [`zel fmt`](/cli/fmt) — formatting, which is a different question
+- [`zel ci`](/cli/ci) — running this on every pull request
+- [The wrapper app](/guide/wrapper) — `npx zellij check`, if you keep one

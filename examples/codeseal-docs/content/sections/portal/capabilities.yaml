@@ -1,0 +1,31 @@
+type: feature-grid
+id: capabilities
+eyebrow: What it does
+heading: The four things a Portal is for
+columns: 2
+items:
+  - icon: key-round
+    title: Lending keys instead of giving them
+    body: >-
+      In `portal-key` the runner never holds a durable secret. It trades a
+      bootstrap secret for a single-use token, redeems that for a *wrapped*
+      key, and unwraps locally — so the Portal stores a key it cannot itself
+      read.
+  - icon: box
+    title: Building where GitHub cannot look
+    body: >-
+      In `portal-build` a worker clones at the commit, decrypts in an isolated
+      workspace, runs your `build.sh`, uploads the artefact, and scrubs. GitHub
+      sends a SHA and receives a status.
+  - icon: users
+    title: Adding and removing people, centrally
+    body: >-
+      Recipients, roles and rekeys through a UI, with the admin key unlocked in
+      the browser and held in Redis under a TTL. Removing someone rewraps every
+      file key without anyone rotating a shared password.
+  - icon: file-text
+    title: Recording what happened
+    body: >-
+      Every unlock, token consumption, rekey and build is an audit row, with
+      secret-shaped strings scrubbed before they are written. Exportable as CSV
+      or JSON, scoped by role.

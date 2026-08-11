@@ -1,0 +1,75 @@
+---
+title: CodeSeal
+description: What it does, what it deliberately does not, and where to start.
+---
+
+CodeSeal keeps chosen source files encrypted inside an ordinary Git repository.
+You pick the files that matter; `sgit` encrypts them on your machine before they
+reach a commit. What your host stores is ciphertext.
+
+Everything else stays as it was. Same remote, same branches, same pull requests,
+same CI — the encrypted files are just blobs that Git carries like any other.
+
+## What it is for
+
+One thing, stated plainly: **source at rest, in someone else's storage.**
+
+A private repository is hidden from the public and not from the platform. That
+is a fine trade for most code. It stops being fine for the parts of a product
+that would let someone rebuild it — a pricing engine, a matching algorithm, the
+rules behind a risk score.
+
+<Callout type="warning" title="Read the threat model before you rely on this">
+CodeSeal does not make your code unreadable everywhere. It makes it unreadable
+*in the repository*. Anyone holding a key — a teammate, a CI runner you handed
+credentials to, your own laptop — reads plaintext.
+
+[The security model](/guide/security) is explicit about which of those apply to
+you, and it is worth reading before the install rather than after.
+</Callout>
+
+## The shape of it
+
+<CardGrid>
+  <Card title="Install" href="/guide/install" icon="download">
+    One static binary, no runtime. A one-liner, or a signed archive you verify
+    yourself.
+  </Card>
+
+  <Card title="Quickstart" href="/quickstart" icon="rocket">
+    An existing repository with something worth protecting in it, sealed and
+    pushed.
+  </Card>
+
+  <Card title="Commands" href="/guide/commands" icon="terminal">
+    `sgit` wraps the Git commands you already run, and adds a handful of its
+    own.
+  </Card>
+
+  <Card title="Teams" href="/guide/teams" icon="users">
+    Per-person keys, so access can be granted and withdrawn one person at a
+    time.
+  </Card>
+
+  <Card title="CI and CD" href="/guide/ci" icon="git-branch">
+    Four ways to let a build read what it needs, ordered by how much you have
+    to trust the runner.
+  </Card>
+
+  <Card title="Reference" href="/guide/reference" icon="book-open">
+    Every command, flag, file and environment variable.
+  </Card>
+</CardGrid>
+
+## Two decisions, made early
+
+Both are changeable later, and both are cheaper to get right now.
+
+**How keys are held.** A shared passphrase is the simplest thing that works and
+is right for one person. Per-recipient keys cost one extra step at setup and
+are the only way to remove someone's access without re-encrypting the
+repository. [Teams](/guide/teams) covers the difference.
+
+**What CI is trusted with.** From handing the runner a key outright to having
+the build happen somewhere the runner never sees plaintext. [CI and
+CD](/guide/ci) lays out the four modes and what each one exposes.

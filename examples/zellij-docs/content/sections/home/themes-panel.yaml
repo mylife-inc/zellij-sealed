@@ -1,0 +1,18 @@
+type: media-panel
+id: themes
+heading: Change one word. Change everything.
+title: Fourteen themes, and not one component knows about any of them
+body: >-
+  Colour, type, geometry, shadow and motion are all tokens. Try the theme
+  picker in the bar — this page restyles as you go.
+image: assets/panel-themes.png
+alt: ""
+align: left
+tone: dark
+ratio: ultrawide
+# Raised from 0.5 when this became a photograph. A gradient field was dark and
+# even under the copy; carved stone is neither, and the body text was sitting on
+# whatever the picture happened to be doing behind it.
+scrim: 0.68
+cta:
+  - { label: How theming works, href: /guide/themes, style: primary }

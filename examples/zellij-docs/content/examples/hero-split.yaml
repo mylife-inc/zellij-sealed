@@ -1,0 +1,28 @@
+type: hero-split
+badge: One folder in, one site out
+badgeIcon: folder-tree
+headline: Plain text in. *A site worth showing people out.*
+titleGradient: [accent, fg]
+subhead: >-
+  Point the engine at a folder of YAML and Markdown. It builds the marketing
+  pages and the documentation together, from one theme, as one deployment.
+cta:
+  - { label: Get started, href: /guide/quickstart, style: primary }
+  - { label: See every section, href: /sections, style: ghost }
+highlights:
+  - { icon: file-text, label: YAML and Markdown }
+  - { icon: palette, label: Fourteen themes }
+  - { icon: terminal, label: One command }
+media: right
+terminal:
+  title: terminal
+  body: |
+    $ zel new docs my-site
+    ✓ Wrote 8 files — no container needed
+
+    $ zel dev my-site
+    ✓ Content valid — 2 pages, 1 guide
+    ✓ Serving on http://localhost:3000
+
+    $ zel build my-site --out dist
+    ✓ Built static — 5 routes, 1.2 MB

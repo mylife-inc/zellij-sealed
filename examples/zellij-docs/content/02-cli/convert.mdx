@@ -1,0 +1,166 @@
+---
+title: zel convert
+description: Read a MkDocs or Docusaurus tree and write the Zellij equivalent beside it.
+---
+
+<Callout type="tip" title="Available">
+Works today.
+</Callout>
+
+```bash title="terminal"
+zel convert ./docs --out ./content
+zel check ./content
+```
+
+```
+Converting ./docs as MkDocs — mkdocs.yml with a nav tree
+
+Wrote 9 files into ./content
+  01-guide/_sidebar.yaml
+  01-guide/index.mdx
+  01-guide/guide/install.mdx
+  …
+  site.yaml
+  pages.yaml
+  sections/home/hero.yaml
+
+2 thing(s) could not be carried over:
+  https://blog.acme.dev: "Blog" is an external link; sidebars hold pages. Add it to menu.yaml.
+  draft.md: on disk but absent from the navigation; not converted
+```
+
+The output goes in a **new folder**. The original is never touched, so a
+conversion you dislike costs nothing but the folder you delete.
+
+Run [`zel detect`](/cli/detect) first if you are not sure what the folder is, or
+[`zel migrate`](/cli/migrate) to detect, convert and validate in one step.
+
+## Take the plan first
+
+```bash title="terminal"
+zel convert ./docs --out ./content --dry-run
+```
+
+Prints exactly what it would write and what it could not carry over, and writes
+nothing. Worth the ten seconds on any tree you did not author yourself: the list
+of unmapped things is the real report, and reading it before there is a folder
+to be attached to makes it easier to act on.
+
+## Options
+
+| | | |
+| --- | --- | --- |
+| `<source>` | Required. The folder to read | — |
+| `--out <path>` | Required. Where to write | — |
+| `--from <format>` | Force a format instead of detecting | detected |
+| `--dry-run` | Report the plan, write nothing | off |
+
+**`--out` can never be the source, and there is no flag to permit it.** A
+conversion that overwrote the original would be unrecoverable — and the whole
+reason a migration is safe to try is that failing costs you a folder you delete.
+
+`--from` is for when [detection](/cli/detect) is unsure or wrong. Forcing a
+format that does not match produces a bad conversion rather than an error, so it
+is worth being right.
+
+## What is recognised
+
+```bash title="terminal"
+zel list formats
+```
+
+| Format | Read from | |
+| --- | --- | --- |
+| MkDocs | `mkdocs.yml` | The `nav` tree, `site_name`, `site_description`, `docs_dir` |
+| Docusaurus | `sidebars.js` | Categories, doc entries, links and nesting — when declarative |
+
+Converters are plugins compiled into the binary, so `zel list formats` prints
+what your build can actually read.
+
+## What does not come across
+
+**A landing page.** Every one of these tools describes a documentation tree.
+Zellij has that *and* marketing pages built from nineteen section types with no
+equivalent anywhere in the source — there is no MkDocs concept that becomes a
+pricing table. So a conversion writes a faithful guide folder, a `site.yaml`
+carrying whatever identity it found, and a `pages.yaml` with one hero to build
+on, and says so every time.
+
+That is not a gap in the converter. It is the part Zellij has that the source
+did not, and the part you get to write.
+
+**Links out of the sidebar.** A sidebar holds pages; an external link belongs in
+[`menu.yaml`](/guide/menu). Reported rather than dropped, because silently
+losing a link to your blog is the kind of thing nobody notices for months.
+
+**Pages the navigation never mentioned.** A file on disk that no `nav` entry
+points at may have been hidden deliberately — a draft, a scratch page, something
+withdrawn. Publishing it because it happened to be in the folder would be a
+worse mistake than leaving it out, so it is listed and skipped.
+
+```
+2 thing(s) could not be carried over:
+  https://blog.acme.dev: "Blog" is an external link; sidebars hold pages. Add it to menu.yaml.
+  draft.md: on disk but absent from the navigation; not converted
+```
+
+## When Docusaurus computes its sidebar
+
+`sidebars.js` is a JavaScript module, not a data file. Most are data wearing
+JavaScript's clothes and read fine. Some are not:
+
+```js
+module.exports = require('./generated').map((item) => ({ ...item }));
+```
+
+That is not read at all. The converter falls back to the folder and names the
+construct that stopped it:
+
+> `sidebars.js` contains a require() call, so it was not read: this converter
+> parses declarative sidebars and will not guess at ones that compute their
+> exports. The pages below came from the folder instead, and their order is
+> alphabetical rather than yours.
+
+Declining is the point. A sidebar half-read from a file the converter did not
+understand would look finished and be wrong.
+
+## Markdown that is not MDX
+
+Zellij compiles guide pages as MDX, which is Markdown plus JSX. That addition is
+not free: `{` opens an expression and `<` opens a tag. Prose written for MkDocs
+has never had to care.
+
+| In the source | Becomes | |
+| --- | --- | --- |
+| `{timeout}` | `\{timeout\}` | In prose only |
+| `a < b` | `a &lt; b` | `<` is the syntax; `>` is just a character |
+| `<n>`, `<your-token>` | `&lt;n>`, `&lt;your-token>` | Nothing closes them |
+| `use <div> for layout` | `use &lt;div> for layout` | Naming a tag, not opening one |
+| `<br>` | `&lt;br>` | Valid HTML, invalid MDX |
+| `<div>…</div>`, `<br/>` | unchanged | Closed, so it is markup |
+| `<https://x.com>` | `[https://x.com](https://x.com)` | MDX has no autolinks |
+| ` ```sh {x} < y ``` ` | unchanged | Code is quoted by definition |
+
+**The test is whether the tag is closed, not what it is called.** MDX is JSX:
+every tag needs a closing tag or a slash, including the ones HTML lets you
+leave open. A tag that is genuinely markup is balanced, because whoever wrote
+it wanted it to render; a tag that is prose is not, because they were writing
+about it.
+
+Two earlier rules were both wrong, and both were caught by converting a real
+MkDocs tree and compiling the result — never by reading the code. "Looks like a
+tag name" accepted `<n>`. "Is a real HTML element" accepted the `<span>` in
+*use `<div>` and `<span>` for layout*.
+
+<Callout type="warning" title="check does not compile MDX">
+[`zel check`](/cli/check) validates the content model — links, section types,
+sidebar entries. It does not compile your Markdown. A converted folder can pass
+`check` and still fail to build, so build it once with
+[`zel build`](/cli/build) before you throw the original away.
+</Callout>
+
+## See also
+
+- [Converting existing docs](/guide/converting) — the concepts, and what to expect
+- [`zel context`](/cli/context) — when there is no structure to convert from
+- [`zel ship`](/cli/ship) — convert and publish in one line

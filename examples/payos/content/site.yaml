@@ -1,0 +1,54 @@
+name: PayOS
+tagline: "Sell your software anywhere, without building a payments team."
+
+# One owner, several sites: the mark returns to the hub and the site's own name
+# becomes the way home within this site (design §4.1).
+brand:
+  logo:
+    src: assets/shebka.png
+    # Derived: the mark's two near-black letters vanish on a dark bar.
+    dark: assets/shebka-dark.png
+    alt: Shebka
+    href: https://shebka.com
+  title: PayOS
+
+theme: cupertino
+mode: system
+motion: expressive
+
+home: home
+
+siteUrl: https://payos.shebka.net
+basePath: ""
+
+nav:
+  sticky: true
+  align: left
+  themeToggle: true
+  themeSwitcher: true
+  search: true
+  transparentOverHero: true
+  cta:
+    - { label: "Get started", href: /guide/getting-started, style: primary }
+
+footer:
+  columns:
+    - heading: Product
+      links:
+        - { label: Why PayOS, page: why }
+        - { label: Capabilities, page: capabilities }
+    - heading: Documentation
+      links:
+        - { label: Getting started, href: /guide/getting-started }
+        - { label: Setup, href: /guide/setup }
+        - { label: Configuration, href: /guide/configuration }
+        - { label: Deploy, href: /guide/deploy }
+    - heading: Using PayOS
+      links:
+        - { label: For vendors, href: /using-payos/vendor }
+        - { label: For customers, href: /using-payos/customer }
+        - { label: For platform admins, href: /using-payos/platform-admin }
+  legal: "© 2026 Shebka LLC. PayOS orchestrates payments — it never holds your funds."
+
+analytics:
+  provider: none

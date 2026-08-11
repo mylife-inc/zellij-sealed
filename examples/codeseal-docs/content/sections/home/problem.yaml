@@ -1,0 +1,28 @@
+type: feature-grid
+id: problem
+eyebrow: The problem
+heading: "\"Private\" does not mean unreadable."
+subhead: >-
+  A private repository hides your code from the public, but not from the
+  platform itself. Anyone with privileged access to the storage backend can read
+  every commit, branch and file in plaintext. For most teams that is fine. For
+  payment engines, proprietary algorithms, security rules and trade secrets, it
+  is not.
+background: tinted
+columns: 3
+items:
+  - icon: eye-off
+    title: Hosting provider employees
+    body: >-
+      Engineers and administrators at GitHub, GitLab or Bitbucket have backend
+      access to private repository storage.
+  - icon: server-crash
+    title: Storage breaches
+    body: >-
+      If your hosting provider is compromised, every line of plaintext source in
+      your private repositories is inside the blast radius.
+  - icon: alert-triangle
+    title: Subpoenas and insider threats
+    body: >-
+      Legal requests, a rogue employee or a misconfigured access control can
+      expose source you assumed was private.

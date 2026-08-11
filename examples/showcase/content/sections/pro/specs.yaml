@@ -1,0 +1,8 @@
+type: stats-band
+id: specs
+heading: Specifications
+stats:
+  - { value: 6.3, label: Inch display, suffix: "″" }
+  - { value: 187, label: Grams }
+  - { value: 31, label: Hours of video, suffix: "h" }
+  - { value: 48, label: Megapixel main, suffix: MP }

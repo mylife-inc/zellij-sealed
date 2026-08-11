@@ -1,0 +1,40 @@
+# Two screens, mirroring the shape of a consumer-electronics site: a landing
+# grid of promo tiles that each link through, and the product page you reach
+# from one of them.
+
+- name: home
+  title: Lumen
+  description: >-
+    Lumen 3 Pro, Lumen 3, Watch and Buds. Titanium, a display you can read in
+    the sun, and a battery that outlasts the day you actually had.
+  layout: landing
+  sections:
+    - home/family
+    - home/buying
+
+- name: lumen-3-pro
+  title: Lumen 3 Pro — titanium, featherweight, relentless
+  description: >-
+    Grade 5 titanium, four cameras, a 2,600-nit display and thirty-one hours of
+    video. From £999.
+  layout: landing
+  sections:
+    - pro/hero
+    - pro/carriers
+    - pro/tour
+    - pro/design
+    - pro/film
+    - pro/camera
+    - pro/finishes
+    - pro/highlights
+    - pro/inbox
+    - pro/privacy
+    - pro/specs
+    - pro/generations
+    - pro/reviews
+    - pro/makers
+    - pro/trade
+    - pro/compare
+    - pro/faq
+    - pro/footnotes
+    - pro/cta

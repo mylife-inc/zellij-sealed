@@ -1,0 +1,12 @@
+type: gallery
+heading: The theme set
+subhead: Click any tile to see it full size.
+columns: 3
+lightbox: true
+items:
+  - { image: assets/example/tile-1.png, alt: The rosette on a pale sea-green field, caption: Sea }
+  - { image: assets/example/tile-2.png, alt: The rosette on a warm clay field, caption: Clay }
+  - { image: assets/example/tile-3.png, alt: The rosette on a dusk-violet field, caption: Dusk }
+  - { image: assets/example/tile-4.png, alt: The rosette on a cool slate field, caption: Slate }
+  - { image: assets/example/tile-5.png, alt: The rosette on a deep ink field, caption: Ink }
+  - { image: assets/example/tile-6.png, alt: The rosette on an inverted sea field, caption: "Sea, inverted" }

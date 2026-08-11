@@ -1,0 +1,36 @@
+type: feature-grid
+id: beliefs
+heading: What it assumes
+subhead: These are the opinions. Everything else is configuration.
+columns: 3
+items:
+  - icon: file-text
+    title: Content is plain text
+    body: >-
+      YAML and Markdown, in a folder, in version control. Reviewable in a pull
+      request by someone who does not write code.
+  - icon: shapes
+    title: A fixed vocabulary beats freedom
+    body: >-
+      Nineteen sections, not arbitrary layout. Constraint is what keeps every
+      page looking like it belongs to the same site.
+  - icon: package
+    title: An engine, not a generator
+    body: >-
+      Nothing is scaffolded into your repository, so there is nothing to
+      re-merge when the engine improves.
+  - icon: shield-alert
+    title: Broken content fails the build
+    body: >-
+      A dead nav link, a missing section file, an unknown icon name — all build
+      errors. Visitors are not the validation layer.
+  - icon: accessibility
+    title: Accessibility is not a mode
+    body: >-
+      Reduced motion is honoured everywhere, focus is visible, dialogs use the
+      platform's own, and contrast is checked per theme.
+  - icon: gauge
+    title: Fast by construction
+    body: >-
+      Static generation, build-time syntax highlighting, a search index that
+      loads on first use and not before.

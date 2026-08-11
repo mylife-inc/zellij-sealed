@@ -1,0 +1,19 @@
+type: markdown-prose
+id: comparison
+heading: PayOS vs. building it yourself
+body: |
+  | Capability | Build it yourself | With PayOS |
+  |---|---|---|
+  | Payment provider integrations | One project *per provider*, maintained forever | Connect with a click; 12 providers behind one interface |
+  | Pricing & checkout pages | Design, build, and PCI-scope per product | Hosted, branded, zero payment code on your site |
+  | New provider later | Another integration sprint | A click in the dashboard |
+  | Licensing / anti-piracy | A second SaaS to integrate and wire up | Built in, atomic with payment |
+  | Customer portal | An auth system + account UI + support load | Included, passwordless, self-service |
+  | Webhooks (verify/dedup/retry) | Your problem, per provider | Handled; one signed event vocabulary |
+  | Refund reconciliation | Hand-rolled, easy to get wrong | Initiated *and* observed refunds reconciled |
+  | Cross-provider analytics | Stitch together N dashboards | One view, per period/country/product/provider |
+  | Where your money lives | Wherever you built it | Your own provider accounts — never held by PayOS |
+  | Time to first sale on product #2 | Rebuild most of the above | Describe the product; done |
+
+  **The bottom line:** PayOS turns "build and maintain a payments platform"
+  into "describe a product and share a link."

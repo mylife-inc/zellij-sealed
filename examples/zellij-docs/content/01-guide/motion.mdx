@@ -1,0 +1,83 @@
+---
+title: Motion
+description: Three presets, and the rule that reduced motion always wins.
+---
+
+```yaml title="site.yaml"
+motion: subtle     # none | subtle | expressive
+```
+
+Pages and individual sections may override it:
+
+```yaml title="pages.yaml"
+- name: launch
+  motion: expressive
+  sections:
+    - launch/hero
+    - { section: launch/features, motion: none }
+```
+
+## The presets
+
+<Tabs>
+<Tab label="none">
+
+Nothing animates. Content renders visible on the first paint. Choose this for
+a documentation-only site, or where motion is a distraction.
+
+</Tab>
+<Tab label="subtle">
+
+The default. Sections fade and rise slightly as they enter the viewport, with a
+small stagger between siblings. Nothing moves that the visitor did not scroll
+to.
+
+</Tab>
+<Tab label="expressive">
+
+Adds scroll-linked behaviour: gentle parallax on hero imagery, and a pinned
+showcase whose visual ramps as the page scrolls past it. Reach for it on a
+landing page, not on a manual.
+
+</Tab>
+</Tabs>
+
+## Two rules the engine keeps
+
+**Only `transform` and `opacity` animate.** Never width, height, margin or
+anything else that affects layout — so an entrance animation cannot contribute
+to layout shift. A test asserts this rather than trusting it.
+
+**`prefers-reduced-motion` beats configuration.** It is not one of the three
+presets and not a setting; a visitor who has asked their system for less motion
+gets `none` regardless of what the site says, including for the scroll-linked
+effects under `expressive`.
+
+<Callout type="warning" title="A reveal is a transform, and transforms have width">
+Sideways reveals translate content before it animates in. On a narrow viewport
+that pushed content past the edge and gave the whole page a horizontal
+scrollbar until the reveal fired. Sections are `overflow-x: clip` for this
+reason — `clip` rather than `hidden`, because `hidden` would make every section
+a scroll container and break the sticky pinning `expressive` relies on.
+</Callout>
+
+## Video
+
+A `media-panel` video is muted, looping and `playsinline`, and autoplay is
+decided in JavaScript rather than by the `autoplay` attribute — the attribute
+would have it moving before any code could stop it. Under reduced motion the
+poster stands in, which is what the still frame is for.
+
+`video-embed` never loads anything until the visitor presses play. A poster
+image and a play button is all that ships.
+
+## Testing motion
+
+The e2e suite covers this directly: that reveals fire on scroll, that nothing
+animates a layout-affecting property, and that under reduced motion every
+section renders visible with no animation at all.
+
+If you are writing tests against a Zellij site and measuring element positions,
+emulate reduced motion first. Measuring mid-reveal reads a position offset by
+however far through the translate it happens to be — that is not a flake, it is
+an animation doing its job.

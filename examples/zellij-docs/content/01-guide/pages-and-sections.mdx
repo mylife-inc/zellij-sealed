@@ -1,0 +1,145 @@
+---
+title: Pages and sections
+description: Composing a page from named section files, and the one rule about overrides.
+---
+
+Sections are files. Pages reference them by name. That separation is the reason
+someone can edit the words on a landing page without opening the file that
+decides what a landing page *is*.
+
+## A section file
+
+One file per section, under `sections/`. Its name is its path below that
+directory with the extension dropped, so `sections/home/hero.yaml` is
+`home/hero`.
+
+<Tabs>
+<Tab label="YAML">
+
+A structured section: `type` plus that type's fields.
+
+```yaml title="sections/home/hero.yaml"
+type: hero
+badge: Acme 2.0 is here
+headline: Operations that run themselves
+subhead: One system for workflows, approvals and reporting.
+cta:
+  - { label: Get started, href: /guide, style: primary }
+visual: assets/hero.png
+```
+
+</Tab>
+<Tab label="Markdown">
+
+A prose section. No `type` needed — a `.md` or `.mdx` file is
+`markdown-prose` unless its frontmatter says otherwise.
+
+```mdx title="sections/home/story.md"
+---
+background: tinted
+---
+
+## Why we build Acme
+
+Operations teams deserve better than a spreadsheet with opinions.
+```
+
+</Tab>
+</Tabs>
+
+## A page
+
+```yaml title="pages.yaml"
+- name: home
+  title: Acme — operations that run themselves
+  description: One system for workflows, approvals and reporting.
+  layout: landing
+  sections:
+    - home/hero
+    - home/story
+    - { section: home/features, background: tinted }
+    - { section: home/features, id: enterprise, background: inverted }
+```
+
+Page-level fields: `name`, `title`, `description`, `route`, `layout`, `theme`,
+`motion`, `navHighlight`, `sections`.
+
+`title` and `description` feed `<title>`, the meta description and the Open
+Graph tags. `layout` is one of `stack`, `stack-narrow`, `stack-sidebar` or
+`landing`.
+
+## The one rule about overrides
+
+A section reference may override **presentation**, never **content**.
+
+<Callout type="warning" title="Content lives in exactly one place">
+`background`, `id`, `motion`, `padding` and `titleGradient` may be overridden
+from a page. Headlines, bodies, items and images may not. The moment content is
+overridable it scatters back into the page file, and sections stop being the
+source of truth for anything.
+</Callout>
+
+That is what makes the fourth line above legal: the same `home/features`
+section appears twice, once tinted and once inverted, and its words are written
+once.
+
+A section used twice needs a distinct `id` on the second occurrence, because
+two identical anchors on one page make `#id` ambiguous. Zellij fails the build
+rather than letting `/#features` go somewhere arbitrary.
+
+## Backgrounds and gradients
+
+`background` takes a named surface or a gradient:
+
+```yaml
+- { section: home/cta, background: tinted }
+- { section: home/cta, background: { gradient: [accent, inverted-bg] } }
+```
+
+Named surfaces are `default`, `tinted`, `inverted` and `accent`. Gradient stops
+may name a palette token — `accent`, `surface`, `bg`, `fg`, `muted`, `border`,
+`inverted-bg`, `inverted-fg`, `accent-fg` — in which case the gradient follows
+the active theme. A literal CSS colour is accepted where it must not.
+
+`titleGradient` takes the same stops and paints the section's leading heading
+with them:
+
+```yaml
+- { section: home/hero, titleGradient: [accent, fg] }
+```
+
+<Callout type="info" title="Legible under forced colours">
+A gradient heading is clipped to the glyphs, which means it has no colour of
+its own. Under `forced-colors` the browser drops the background and Zellij puts
+a solid colour back, so the heading never disappears.
+</Callout>
+
+## Unused files
+
+A section file no page references is a **warning**, not an error — half-written
+content should not stop a build. `zellij check` lists them.
+
+A reference to a section that does not exist *is* an error, and the message
+lists the sections that do:
+
+```
+pages.yaml › home: sections[2] refers to "hero-main", which has no file.
+  Expected sections/hero-main.yaml (or .md/.mdx).
+  Available: home/cta, home/features, home/hero, home/story
+```
+
+## Write lists in block style
+
+```yaml
+# Good
+items:
+  - image: assets/office.png
+    caption: Lisbon, 2024
+
+# Trouble
+items:
+  - { image: assets/office.png, caption: Lisbon, 2024 }
+```
+
+An unquoted comma ends an entry inside a flow mapping, so the second reads as
+`caption: Lisbon` plus a stray key. Block style has no such trap.

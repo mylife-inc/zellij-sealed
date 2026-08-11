@@ -1,0 +1,21 @@
+type: bento-grid
+heading: One engine, not five tools
+items:
+  - title: A folder is the whole input
+    body: site.yaml, a menu, some sections, a guide folder. That is the build.
+    image: assets/bento-model.png
+    span: large
+    href: /guide/content-model
+  - title: Themes
+    body: Fourteen of them, switchable at runtime.
+    icon: palette
+    span: normal
+    background: tinted
+  - title: Search
+    body: Built at compile time, loaded on first keystroke.
+    icon: search
+    span: normal
+  - title: Motion
+    body: Three presets, and reduced-motion always wins.
+    icon: sparkles
+    span: wide

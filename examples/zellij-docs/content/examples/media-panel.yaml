@@ -1,0 +1,11 @@
+type: media-panel
+heading: Take a closer look.
+title: One image, and the copy laid over it
+body: The panel grows past its ratio when the copy needs more room.
+image: assets/example/wide-1.png
+alt: ""
+align: left
+tone: dark
+ratio: ultrawide
+scrim: 0.45
+cta: [{ label: Watch the tour, href: /guide }]

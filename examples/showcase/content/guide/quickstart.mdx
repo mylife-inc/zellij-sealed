@@ -1,0 +1,81 @@
+---
+title: Quickstart
+description: Get a working Lumen workflow running in about ten minutes.
+---
+
+# Quickstart
+
+This guide takes you from an empty account to a running workflow.
+
+<Callout type="info">
+You need Node.js 20.11 or newer. Check with `node --version`.
+</Callout>
+
+<Steps>
+  <Step title="Install the CLI">
+    The CLI drives setup and deployment.
+
+    ```bash
+    npm install -g @lumen/cli
+    ```
+  </Step>
+
+  <Step title="Authenticate">
+    Sign in once; the token is cached in your home directory.
+
+    ```bash
+    lumen login
+    ```
+  </Step>
+
+  <Step title="Create your first workflow">
+    Scaffold a workflow from the approval template.
+
+    ```bash title="terminal"
+    lumen workflow create --template approval --name "Invoice review"
+    ```
+  </Step>
+
+  <Step title="Run it">
+    Trigger the workflow and watch it move through its steps.
+
+    ```bash
+    lumen workflow run "Invoice review"
+    ```
+  </Step>
+</Steps>
+
+## Verifying the run
+
+<Tabs>
+  <Tab label="CLI">
+    ```bash
+    lumen workflow status "Invoice review"
+    ```
+  </Tab>
+  <Tab label="Dashboard">
+    Open the dashboard and select **Workflows → Invoice review**. The run appears
+    at the top of the activity list.
+  </Tab>
+</Tabs>
+
+<Callout type="tip">
+Workflows are versioned. Editing one creates a new version; in-flight runs finish
+on the version they started with.
+</Callout>
+
+<Callout type="warning" title="What a version pin does and does not cover">
+Pinning fixes the workflow definition. It does not fix what the steps reach out
+to, so a run can still change behaviour underneath a pin.
+
+| | Pinned by a version | |
+| --- | --- | --- |
+| `steps` | Yes | The definition itself, including order and conditions |
+| `secrets` | No | Resolved at run time, so a rotated credential takes effect immediately |
+| `connectors` | No | The remote service is free to change its own responses between runs |
+</Callout>
+
+## Next steps
+
+- [Installation](/guide/installation) — production deployment options.
+- [Configuration overview](/guide/config/overview) — tuning the platform.

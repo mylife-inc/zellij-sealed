@@ -1,0 +1,88 @@
+---
+title: zel detect
+description: Say what tool a documentation folder was written for, and how sure it is.
+---
+
+<Callout type="tip" title="Available">
+Works today. Reads the folder and changes nothing in it.
+</Callout>
+
+```bash title="terminal"
+zel detect ./docs
+```
+
+```
+mkdocs       MkDocs — mkdocs.yml with a nav tree  (certain)
+```
+
+## Why a separate command
+
+Because the answer changes what you do next, and you want it **before** you
+commit to anything. `detect` reads a folder and writes nothing — no output
+directory, no temporary files, no changes to the source. It is safe to run on
+someone else's repository, on a folder you do not own, and on something you are
+only considering migrating.
+
+It is also the first step of [`zel migrate`](/cli/migrate), so running it alone
+tells you what that command is about to do.
+
+## The three answers
+
+| | What it means | What to do |
+| --- | --- | --- |
+| A format, **certain** | The tool's own configuration file is present and readable | [`zel convert`](/cli/convert) |
+| A format, **likely** | The folder matches a default layout, but nothing confirms it | Convert, and read the report closely |
+| Nothing recognised | No machine-readable structure | [The AI route](/cli/context) |
+
+**Certainty is not politeness.** A folder containing `mkdocs.yml` is certain: the
+file names the format and carries the navigation. A folder that merely looks
+like `docs/` with some Markdown in it is a guess, and Zellij will not make a
+confident one — a wrong guess between two plausible formats produces a
+conversion that is wrong in ways nobody notices for a month.
+
+An ambiguous tree asks rather than choosing.
+
+## When nothing is recognised
+
+```
+Nothing here looks like a documentation tool this build knows.
+
+If the folder is plain Markdown with no configuration, there is no
+structure to convert from. Write the reference with `zel context` and
+ask an AI agent to author the folder instead.
+```
+
+This is the honest answer, not a failure to work around. A folder of loose
+Markdown has no order, no grouping, and no titles beyond each file's first
+heading. There is nothing to convert *from* — and a converter that invented an
+order would produce something that looks finished, reads plausibly, and is not
+what anyone wanted.
+
+The alternative route is real and works well: [`zel context`](/cli/context)
+writes the whole content model as one file, an agent does the structuring, and
+[`zel check`](/cli/check) holds it to account.
+
+## What it looks at
+
+| Format | Decides on | Reads |
+| --- | --- | --- |
+| MkDocs | `mkdocs.yml` at the root | `nav`, `site_name`, `site_description`, `docs_dir` |
+| Docusaurus | `sidebars.js` beside a `docs/` folder | Categories, doc entries, links, nesting |
+
+What *your* binary can detect is what [`zel list formats`](/cli/list) prints.
+Converters are compiled in, so the answer is specific to the build you have
+rather than to this page.
+
+## Options
+
+| | | |
+| --- | --- | --- |
+| `<dir>` | Required. The folder to inspect | — |
+
+No `--force`, no `--out`, nothing that writes. That is the point of it.
+
+## See also
+
+- [`zel convert`](/cli/convert) — act on the answer
+- [`zel migrate`](/cli/migrate) — detect, convert and check in one step
+- [`zel context`](/cli/context) — when there is nothing to detect

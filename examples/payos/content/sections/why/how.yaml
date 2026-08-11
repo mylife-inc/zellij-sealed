@@ -1,0 +1,16 @@
+type: markdown-prose
+id: how
+heading: How PayOS does it once
+body: |
+  Describe your product in PayOS **one time**. In return you get a hosted
+  pricing page, a hosted checkout wired to every provider you've connected,
+  license issuance, a customer portal, webhooks, refunds, and analytics — for
+  that product and every future one. Your website's only job is a
+  **redirect link**.
+
+  <Callout type="info" title="Orchestrator, not merchant of record">
+  You connect your own provider accounts, funds settle directly with you, and
+  PayOS never touches the money. That means no money-transmitter licensing on
+  our side, minimal PCI scope on yours, and no lock-in of your funds or your
+  customers. PayOS is replaceable plumbing, never a custodian.
+  </Callout>

@@ -1,0 +1,41 @@
+version: 1
+file: engine/packages/zellij/src/chrome/footer.tsx
+recipients:
+- name: sid-med
+  role: developer
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBkN0RyTGRIbVRHemZac2RW
+    QkM2YldMdllESDk1R1IwRC9ienR6WUoxQlJNCmx6ZzFtNGl1eTV6R2wvVThwamV3
+    SERzMFNjWWRpZlVGcllCTUtyc2lUTG8KLT4gJj05P2NaLWdyZWFzZSBNIDwgRnEr
+    CldrQWFoQ1RqYWNEMU5KNTI3ZUhRbW5TWVpDQlN0VHZEY2pSY3E1a0pJRkMwdGly
+    dmVud0NnMEoxZHBMVUdCTG4KVzNnCi0tLSA0T2JWZ2ZuK215TlBSeW5IMWpuSkhR
+    ejV2U1dOUnZkcC9HaDMzZEVTakdFCkhw/Xm0X9i+HsHXVBDJoPfC52vfAyyhfKJr
+    kWxUlZEEcXTUHY0N236yfPg9J/zxc4P4eq2PrUXMSbIrFxGSSxE=
+    -----END AGE ENCRYPTED FILE-----
+- name: ci-runner
+  role: ci
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBzSGJib3A3eDIyMGw2cmdC
+    ZWJIR2ErMWU1cUhWMHVkQkZ3NWg4dGZtVGlZCmdDWGp6QW9zRDZpNHdhYjgveFd5
+    emxULzlKa2drTjVPbjVua3RDaWRlWVUKLT4gXTRsYS1ncmVhc2UgSyU2IE1GYU95
+    IEs9Y3BTfnFHIE9PCjVTb0o3VUdxckhqcGJNWllpejJjZVF3QmtXeGRLbDJFUFht
+    cFUvMGJrY2ZYMXFLZG8vNEh0VS9Gc0pqdkw1b0cKTkJYakxNcWdhcFRUQXlpSHNX
+    YkZzbFJwd3NaYU5PcENNcEdxcGVsQ2lTRnQKLS0tIE8vc2NpQ0E5NS80dW9hL0Zi
+    R1FtQU53d2JPOUNBNXQ2THNDczVFbzE5QUUK+hdywOKsii/4S/318qZsgU45O1We
+    YXSB1rMSOIh9IusLZA0nv55sMFQmcZp/yYcJ/eKIGOw2FmA5hV0s6hiR3g==
+    -----END AGE ENCRYPTED FILE-----
+- name: admin-server
+  role: admin
+  wrapped_key: |
+    -----BEGIN AGE ENCRYPTED FILE-----
+    YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBoSFJuL2lKeUNOM1E2NVph
+    UENsUnJmeDlUUWVXUFRES0QvbnhvY0pHaWkwCmQ2SHNMSllrcDZ6WXNuamRzaHhl
+    cEdhQ0xWbDZmNTBSMnNxeTNJYW1ERmMKLT4gNlNpK00qRC1ncmVhc2UgMnBxUHx5
+    CmgrVWdNOTNIOUhtQ2FOSkVyNVRkamVKWmFZakdGS2xDdDk2QmNhYzVuVXpENFFJ
+    M1Zrd2FWdi9mbkF2Q0tBbE0KTzFpc2ZxdlhoMFllalJ6eWp3ZFVucjdIS3M3RnZi
+    STFTZmlyWmdITAotLS0gVG9rNHBSQy9QTUp1WHNWOTduOTErcWEzcmpPMkR4clVD
+    b0srUk9HVlVqUQpfOjlQZFaQ3KxTLq81h5ueExH9gt4cNpIxJuQOdLfnocHVNlg1
+    Avgbcrsl6hJLMOaJqExLdzna5vCwB+uDlCCJ
+    -----END AGE ENCRYPTED FILE-----

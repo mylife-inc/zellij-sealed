@@ -1,0 +1,30 @@
+type: hero-split
+id: top
+badge: Optional · self-hosted
+headline: A Portal you run. *Nobody else's cloud.*
+subhead: >-
+  Four of the eight CodeSeal setups work with nothing but the CLI. The other
+  four add a Portal — a service you host, which holds the keys, hands out
+  single-use credentials, and can run the build itself so your CI provider
+  never sees plaintext.
+cta:
+  - { label: Run one locally, href: "#run", style: primary }
+  - { label: Do I need it?, href: "#need", style: ghost }
+highlights:
+  - { icon: server, label: Yours to host }
+  - { icon: clock, label: Sixty-second credentials }
+  - { icon: file-text, label: Audited, exportable }
+media: right
+terminal:
+  title: terminal
+  body: |
+    $ seal up
+    ✓ postgres      healthy
+    ✓ redis         healthy
+    ✓ portal        http://localhost:3000
+    ✓ workers       rekey · build · rotation · cleanup
+
+    $ seal deploy railway acme
+    ✓ pushed        portal:1.0.0
+    ✓ migrated      14 models
+    ✓ live          https://codeseal.acme.dev

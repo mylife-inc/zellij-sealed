@@ -1,0 +1,31 @@
+type: card-carousel
+heading: Why teams pick Zellij
+subhead: Everything below ships in the engine.
+link: { label: Browse the guide, href: /guide }
+cardWidth: medium
+items:
+  - eyebrow: Content
+    title: Write YAML, not components.
+    body: A section is a file with a type and some fields.
+    image: assets/card-content.png
+    href: /guide/content-model
+  - eyebrow: Sections
+    title: Nineteen ways to say it.
+    body: Each one is documented with its source and its output.
+    image: assets/card-sections.png
+    href: /sections
+  - eyebrow: Themes
+    title: Fourteen looks, no redesign.
+    body: Swap a single line in site.yaml.
+    image: assets/card-themes.png
+    background: tinted
+  - eyebrow: Guides
+    title: MDX with the parts you actually want.
+    body: Callouts, steps, tabs, code groups and a table of contents.
+    image: assets/card-guides.png
+    href: /guide
+  - eyebrow: CLI
+    title: Check before you ship.
+    body: One command validates the whole content folder.
+    image: assets/card-cli.png
+    href: /cli

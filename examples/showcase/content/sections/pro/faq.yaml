@@ -1,0 +1,18 @@
+type: faq
+id: questions
+heading: Questions people actually ask
+items:
+  - question: Will my photos and messages come across?
+    answer: >-
+      Yes — everything moves in one pass, including the way you had your home
+      screen arranged. It takes about eight minutes over a cable.
+  - question: Is the titanium frame actually stronger?
+    answer: >-
+      Stiffer, and twelve grams lighter. Grade 5 titanium is the alloy used for
+      aircraft fasteners, which is a strange sentence to write about a phone.
+  - question: What does "31 hours of video" mean?
+    answer: >-
+      Continuous local playback at 50% brightness. Streaming is roughly 24
+      hours, which is the number worth planning around.
+  - question: Can I use my existing carrier?
+    answer: Every network, every plan, and you keep your number.

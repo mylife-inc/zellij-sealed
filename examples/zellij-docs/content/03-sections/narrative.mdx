@@ -1,0 +1,112 @@
+---
+title: Narrative
+description: zigzag, markdown-prose, timeline, steps-panel and faq — sections that carry an argument.
+---
+
+## zigzag
+
+Alternating text and image rows. The standard way to explain three or four
+things in sequence without a wall of prose.
+
+<SectionPreview example="zigzag" />
+
+`body` accepts inline markdown — bold, italic, code spans and links. Not block
+markdown: for that, use `markdown-prose` or a guide page.
+
+## markdown-prose
+
+The escape hatch. Free-form prose inside marketing styling, for the page that
+needs a paragraph the tiles do not cover.
+
+<SectionPreview example="markdown-prose" />
+
+A `.md` or `.mdx` file under `sections/` is this type without saying so:
+
+```mdx title="sections/home/story.md"
+---
+background: tinted
+---
+
+## Why we build Acme
+
+Operations teams deserve better than a spreadsheet with opinions.
+```
+
+<Callout type="tip" title="Reach for this last">
+If a page needs a lot of `markdown-prose`, it probably wants to be a guide page
+instead — that layout has a sidebar, an on-this-page rail and search, and prose
+is what it is for.
+</Callout>
+
+## timeline
+
+A dated sequence: company history, a roadmap, milestones, the chapters of a
+book. Rendered as an ordered list, because that is what it is.
+
+<SectionPreview example="timeline" />
+
+`date` is free text, not a date type — `1984`, `Q3`, `Chapter one` and
+`Some time in the eighties` all belong. A bare year is accepted and
+stringified, since YAML hands `2019` over as a number.
+
+Items reveal from the side under `subtle` and `expressive`, which reads as the
+sequence assembling itself as you scroll.
+
+## steps-panel
+
+Numbered steps on one side, the result they produce on the other. For a process
+where the outcome is a shape somebody needs to recognise — a folder, a schema, a
+directory tree — and a list of instructions alone would leave them guessing what
+they are working toward.
+
+<SectionPreview example="steps-panel" />
+
+The numbers are drawn from the list's own counter and never authored. Writing
+`01`, `02` into the titles works right up until a step is inserted in the
+middle, and a screen reader would read every number twice.
+
+The panel is sticky beside the steps on a wide viewport, so it is still there at
+the last step; stacked on a narrow one, where pinning it would cover the steps
+below.
+
+The panel takes one of three things: `visual` for an image, `terminal` for a
+transcript, or `diagram` for Mermaid source. The last is what the section was
+really built for — a sequence diagram beside a numbered legend, where the
+numbers on the arrows are the numbers down the list:
+
+```yaml title="a mode of a CI pipeline, drawn and explained"
+type: steps-panel
+media: left
+diagram: |
+  sequenceDiagram
+      autonumber
+      participant C as CI Runner<br/>ubuntu-latest
+      participant S as GitHub Secrets<br/>encrypted store
+      S->>C: inject SGIT_KEY
+      C->>C: run-secure: decrypt
+steps:
+  - title: inject SGIT_KEY
+    body: GitHub decrypts the repository secret into the job's environment.
+  - title: run-secure — decrypt
+    body: Derives the key with scrypt and decrypts every manifest-listed blob.
+```
+
+Up to twelve steps. The panel is sticky so it survives a long legend, but a
+legend that outruns a screen twice over has become an article, and an article
+belongs in a guide.
+
+<Callout type="tip" title="Not the same as timeline">
+The two look alike and answer different questions. A `timeline` is dated and its
+order is history — it happened in that sequence. A `steps-panel` is numbered and
+its order is instruction — do this, then this. If your items have real dates,
+you want `timeline`.
+</Callout>
+
+## faq
+
+An accordion of question and answer pairs.
+
+<SectionPreview example="faq" />
+
+Built on `<details>`, so it expands and collapses with no JavaScript at all and
+is keyboard operable for free. Answers accept inline markdown.

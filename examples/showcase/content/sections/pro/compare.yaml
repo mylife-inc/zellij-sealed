@@ -1,0 +1,27 @@
+type: pricing-table
+id: buy
+# A comparison table is read, not watched: staggering the columns in only
+# delays the answer the reader came for.
+motion: none
+heading: Which Lumen is for you?
+subhead: Every model ships with the same two-year support.
+tiers:
+  - name: Lumen 3
+    price: "£699"
+    period: or £29.12/mo for 24 months
+    description: The one most people should buy.
+    features: [6.1″ display, Dual camera, 22 hours of video, USB-C]
+    cta: { label: Buy Lumen 3, href: /guide/quickstart }
+  - name: Lumen 3 Pro
+    price: "£999"
+    period: or £41.62/mo for 24 months
+    description: Titanium, four lenses, the L3 Pro chip.
+    features: [6.3″ display, Four cameras, 31 hours of video, 40Gb/s USB-C, Satellite messaging]
+    cta: { label: Buy Lumen 3 Pro, href: /guide/quickstart }
+    highlighted: true
+  - name: Lumen 3 Pro Max
+    price: "£1,199"
+    period: or £49.96/mo for 24 months
+    description: The same, with more of everything.
+    features: [6.9″ display, Four cameras, 38 hours of video, 40Gb/s USB-C, Satellite messaging]
+    cta: { label: Buy Pro Max, href: /guide/quickstart }

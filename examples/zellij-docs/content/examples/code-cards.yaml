@@ -1,0 +1,41 @@
+type: code-cards
+eyebrow: Deployment
+heading: Three ways to put it somewhere
+subhead: >-
+  Each one is the same content folder. What differs is the file you commit to
+  make it happen.
+cards:
+  - eyebrow: Static
+    title: A directory of files
+    body: Any host that serves files. Netlify, Cloudflare Pages, S3, a web server.
+    code:
+      title: .github/workflows/docs.yml
+      body: |
+        - run: zel build docs --out dist
+        - uses: nwtgck/actions-netlify@v3
+          with:
+            publish-dir: dist
+  - eyebrow: Container
+    title: An image that serves itself
+    featured: true
+    body: For a platform that runs containers rather than hosting files.
+    code:
+      title: .github/workflows/image.yml
+      body: |
+        - run: zel build docs --target image \
+                 --tag ghcr.io/acme/docs:$GITHUB_SHA
+        - run: docker push ghcr.io/acme/docs:$GITHUB_SHA
+  - eyebrow: Wrapper
+    title: A Next.js app you own
+    body: When you want your own routes beside the generated ones.
+    code:
+      title: package.json
+      body: |
+        {
+          "scripts": {
+            "build": "zellij prepare && next build"
+          }
+        }
+footnote: >-
+  `zel ci init` writes whichever of these you pick, so the snippets are what you
+  end up with rather than what you have to type.

@@ -1,0 +1,32 @@
+{
+  "name": "zellij-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Zellij \u2014 a shared Next.js engine that turns structured content into a complete product website.",
+  "license": "UNLICENSED",
+  "author": "Shebka LLC",
+  "workspaces": [
+    "engine/packages/*",
+    "examples/*"
+  ],
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "dev": "npm run dev -w @shebka/zellij-showcase",
+    "dev:docs": "npm run dev -w @shebka/zellij-docs",
+    "dev:payos": "npm run dev -w @shebka/payos-site",
+    "build": "npm run build -w @shebka/zellij-showcase",
+    "start": "npm run start -w @shebka/zellij-showcase",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test -w @shebka/zellij",
+    "test:e2e": "npm run build -w @shebka/zellij-showcase && npm run test:e2e -w @shebka/zellij-showcase",
+    "lint": "npm run lint --workspaces --if-present",
+    "verify:basepath": "npm run verify:basepath -w @shebka/zellij-showcase",
+    "verify:links": "npm run verify:links -w @shebka/zellij-docs",
+    "check": "npm run build -w @shebka/zellij && (cd examples/showcase && npx zellij check) && (cd examples/zellij-docs && npx zellij check) && (cd examples/payos && npx zellij check)"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

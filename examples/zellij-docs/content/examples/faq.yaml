@@ -1,0 +1,11 @@
+type: faq
+heading: Reasonable questions
+items:
+  - question: Do I have to write React?
+    answer: >-
+      No. A wrapper app is three files and under thirty lines, and none of it
+      changes as your site grows.
+  - question: Can I add my own section type?
+    answer: Yes — `registerSection` takes a schema and a component, and the renderer picks it up.
+  - question: What happens if a link points at nothing?
+    answer: The build fails and names the file, rather than shipping a 404.

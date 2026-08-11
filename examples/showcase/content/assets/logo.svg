@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 132 32" width="132" height="32" role="img" aria-label="Lumen">
+  <circle cx="15" cy="16" r="10" fill="none" stroke="#1d1d1f" stroke-width="2.5"/>
+  <circle cx="15" cy="16" r="3.5" fill="#1d1d1f"/>
+  <text x="34" y="23" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="21" font-weight="600" letter-spacing="-0.6" fill="#1d1d1f">Lumen</text>
+</svg>

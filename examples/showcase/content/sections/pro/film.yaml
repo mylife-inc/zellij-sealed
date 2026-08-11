@@ -1,0 +1,6 @@
+type: video-embed
+id: film
+heading: Watch the film
+src: assets/film-poster.png
+poster: assets/film-poster.png
+caption: Two minutes on how the frame is made.

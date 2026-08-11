@@ -1,0 +1,150 @@
+---
+title: zel dev
+description: A development server for a content folder, without installing Node.
+---
+
+<Callout type="tip" title="Available">
+Works today.
+</Callout>
+
+```bash title="terminal"
+zel dev
+zel dev ./docs --port 4000
+```
+
+```
+  Engine   ghcr.io/mylife-inc/zellij-base:latest
+  Content  ./content
+  Serving  http://localhost:3000
+
+  Edit anything under ./content and reload. Ctrl-C to stop.
+
+✓ /app/content
+  site        Acme · theme cupertino
+  pages       6
+  guides      1 (5 pages) · /guide
+```
+
+Edit a YAML file, save it, reload the page. Add a page to `pages.yaml` and the
+route appears.
+
+## What it is for
+
+You are writing, not running a project.
+
+There is no `package.json` in your folder, no Node version to match, no
+lockfile, and nothing left behind when you stop. The engine is a Next.js
+application, and `zel dev` runs it **in a container** with your folder mounted —
+so the machinery that renders your site is never something you installed,
+upgraded, or have to think about.
+
+That is the whole design. Someone writing documentation should need a text
+editor and this command.
+
+## What happens when you run it
+
+<Steps>
+<Step title="Finds your content">
+[The usual resolution](/cli/#how-a-command-finds-your-content), or the folder you
+named. It stops rather than guessing at something that merely contains Markdown.
+</Step>
+<Step title="Validates it">
+The same pass as [`zel check`](/cli/check), in the same container. A broken
+folder is reported in about a second — before the install, not after it.
+</Step>
+<Step title="Installs what this site needs">
+The base image carries the engine and installs nothing, so the first run fetches
+Next.js and whatever your content asks for. It goes into a named volume keyed to
+the image, so the **second run starts in seconds**.
+</Step>
+<Step title="Serves">
+Next.js in development mode, bound inside the container and published to your
+machine on `--port`.
+</Step>
+</Steps>
+
+**The first run takes a couple of minutes** — a 237 MB image and an install.
+Everything after is fast. Worth knowing before you assume it has hung.
+
+## Reload, not watch
+
+There is no websocket pushing content changes at the browser, and that is worth
+understanding rather than working around.
+
+Next reloads when files **inside the Next project** change. Your content is not
+inside it — it is a folder elsewhere on your disk, on the other side of a
+container mount — so Next never learns a YAML file moved, and nothing can tell
+the browser to refresh itself.
+
+What happens instead: the engine re-reads the folder per request, so reloading
+shows the current file. Save, switch to the browser, reload.
+
+<Callout type="info" title="This was a bug until recently">
+The runtime memoised the loaded site permanently, on the reasoning that Next
+re-evaluates modules when they change. It does — for its own modules. Content
+lives outside them, so the first read of the process was served for as long as
+the server ran, and editing a headline showed the old one until restart.
+
+The memo now expires in development. If you are on an older base image and edits
+are not appearing, that is why — `docker pull ghcr.io/mylife-inc/zellij-base:latest`.
+</Callout>
+
+## Looking at it on a phone
+
+The server binds to every interface inside the container and the port is
+published to your machine, so anything on your network can reach it:
+
+```bash title="terminal"
+ipconfig getifaddr en0        # macOS
+hostname -I | cut -d' ' -f1   # Linux
+```
+
+Then `http://<that address>:3000` from the phone.
+
+Worth doing once per site. The mobile menu, the order sections stack in, and the
+type scale are the three things a desktop browser will not show you — and all
+three are cheap to fix while you are still writing.
+
+## When your folder is somewhere the runtime cannot see
+
+```
+error: my-docs is not shared with the container runtime
+```
+
+A bind mount of a path the runtime cannot reach does not fail — it mounts an
+empty directory, and the site comes out with no pages. `zel` detects that and
+says so, rather than reporting an empty site as though it were yours.
+
+Colima shares `$HOME` and not `/tmp`. Either work under your home directory, or
+share the path:
+
+```bash title="terminal"
+colima stop && colima start --mount '/tmp:w'
+```
+
+Docker Desktop: Settings → Resources → File sharing.
+
+## Options
+
+| | | |
+| --- | --- | --- |
+| `[dir]` | The content folder | [Resolved](/cli/#how-a-command-finds-your-content) |
+| `--port <n>` | | `3000` |
+
+`--open`, `--host` and `--features` are specified and not yet built.
+
+## When you have a wrapper app instead
+
+If you generated an app with `zel new app` and checked it into your repository,
+you already have Node and a `package.json`, and `npm run dev` is a shorter path
+than starting a container.
+
+`zel dev` is for the case where the content folder is all there is — which is
+most cases, and the one Zellij is built around.
+
+## See also
+
+- [`zel check`](/cli/check) — the same validation, without a browser
+- [`zel serve`](/cli/serve) — the built site, which can differ from this one
+- [`zel build`](/cli/build) — what you ship
+- [Lab 1](/guide/quickstart/from-scratch) — this command in the writing loop

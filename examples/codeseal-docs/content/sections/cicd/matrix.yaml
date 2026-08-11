@@ -1,0 +1,42 @@
+type: matrix
+id: matrix
+heading: Two independent choices — not one
+subhead: >-
+  Every encryption mode works with every CI mode. The CI mode decides *where the
+  key material lives and how it reaches the runner*; the encryption mode decides
+  *what that key material is*. Eight combinations, all supported.
+background: tinted
+
+rowAxis: Encryption
+columnAxis: CI mode
+
+columns:
+  - { label: 1 · secrets }
+  - { label: 2 · portal-key }
+  - { label: 3 · portal-build }
+  - { label: 4 · portal-dispatch }
+
+rows:
+  - label: passphrase
+    description: One shared secret, stretched with scrypt.
+    cells:
+      - "`SGIT_KEY` stored in GitHub Secrets."
+      - Portal delivers the passphrase, wrapped to the GitHub wrapper key.
+      - Portal decrypts server-side with the stored passphrase.
+      - The dispatch token carries the passphrase.
+
+  - label: recipient
+    description: Every developer has their own age keypair.
+    cells:
+      - "The runner's own private key, in GitHub Secrets as `CI_RUNNER_PRIVATE_KEY_B64`."
+      - Portal delivers the wrapped CI runner key.
+      - Portal decrypts server-side with its recipient keys.
+      - The dispatch token carries the CI runner key.
+
+footnote: >-
+  **In `recipient` mode the CI runner is just another recipient.** Its public key
+  sits in `.sgit/recipients.yaml` with role `ci`, and every file's key is wrapped
+  to it in the stanza exactly as it is to a teammate's. Only the private half is
+  a secret — and which column you are in decides where that private half lives.
+  That is why the two axes are genuinely independent rather than approximately
+  so.

@@ -1,0 +1,177 @@
+---
+title: CI and CD
+description: Four ways to let a build read what it needs, in decreasing order of trust.
+---
+
+A build needs plaintext. That is the whole problem: everything CodeSeal does to
+keep source unreadable has to be undone, briefly, somewhere, by something you
+trust.
+
+The four modes differ in **who that something is**, and how long they hold the
+key. `sgit init --ci-mode <mode>` writes the matching workflow.
+
+<Callout type="tip" title="Deciding, rather than looking something up">
+This page is the reference — every flag, every command, in the order you run
+them. If you have not picked a mode yet, [the CI/CD
+page](/cicd) is the one to read first: it draws every message each mode sends,
+so you can see what you are trusting before you commit to it.
+</Callout>
+
+| mode | who decrypts | who sees plaintext |
+| --- | --- | --- |
+| `secrets` | your CI runner | your CI provider |
+| `portal-key` | your CI runner, with a 60-second single-use key | your CI provider |
+| `portal-build` | a Portal worker | your Portal host |
+| `portal-dispatch` | your CI runner, per build | your CI provider |
+
+<Callout type="warning" title="There is no mode where nobody sees it">
+Something has to compile your code, and that something reads it. Choosing a
+mode is choosing *who* — not avoiding the question. Anyone who tells you
+otherwise is selling something.
+</Callout>
+
+## Mode 1 — `secrets`
+
+The simplest. Key material lives in GitHub Secrets, the runner reads it,
+decrypts, builds, cleans up.
+
+<Steps>
+<Step title="The runner checks out ciphertext">
+An ordinary `actions/checkout`. What lands is blobs.
+</Step>
+<Step title="sgit is installed">
+With `SGIT_ONLY=1`, so the installer fetches the binary and nothing else.
+</Step>
+<Step title="The key is injected from GitHub Secrets">
+As an environment variable, never an argument.
+</Step>
+<Step title="run-secure decrypts, builds, cleans">
+`sgit run-secure -- ./build.sh`. Plaintext is removed afterwards whether the
+build passed or failed.
+</Step>
+</Steps>
+
+**Choose it when** your CI provider is already trusted with everything else, and
+you want the encryption to protect you against storage exposure rather than
+against the build.
+
+## Mode 2 — `portal-key`
+
+The runner never holds a long-lived key. It presents a bootstrap secret, gets a
+**single-use token with a sixty-second life**, redeems it for a wrapped runner
+key, unwraps it, and deletes it before the build starts.
+
+<Steps>
+<Step title="Exchange the bootstrap secret for a token">
+`sgit ci request-token`. The Portal verifies the secret against a stored hash
+and mints a token that lives sixty seconds in Redis.
+</Step>
+<Step title="Redeem the token for a wrapped key">
+`sgit ci runner-key`. Consumed atomically, so a replay finds it already spent.
+</Step>
+<Step title="Unwrap locally, then delete both keys">
+`sgit ci unwrap-key`, then `rm` — before `build.sh` runs. The Portal stores the
+key encrypted to a wrapper public key it does not hold, so it cannot read what
+it hands out.
+</Step>
+<Step title="run-secure decrypts, builds, cleans">
+`sgit run-secure -- ./build.sh`, the same finale as Mode 1.
+</Step>
+</Steps>
+
+```bash title="the four calls, in order"
+sgit ci request-token > .ci-token
+sgit ci runner-key > runner.wrapped.age
+sgit ci unwrap-key -i wrapper.age -I runner.wrapped.age -o runner.key
+rm -f runner.wrapped.age wrapper.age   # gone before the build starts
+sgit run-secure -- ./build.sh
+```
+
+Every message this exchanges is drawn out, arrow by arrow, on
+[the CI/CD page](/cicd#mode-portal-key).
+
+**Choose it when** you want central audit and rotation — someone can see which
+builds requested keys and when — while builds stay on your existing CI.
+
+## Mode 3 — `portal-build`
+
+Your CI provider never sees plaintext at all. It asks for a build; the Portal's
+worker clones, decrypts, builds and returns an artifact.
+
+<Steps>
+<Step title="The runner posts a commit SHA">
+`sgit build trigger`. That is all it sends, and all it knows.
+</Step>
+<Step title="A Portal worker does the work">
+Clone, decrypt with the admin key, delete the keys, run `build.sh`.
+</Step>
+<Step title="The artifact is uploaded">
+The runner polls `sgit build status` until the build reaches a terminal state,
+then collects the artifact.
+</Step>
+</Steps>
+
+**Choose it when** your CI provider is explicitly outside the trust boundary.
+Note what you have done, though: the Portal host is now inside it. This moves
+the trust, it does not remove it.
+
+## Mode 4 — `portal-dispatch`
+
+The most involved, and the one that keeps the Portal's existence out of your CI
+configuration.
+
+<Steps>
+<Step title="Your push notifies the Portal">
+`sgit push` sends the commit SHA when `auto_on_push` is set. Note the
+direction — your machine talks to the Portal, and the workflow never does.
+</Step>
+<Step title="The Portal mints a token bound to that commit">
+Encrypted to the dispatch public key in the manifest, so only the runner
+holding the matching private key can open it.
+</Step>
+<Step title="The Portal calls GitHub">
+`workflow_dispatch`, with the encrypted token as an input. This is the whole
+point of the mode: the connection opens outward, so your workflow needs no
+Portal URL and no Portal credentials.
+</Step>
+<Step title="The runner unwraps and builds">
+`sgit ci unwrap-dispatch-token`, then `run-secure`. The token was valid for one
+commit and is now spent.
+</Step>
+</Steps>
+
+```bash title="triggering by hand, when you do not want auto_on_push"
+sgit ci dispatch --commit-sha $(git rev-parse HEAD)
+```
+
+Because `sgit push` dispatches, the Portal sees every change — the point if you
+need an audit trail that cannot be sidestepped by pushing from somewhere else.
+
+The reversed trigger direction is the part worth seeing rather than reading:
+[the diagram](/cicd#mode-portal-dispatch) makes it obvious in a way this
+paragraph does not.
+
+**Choose it when** you need per-build scoping and a complete audit trail, and
+builds must stay on your existing CI.
+
+## Which one
+
+Most teams should start at `secrets` and move only when they can say what
+they are moving *away from*.
+
+The honest ordering by what each protects against:
+
+- **Storage exposure at your Git host** — all four, equally. This is what
+  CodeSeal is for.
+- **A compromised CI provider** — only `portal-build`.
+- **A long-lived key sitting in CI configuration** — `portal-key` and
+  `portal-dispatch`.
+- **Not knowing what was built from what** — `portal-dispatch`.
+
+If the answer is only the first one, `secrets` is the right mode and the others
+are cost without benefit.
+
+## See also
+
+- [Commands](/guide/commands#ci-pipeline) — what the generated workflow calls
+- [Security model](/guide/security) — the threat model these modes sit inside

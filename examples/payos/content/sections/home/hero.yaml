@@ -1,0 +1,11 @@
+type: hero
+badge: Orchestration, not custody
+headline: Sell your software anywhere, without building a payments team
+subhead: A hosted pricing page, a checkout that speaks to 12 payment providers, license keys with anti-piracy enforcement, and a self-service customer portal — all from one dashboard, with zero payment code on your own website.
+cta:
+  - label: Get started
+    href: /guide/getting-started
+    style: primary
+  - label: Why PayOS
+    href: /why
+    style: ghost

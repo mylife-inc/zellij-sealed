@@ -1,0 +1,8 @@
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+.DS_Store
+
+# Written by `zellij prepare` from the content folder.
+public/_zellij/

@@ -1,0 +1,249 @@
+---
+title: Lab 2 — Documentation you already have
+description: MkDocs, Docusaurus or loose Markdown, brought across without losing the original.
+---
+
+**You have:** documentation, in some tool or none. **You will have:** the same
+words in a Zellij folder, checked, edited and published.
+
+**Needs:** `zel`, and a container runtime from step 4 onward.
+
+The original is never modified. Everything below writes into a **new folder**,
+so a conversion you dislike costs you the folder you delete.
+
+<Callout type="info" title="What runs today">
+Steps 1 to 5 all run. The only gap is step 6: `zel deploy` is still landing, so
+build with `zel build` and upload the folder with your host's own tool — the
+step says how.
+</Callout>
+
+<Steps>
+
+<Step title="Find out what you have">
+
+```bash title="terminal"
+zel detect ./docs
+```
+
+```
+mkdocs       MkDocs — mkdocs.yml with a nav tree  (certain)
+```
+
+Three answers are possible, and they lead to different steps:
+
+| Answer | Go to |
+| --- | --- |
+| A format, **certain** | Step 2 |
+| A format, **likely** | Step 2, and read the report carefully |
+| Nothing recognised | Step 3 — the AI route |
+
+Certainty matters. A folder with the tool's own config file is certain; one that
+merely looks like a default layout is not. `zel` will not guess between two
+plausible formats, because a wrong guess produces a conversion that is wrong in
+ways nobody notices for a month.
+
+```bash title="terminal"
+zel list formats
+```
+
+```
+docusaurus     Docusaurus — sidebars.js and a docs folder
+mkdocs         MkDocs — mkdocs.yml with a nav tree
+```
+
+Converters are compiled into the binary, so that is what *your* build can read.
+
+</Step>
+
+<Step title="Convert it">
+
+Take the plan first:
+
+```bash title="terminal"
+zel convert ./docs --out ./content --dry-run
+```
+
+Nothing is written. Read what it intends to do, then do it:
+
+```bash title="terminal"
+zel convert ./docs --out ./content
+```
+
+```
+Converting . as MkDocs — mkdocs.yml with a nav tree
+
+Would write 9 files into ../content:
+  01-guide/_sidebar.yaml
+  01-guide/index.mdx
+  01-guide/guide/install.mdx
+  01-guide/guide/configure.mdx
+  01-guide/api/index.mdx
+  01-guide/api/errors.mdx
+  site.yaml
+  pages.yaml
+  sections/home/hero.yaml
+
+2 thing(s) could not be carried over:
+  https://blog.acme.dev: "Blog" is an external link; sidebars hold pages. Add it to menu.yaml.
+  draft.md: on disk but absent from the navigation; not converted
+
+Note: Zellij also has marketing pages built from section types the source had
+no equivalent for. A landing page with one hero was written to build on; it is
+not a conversion of anything.
+```
+
+**Read those warnings.** They are the three things a conversion cannot do:
+
+- **A landing page.** Every one of these tools describes a documentation tree.
+  Zellij has that *and* marketing pages built from nineteen section types with
+  no equivalent in the source. You get a faithful guide folder and one hero to
+  build on.
+- **Links out of the sidebar.** A sidebar holds pages; an external link belongs
+  in `menu.yaml`.
+- **Pages the navigation never mentioned.** A page hidden from its own
+  navigation may have been hidden deliberately, so it is listed rather than
+  silently published.
+
+<Callout type="info" title="If Docusaurus computes its sidebar">
+`sidebars.js` is a JavaScript module. Most are data wearing JavaScript's
+clothes and read fine. One that calls `require()`, or maps over something, is
+not read at all — the converter falls back to the folder, names the construct
+that stopped it, and tells you the order is alphabetical rather than yours.
+
+Declining is deliberate. A sidebar half-read from a file it did not understand
+would look finished and be wrong.
+</Callout>
+
+Skip to step 4.
+
+</Step>
+
+<Step title="If nothing was recognised — the AI route">
+
+A folder of loose Markdown has no order, no grouping and no titles beyond the
+first heading. There is nothing to convert *from*, and inventing a structure
+would be a worse answer than saying so. `zel` says so, and points here.
+
+**Write the reference.**
+
+```bash title="terminal"
+zel context zellij.md
+```
+
+One self-contained file: the folder layout, the naming and routing rules, every
+field of every config file, all nineteen section types with their defaults and
+allowed values, the MDX components, and a worked example. It is generated from
+the engine's schemas, and CI fails if it falls behind them — so it is never the
+stale reference that makes an agent write confident, invalid YAML.
+
+**Give it to an agent, with a prompt like this:**
+
+> Read `zellij.md`. It describes a documentation site format.
+>
+> Convert everything under `./notes` into a Zellij content folder at
+> `./content`:
+>
+> - one guide folder, with a page per topic and a `_sidebar.yaml` ordering them
+>   the way a reader should meet them, not alphabetically
+> - `site.yaml` with the site name "Acme" and the `cupertino` theme
+> - `pages.yaml` with a landing page: a hero, a feature grid, and a CTA banner
+> - keep the original wording; do not summarise or rewrite
+>
+> Then run `zel check ./content` and fix everything it reports until it passes.
+
+**That last line is the point.** An agent with a precise schema and a validator
+that fails loudly converges quickly. An agent with prose and no way to check
+itself does not.
+
+```bash title="terminal"
+zel check ./content
+```
+
+</Step>
+
+<Step title="Look at it">
+
+```bash title="terminal"
+zel dev ./content --open
+```
+
+Read a few pages. Converted prose usually needs three things:
+
+- **The landing page.** It has one placeholder hero. See
+  [Sections](/sections) for the other eighteen.
+- **The sidebar order.** Fine if it came from a `nav` tree; alphabetical if it
+  came from a folder.
+- **Anything the report listed.** External links into `menu.yaml`, pages you
+  meant to keep.
+
+</Step>
+
+<Step title="Build it once, before you delete anything">
+
+<Callout type="warning" title="check does not compile MDX">
+`zel check` validates the content model — links, section types, sidebar
+entries. It does not compile your Markdown.
+
+Zellij compiles guide pages as MDX, which is Markdown plus JSX: `{` opens an
+expression and `<` opens a tag. Prose written for MkDocs has never had to care,
+so `set {timeout} to <n> seconds` is good Markdown and a syntax error here.
+
+The converter escapes both where they would be read as code and leaves fenced
+blocks alone. It is careful, not infallible. **A converted folder can pass
+`check` and still fail to build.**
+</Callout>
+
+```bash title="terminal"
+zel build ./content
+```
+
+If that succeeds, the conversion is sound. Now you can delete the original —
+and not before.
+
+</Step>
+
+<Step title="Publish">
+
+Same as [Lab 1, step 6](/guide/quickstart/from-scratch) — a static site on
+Netlify, or a container image. The shortest version of each:
+
+```bash title="terminal"
+# a folder for a CDN
+zel build ./content --out dist
+netlify deploy --prod --dir dist
+
+# or a container
+zel image build ./content --tag acme-docs:v1
+zel image run acme-docs:v1
+```
+
+`zel deploy netlify ./content` will collapse the first pair once it lands.
+
+</Step>
+
+</Steps>
+
+## What each source gives you
+
+| From | Comes across | Does not |
+| --- | --- | --- |
+| MkDocs | `nav` tree, `site_name`, `site_description`, all pages | Theme, plugins, macros |
+| Docusaurus | Declarative `sidebars.js`, categories, nesting, all docs | `docusaurus.config.js` theming, React components in MDX |
+| Loose Markdown | Nothing automatic — use the AI route | — |
+
+In every case the landing page is yours to build. That is not a gap in the
+converter; it is the part Zellij has that the source did not.
+
+## Next
+
+<CardGrid>
+  <Card title="Build the landing page" href="/sections" icon="layout-grid">
+    Nineteen section types, with previews.
+  </Card>
+  <Card title="Convert, in detail" href="/cli/convert" icon="terminal">
+    Every option, and exactly what each converter reads.
+  </Card>
+  <Card title="Publish on every push" href="/guide/quickstart/existing-repo" icon="git-branch">
+    Now that the folder exists, let CI deploy it.
+  </Card>
+</CardGrid>

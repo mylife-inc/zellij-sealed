@@ -1,0 +1,279 @@
+---
+title: RD · Recipient + Dispatch
+description: Keys on your machine, builds on GitHub, triggered by sgit push. The recommended combination.
+---
+
+**Every developer has their own keypair. No decryption key ever lives on
+GitHub. `sgit push` starts the build and sends the key material with it,
+sealed, for that one build.**
+
+The recommended pair, and the only one where the two properties people usually
+want hold at the same time: *per-person access* and *no long-lived decryption
+key on the platform*.
+
+<Callout type="info" title="What it costs, before you start">
+Your machine needs a GitHub token permanently — every build you trigger is an
+API call. The other modes need one only at setup.
+
+Pick which secret you would rather have long-lived: a scoped, revocable token
+on your laptop, or a key on GitHub that decrypts your source. There is no
+arrangement with no long-lived secret anywhere.
+</Callout>
+
+## 1 · Create the token
+
+Do this first. `sgit init` uploads the secrets your workflow reads, and without
+a token it can set up everything except the half that makes builds run.
+
+**GitHub → Settings → Developer settings → Fine-grained tokens → Generate new**
+
+| | |
+| --- | --- |
+| Repository access | Only select repositories → **this one** |
+| Contents | **Read and write** — so you can push |
+| Actions | **Read and write** — so `sgit push` can trigger builds |
+| Secrets | **Read and write** — so `init` can upload them |
+
+Metadata: read is added for you. Give it an expiry you will notice — `sgit
+doctor` warns before it lapses.
+
+```bash title="terminal"
+export GITHUB_PAT=github_pat_…
+```
+
+`GH_TOKEN` and `GITHUB_TOKEN` work too. If none is set and you are at a
+terminal, `init` will offer to take it and store it for you.
+
+<Callout type="tip" title="Push over SSH? You still need this">
+An SSH remote authenticates pushes without a token — but provisioning and
+dispatch are REST calls, and those need one regardless.
+</Callout>
+
+## 2 · Seal the repository
+
+From the root of an existing Git repository:
+
+```bash title="terminal"
+sgit rd
+```
+
+`rd` is the shorthand for this pair, and takes every flag `init` takes.
+Spelled out, it is:
+
+```bash title="the same thing, in full"
+sgit init --mode recipient --ci-mode portal-dispatch
+```
+
+It asks one question — the project name, defaulted from the directory — and
+does the rest:
+
+```text title="output"
+Admin keypair generated.
+Public key (committed to manifest): age1ph3c3y660cerffgujpfu28ja3rp0k77…
+  admin private key → $CODESEAL/demo/admin.key
+
+Your identity: $CODESEAL/demo/identity.age
+  public key:  age1wt06z4uzwknw7qxcz6g8trhjk2cmxwsavkwpxl24mtjh9q7c34nqq…
+
+It is outside the repository on purpose — it can never be
+committed by accident. Back up $CODESEAL and you keep the
+ability to read everything you have encrypted.
+
+Dispatch keypair (CI Mode 4):
+  private → $CODESEAL/demo/dispatch.key
+  public  → committed to the manifest
+
+CI runner keypair:
+  private → $CODESEAL/demo/ci-runner.key
+  public  → registered as recipient `ci-runner`
+  sealed  → .sgit/ci-runner.age (readable by every recipient)
+```
+
+**Four keys, none of them in your repository:**
+
+| file | what it is |
+| --- | --- |
+| `admin.key` | the master key — adds and removes recipients |
+| `identity.age` | yours; what decrypts your files |
+| `ci-runner.key` | the runner's; rides inside each dispatch token |
+| `dispatch.key` | unwraps that token; uploaded to GitHub |
+
+All `0600`. A key in the working tree is one `git add -A` from being published,
+so none of them are there.
+
+**And in the repository** — `init` lists this too, because it is a lot to do
+silently:
+
+```text title="output, continued"
+In the repository:
+  .sgit/manifest.yaml      what is protected, and how
+  .sgit/recipients.yaml    who can decrypt
+  .gitignore               managed block — keeps plaintext out of commits
+  .gitattributes           managed block — marks blobs binary, no diff/merge
+  .github/workflows/codeseal-portal-dispatch.yml    the only workflow for this mode
+  build.sh                 your build steps go here
+
+Git hooks installed (.git/hooks — never committed):
+  pre-commit     refuses a commit that would include plaintext
+  pre-push       re-checks before anything leaves the machine
+  post-checkout  decrypts what the new branch protects
+  post-merge     the same, after a merge brings new blobs
+```
+
+Plus `.sgit/ci-runner.age` — the runner key wrapped to every recipient, which
+is what lets a teammate trigger builds without anyone sending them a key.
+
+<Callout type="info" title="The hooks are the safety net, and they are not committed">
+Git hooks live in `.git/hooks`, which is never part of a commit. So they
+protect *your* clone and nobody else's: a teammate who clones the repository
+gets no hooks until they run `sgit init` or `sgit onboard` themselves.
+
+Encryption does not depend on them — `sgit commit` and `sgit push` do the same
+checks. The hooks are there for the times you use plain `git` out of habit.
+</Callout>
+
+<Callout type="tip" title="One workflow, not four">
+Only the workflow for the mode you chose is written. Earlier versions wrote all
+four, and since three of them trigger on push, every push ran three builds that
+failed on missing secrets. Switching modes — edit `ci.mode`, run `sgit
+workflows` — swaps the file and removes the old one.
+</Callout>
+
+<Callout type="info" title="If it says the secrets were not uploaded">
+```
+No GitHub credential, so the secrets were not uploaded.
+  Run `sgit auth`, then `sgit ci provision`.
+```
+
+Nothing is broken — that step is postponed, not lost. Do those two and carry
+on. The same applies if you had no remote yet.
+</Callout>
+
+## 3 · Check GitHub is ready
+
+```bash title="terminal"
+sgit ci verify
+```
+
+```
+mylife-inc/demo is ready to build.
+```
+
+It asks GitHub what it actually has: a working credential, and
+`CODESEAL_DISPATCH_PRIVATE_KEY` present by name. That secret unwraps a dispatch
+token and decrypts nothing on its own — which is why it can sit on GitHub
+without giving anything away.
+
+## 4 · Protect something
+
+```bash title="terminal"
+sgit add-sensitive src/private
+sgit encrypt
+```
+
+Directory selections expand into individual file entries, so what is protected
+stays explicit as the tree grows.
+
+```bash title="terminal"
+git status --short
+```
+
+The plaintext is gitignored; `.sgit/store/` holds the ciphertext.
+
+<Callout type="warning" title="A file already committed in plaintext is refused">
+`add-sensitive` checks Git history and stops if the path is already in it —
+encrypting from here would leave the plaintext in every old commit while
+looking protected. See [`sgit history-rewrite`](/guide/commands).
+</Callout>
+
+## 5 · The everyday loop
+
+```bash title="terminal"
+sgit add -s src/private/payment.rs
+sgit commit -- -m "protect payments"
+sgit push origin main
+```
+
+```
+sgit push: auto-dispatch firing for branch main…
+sgit ci dispatch: queued build 018f2a…
+                 view at https://github.com/mylife-inc/demo/actions
+```
+
+`sgit push` pushes ciphertext, then calls `workflow_dispatch` with a token
+carrying the runner key, encrypted to the dispatch public key. The runner opens
+it with the secret from step 2, decrypts, builds, and scrubs.
+
+To fire on every push, set it once:
+
+```yaml title=".sgit/manifest.yaml"
+dispatch:
+  auto_on_push:
+    enabled: true
+    branches: [main]
+```
+
+<Callout type="warning" title="The first dispatch often 404s, and it is fine">
+`workflow_dispatch` only works once the workflow is on the remote's default
+branch — and your first push puts it there a second before the call goes out.
+GitHub has not registered it yet, and says so unhelpfully.
+
+Wait a moment and run `sgit ci dispatch`. Once per repository.
+</Callout>
+
+## 6 · Add a second developer
+
+**They** clone and generate an identity:
+
+```bash title="terminal"
+sgit onboard --offline
+```
+
+```
+Identity written to $CODESEAL/demo/identity.age (mode 0600)
+Public key:   age16yxpfma9c70dt2g2szv4lzz4…
+```
+
+**You** add them:
+
+```bash title="terminal"
+export SGIT_ADMIN_IDENTITY=$(cat $CODESEAL/demo/admin.key)
+sgit rekey add-recipient bob age16yxpfma9c70dt2g2szv4lzz4… developer
+```
+
+Every file's key is unwrapped with the admin key and rewrapped for Bob. The
+ciphertext does not change — only the small stanza beside it. **The runner key
+is rewrapped at the same time**, so Bob's first `sgit push` fetches it from the
+repository:
+
+```
+Fetched the CI runner key → $CODESEAL/demo/ci-runner.key
+```
+
+Nothing was sent between you. Bob needs his own token from step 1 — his GitHub
+account, his permissions.
+
+Removing him is the same in reverse, and takes the runner key with it.
+
+<Callout type="tip" title="This is what the admin key is for">
+Adding and removing people is the only thing it does, and it is the one key
+that cannot be regenerated: lose it and nobody can ever be granted access
+again. It is stored rather than printed for that reason.
+</Callout>
+
+## What you end up with
+
+| | |
+| --- | --- |
+| On GitHub | ciphertext, and one key that decrypts nothing by itself |
+| On your machine | every key, in one backed-up directory |
+| Adding a teammate | a rewrap; no shared secret changes |
+| Removing one | the same, and their key stops working |
+| To start a build | you, from a terminal, with a token |
+
+## See also
+
+- [PD](/quickstart/pd) — the same trigger model with one shared passphrase
+- [RS](/quickstart/rs) — per-developer keys, but builds start on their own
+- [CI/CD](/cicd) — every mode's message flow, drawn
+- [Security model](/guide/security) — what this protects against, and what it does not

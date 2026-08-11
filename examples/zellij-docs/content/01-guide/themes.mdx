@@ -1,0 +1,140 @@
+---
+title: Themes
+description: Fourteen glazes, one token system, and no component that knows about any of them.
+---
+
+Set one word:
+
+```yaml title="site.yaml"
+theme: cupertino
+```
+
+The theme picker in the bar above changes it live. That is the fastest way to
+understand what a theme actually does here — every page on this site restyles,
+including this one.
+
+## The fourteen
+
+| Name | What it is |
+| --- | --- |
+| `midnight` | Dark, electric accent, tight geometry — a product-tool aesthetic. |
+| `paper` | Light, warm, editorial serif headings over a cream page. |
+| `terracotta` | Warm Moroccan palette with generous curves — the Shebka house style. |
+| `mono` | Austere black and white with a single hot accent and brutalist edges. |
+| `aurora` | Dark with soft gradient glows and glassy surfaces. |
+| `slate` | Cool corporate blue-grey — enterprise-safe and unfussy. |
+| `forest` | Deep greens, natural and calm. |
+| `sunburst` | Light and high-energy, playful radius and a hot warm accent. |
+| `carbon` | Near-black developer-tool aesthetic with monospace-flavoured headings. |
+| `porcelain` | Ultra-minimal light, hairline borders, quiet luxury. |
+| `cupertino` | Very large tight headlines, centred compositions, huge breathing room. |
+| `studio` | Editorial creative studio — warm paper, monochrome type, a luminous violet. |
+| `iris` | Bright enterprise SaaS — near-white neutrals, roomy surfaces, a violet brand. |
+| `meridian` | Warm cream over deep navy ink with an electric blue — calm and human. |
+
+## What a theme controls
+
+A theme is a token set, emitted as CSS custom properties. No component contains
+a colour, a font, a radius or a duration.
+
+<Tabs>
+<Tab label="Palette">
+
+Per colour mode: `bg`, `fg`, `muted`, `surface`, `border`, `accent`,
+`accent-fg`, `inverted-bg`, `inverted-fg`.
+
+```css
+--zellij-bg: #ffffff;
+--zellij-accent: #0071e3;
+--zellij-inverted-bg: #1d1d1f;
+```
+
+</Tab>
+<Tab label="Geometry and type">
+
+```css
+--zellij-radius / --zellij-radius-button / --zellij-radius-media
+--zellij-container / --zellij-section-gap / --zellij-nav-height
+--zellij-font-heading / --zellij-font-body / --zellij-font-mono
+--zellij-tracking / --zellij-heading-weight / --zellij-display-scale
+```
+
+`display-scale` is what makes `cupertino` headlines enormous and `porcelain`
+headlines quiet, without either theme touching a component.
+
+</Tab>
+<Tab label="Shadow and motion">
+
+```css
+--zellij-shadow-card / --zellij-shadow-float
+--zellij-motion-duration / --zellij-motion-ease
+--zellij-motion-distance / --zellij-motion-stagger
+```
+
+</Tab>
+</Tabs>
+
+## Light and dark
+
+```yaml title="site.yaml"
+mode: system     # light | dark | system
+```
+
+Every theme defines both palettes. `system` follows the operating system and
+can still be overridden by the visitor with `nav.themeToggle: true`; the choice
+is remembered.
+
+Code blocks follow the mode too — Shiki emits both palettes at build time and a
+CSS variable picks between them, so switching is instant and no highlighter
+runs in the browser.
+
+## Overrides
+
+Tweak a theme without forking it:
+
+```yaml title="site.yaml"
+overrides:
+  accent: "#E86A33"
+  accentForeground: "#ffffff"
+  radius: lg              # none | sm | md | lg | xl
+  fontHeading: "Georgia, serif"
+  fontBody: "system-ui, sans-serif"
+```
+
+Values are validated before they reach the stylesheet. They come from a config
+file rather than a request, but they are interpolated into CSS, so they are
+checked rather than trusted.
+
+## The runtime picker
+
+```yaml title="site.yaml"
+nav:
+  themeSwitcher: true
+```
+
+<Callout type="info" title="Opt-in, because it changes what ships">
+Normally Zellij emits only the active theme's tokens. A runtime switcher needs
+every theme present in the page. That costs about 2.4KB brotli for all
+fourteen, against 569 bytes for one — small enough that on-demand loading would
+be the wrong trade, and it is what lets each swatch in the picker paint itself
+in the theme it names.
+</Callout>
+
+## Per-page themes
+
+A page may override the site theme:
+
+```yaml title="pages.yaml"
+- name: launch
+  theme: aurora
+  sections: [launch/hero]
+```
+
+Use it sparingly. A site where every page looks different is the problem Zellij
+exists to prevent.
+
+## Adding a theme
+
+Themes live in the engine, not in content. A new one is a token set added to
+`THEMES` and a name added to `THEME_NAMES` — no component changes, and a test
+asserts every theme emits every token and clears the contrast floor.

@@ -1,0 +1,120 @@
+---
+title: PS · Passphrase + Secrets
+description: One shared passphrase in GitHub Secrets. The fewest moving parts, and the most trust in GitHub.
+---
+
+**One passphrase, shared by the team, stored permanently in GitHub Secrets.
+Builds start on push. Nothing runs locally.**
+
+The simplest of the eight, and the one that asks the most of your CI provider.
+Right for a solo project, or a team that already trusts GitHub Actions with
+everything else it holds.
+
+## 1 · Create the token
+
+Do this first. `sgit init` uploads the secrets your workflow reads, and without
+a token it sets up everything except the half that makes builds run.
+
+**GitHub → Settings → Developer settings → Fine-grained tokens → Generate new**
+
+| | |
+| --- | --- |
+| Repository access | Only select repositories → **this one** |
+| Contents | **Read and write** — so you can push |
+| Secrets | **Read and write** — so `init` can upload them |
+
+Metadata: read is added for you.
+
+```bash title="terminal"
+export GITHUB_PAT=github_pat_…
+```
+
+`GH_TOKEN` and `GITHUB_TOKEN` work too. If none is set and you are at a
+terminal, `init` offers to take it and stores it per project.
+
+## 2 · Choose the passphrase, then seal
+
+```bash title="terminal"
+export SGIT_KEY="$(openssl rand -base64 32)"
+sgit init --mode passphrase --ci-mode secrets
+```
+
+**On your disk:**
+
+```text title="$CODESEAL/<project>/"
+passphrase      # a copy of $SGIT_KEY, so it outlives the shell
+```
+
+One file. This mode has no admin key, no identity, no dispatch key — and one
+secret to lose.
+
+**In the repository:** the manifest naming `SGIT_KEY`, and an `on: push`
+workflow.
+
+## 3 · Check GitHub is ready
+
+`sgit init` uploaded `SGIT_KEY` as it went — that is what the token in step 1
+was for. Confirm it landed:
+
+```bash title="terminal"
+sgit ci verify
+```
+
+```
+mylife-inc/demo is ready to build.
+```
+
+**GitHub now holds the passphrase that decrypts your source**, indefinitely. Anyone who can read your Actions secrets can read your code.
+
+<Callout type="info" title="If init said the secrets were not uploaded">
+Run `sgit ci provision`. Nothing is broken — that step is postponed, not lost,
+and `verify` tells you when it is done.
+</Callout>
+
+## 4 · Protect something
+
+```bash title="terminal"
+sgit add-sensitive src/private
+sgit encrypt
+```
+
+## 5 · The everyday loop
+
+```bash title="terminal"
+sgit add -s src/private/payment.rs
+sgit commit -- -m "protect payments"
+sgit push origin main
+```
+
+Push, and GitHub does the rest.
+
+## Adding and removing people
+
+Adding: give them the passphrase.
+
+Removing: change it, re-encrypt, re-provision, tell everyone.
+
+```bash title="terminal"
+export SGIT_KEY="$(openssl rand -base64 32)"
+sgit encrypt --force
+sgit ci provision
+```
+
+Their old copy still opens everything they already cloned. There is no way
+around that with a shared secret — which is what [RS](/quickstart/rs) fixes for
+the same triggering model.
+
+## What you end up with
+
+| | |
+| --- | --- |
+| On GitHub | ciphertext, **and the passphrase that decrypts it** |
+| On your machine | a copy of the passphrase |
+| Adding a teammate | tell them |
+| Removing one | rotate everything |
+| To start a build | nothing — GitHub does it |
+
+## See also
+
+- [PD](/quickstart/pd) — same passphrase, never given to GitHub
+- [RS](/quickstart/rs) — same triggering, per-developer keys

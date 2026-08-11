@@ -1,0 +1,43 @@
+---
+title: Configuration overview
+description: How Lumen reads configuration and which settings matter most.
+---
+
+# Configuration overview
+
+Lumen reads configuration from environment variables first, then `lumen.yaml`,
+then built-in defaults. Environment variables always win.
+
+## Core settings
+
+| Setting | Environment variable | Default |
+| --- | --- | --- |
+| Database URL | `LUMEN_DATABASE_URL` | — (required) |
+| Listen port | `LUMEN_PORT` | `8080` |
+| Log level | `LUMEN_LOG_LEVEL` | `info` |
+| Retention window | `LUMEN_RETENTION_DAYS` | `365` |
+
+## Example
+
+```yaml title="lumen.yaml" {2,5-6}
+server:
+  port: 8080
+  logLevel: info
+
+retention:
+  days: 365
+```
+
+<Callout type="danger">
+Lowering `retention.days` deletes history beyond the new window on the next
+maintenance run. The deletion is permanent.
+</Callout>
+
+<CardGrid>
+  <Card title="Database setup" href="/guide/config/database">
+    Connection pooling, migrations, and read replicas.
+  </Card>
+  <Card title="Quickstart" href="/guide/quickstart">
+    Back to the ten-minute setup.
+  </Card>
+</CardGrid>

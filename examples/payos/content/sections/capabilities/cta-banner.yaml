@@ -1,0 +1,7 @@
+type: cta-banner
+headline: Try it against the mock provider
+body: No real account needed to see the whole pipeline work.
+cta:
+  - label: Getting started
+    href: /guide/getting-started
+    style: primary

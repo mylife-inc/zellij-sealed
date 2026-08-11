@@ -1,0 +1,25 @@
+title: Guide
+order: 1
+description: Install CodeSeal, seal a repository, and ship from CI.
+
+nav:
+  - label: Start here
+    items:
+      - index
+      - install
+
+  - label: Everyday use
+    items:
+      - commands
+      - teams
+
+  - label: Shipping
+    items:
+      - ci
+
+  - label: Understand
+    items:
+      - security
+      - portal
+      - reference
+      - faq

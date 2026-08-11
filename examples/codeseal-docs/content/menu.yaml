@@ -1,0 +1,38 @@
+# The whole top bar. Search and the light/dark toggle are built in and
+# configured under `nav:` in site.yaml.
+
+- name: Guide
+  page: guide
+
+- name: Quickstart
+  page: quickstart
+
+- name: Start here
+  items:
+    - name: Install
+      url: /guide/install
+      description: One binary, on your PATH.
+      icon: download
+    - name: Quickstart
+      url: /quickstart
+      description: Eight labs — pick your pair of modes.
+      icon: rocket
+
+- name: Understand
+  items:
+    - name: Security model
+      url: /guide/security
+      description: What it protects, and what it does not.
+      icon: shield-check
+    - name: The Portal
+      url: /portal
+      description: Self-hosted key custody, and builds GitHub cannot see.
+      icon: server
+    - name: CI and CD
+      url: /cicd
+      description: Four modes, in decreasing order of trust.
+      icon: git-branch
+    - name: FAQ
+      url: /guide/faq
+      description: The questions that come up first.
+      icon: help-circle

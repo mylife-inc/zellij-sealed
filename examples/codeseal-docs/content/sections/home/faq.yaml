@@ -1,0 +1,42 @@
+type: faq
+id: faq
+eyebrow: Questions
+heading: The ones people actually ask.
+subhead: >-
+  The full set lives in [the FAQ](/guide/faq). These are the ones that come up
+  before anyone installs anything.
+items:
+  - question: Does CodeSeal replace Git?
+    answer: >-
+      No. It wraps Git and uses normal Git storage for the encrypted blobs. Your
+      hosting provider, your workflow and your tooling all stay exactly as they
+      are.
+  - question: Are the encrypted files committed?
+    answer: >-
+      Yes — everything under `.sgit/store/` is committed and pushed. The
+      plaintext originals stay local, ignored through a managed `.gitignore`
+      block.
+  - question: Can I add CodeSeal to a project that already exists?
+    answer: >-
+      Yes. `sgit init --wizard` walks through it interactively. One caveat worth
+      reading twice: anything already pushed in plaintext stays in Git history
+      until you rewrite it, which is what `sgit history-rewrite` is for.
+  - question: Passphrase mode or recipient mode?
+    answer: >-
+      Passphrase mode is one shared secret for the team, and it is the simplest
+      thing that works. Recipient mode gives every person their own keypair, so
+      you can add, remove and rotate people without re-encrypting the
+      repository. Use passphrase mode for solo work; move to recipient mode the
+      moment more than one human needs access you might later want to withdraw.
+  - question: Can my CI still build the project?
+    answer: >-
+      Yes, in four modes of decreasing runner trust — from handing the runner
+      key material outright, to the Portal doing the build so the runner never
+      sees plaintext at all. [The CI guide](/guide/ci) lays out what each mode
+      trusts with what.
+  - question: Can the build provider see plaintext?
+    answer: >-
+      In three of the four modes, yes — the runner decrypts, so it can read what
+      it decrypted. In portal-build mode your CI provider never sees plaintext,
+      but the Portal worker does. CodeSeal protects source *at rest*; pick the
+      mode matching who you are willing to trust with the build itself.

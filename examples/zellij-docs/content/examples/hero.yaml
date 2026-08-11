@@ -1,0 +1,10 @@
+type: hero
+badge: Zellij 1.0
+headline: A folder of content is a website
+subhead: Write YAML and MDX. Zellij renders the rest.
+cta:
+  - { label: Get started, href: /guide, style: primary }
+  - { label: Browse sections, href: /sections, style: ghost }
+visual: assets/hero.png
+visualStyle: floating
+titleGradient: [accent, fg]

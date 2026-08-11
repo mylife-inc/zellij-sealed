@@ -1,0 +1,109 @@
+---
+title: The menu
+description: Declaring the top bar, and what happens when you don't.
+---
+
+`menu.yaml` declares the items in the top bar and nothing else. Search, the
+theme picker, the light/dark toggle, the CTA and the announcement bar are
+configured under `nav:` in `site.yaml` — they are chrome, not navigation.
+
+```yaml title="menu.yaml"
+- { name: Features, page: features }
+- { name: Security, url: /features#security }
+
+- name: Solutions
+  items:
+    - { name: For startups, page: solutions/startups }
+    - { name: For enterprise, page: solutions/enterprise }
+
+- name: Resources
+  items:
+    - name: Learn
+      items:
+        - { name: Guide, page: guide, description: Install and operate., icon: book }
+        - { name: Blog, url: "https://blog.example.com" }
+    - name: Company
+      items:
+        - { name: About, page: about, icon: users }
+```
+
+## One target per item
+
+Each item declares **exactly one** of these:
+
+| Key | Target |
+| --- | --- |
+| `page:` | A sections page or guide folder, by name. Validated at build time. |
+| `url:` | Any literal href — external, or internal when it needs an anchor. Not validated. |
+| `items:` | Children, which makes this a drawer. |
+
+A `page:` that names nothing fails the build, listing what exists:
+
+```
+Broken menu references (1):
+  · menu › Docs: "Docs" → page: guides
+    No page or guide folder is named "guides".
+    Available: about, features, guide, pricing, solutions/startups
+```
+
+`url:` is never validated, because the engine has no way to check it. Use
+`page:` wherever you can — it is the only form that survives a rename.
+
+## Drawers and panels
+
+A drawer whose children are plain leaves renders as a compact dropdown. A
+drawer with at least one child that has *its own* `items` renders as a
+full-width panel with headed columns, which is what the `Resources` example
+above produces.
+
+Optional per item: `description` and `icon` (a [lucide](https://lucide.dev)
+name, kebab-case; an unknown one fails the build), and `wide: true` to force
+the panel form.
+
+<Callout type="info" title="Leaving the site is visible">
+An item whose `url:` is external gets an outbound icon and opens in a new tab,
+so the visitor keeps their place. `newTab: false` overrides that.
+</Callout>
+
+## When there is no menu.yaml
+
+One is derived — the **union** of everything reachable:
+
+1. every entry in `pages.yaml`, in file order
+2. every guide folder not already named above
+
+The union matters. Deriving from `pages.yaml` alone would leave guide folders
+with no way in, and a site that quietly hides half of itself is worse than one
+with an untidy bar.
+
+Past `menuOverflowAfter` items — seven by default, set it in `site.yaml` — the
+remainder collapses into one trailing drawer. A book with thirty chapters gets
+a usable bar with no configuration at all.
+
+<Callout type="warning" title="Declaring a menu turns derivation off">
+When `menu.yaml` exists it is the whole bar. Nothing is appended, so a folder
+you forgot to list will not appear. That is deliberate: a declared menu is a
+decision, and the engine should not second-guess it.
+</Callout>
+
+## Sites that share an owner
+
+`brand.logo.href` is how a family of sites belongs to one company. Point it at
+the hub and the mark leaves for the hub, while `brand.title` becomes the way
+home within this site.
+
+```yaml title="site.yaml"
+brand:
+  logo:
+    src: assets/shebka.svg
+    alt: Shebka
+    href: https://shebka.com
+  title: PayOS
+```
+
+Omit `href` and the logo links to `/`, which is the single-site case; `title`
+is then unnecessary.
+
+This needs no session state and no query parameters, and it works for someone
+who arrived from a search result rather than from the hub — which is most
+people.

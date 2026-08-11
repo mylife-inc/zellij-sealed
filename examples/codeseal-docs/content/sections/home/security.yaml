@@ -1,0 +1,32 @@
+type: feature-grid
+id: security
+eyebrow: Security model
+heading: Honest about what we protect.
+subhead: >-
+  CodeSeal protects source *at rest* in remote Git storage. Both halves of that
+  sentence carry weight, so here is each one written out rather than implied.
+background: tinted
+columns: 3
+items:
+  - icon: shield-check
+    title: What it protects against
+    body: >-
+      Storage exposure at your Git host, whoever holds the keys to it.
+      Accidental plaintext pushes, because the workflow checks before it sends.
+      And any reader of the repository without a decryption key — to them the
+      protected files are noise.
+  - icon: alert-triangle
+    title: What it does not
+    body: >-
+      A CI provider handed key material can read what it decrypts, and so can a
+      deployment platform decrypting at build time. Nor does it help against a
+      developer who already holds a valid key, a compromised machine, or
+      plaintext already committed to history before you adopted it.
+  - icon: key-round
+    title: Two ways to hold the keys
+    body: >-
+      **Passphrase mode** is one shared secret — simple, but removing a
+      teammate means rotating it and re-encrypting everything. **Recipient
+      mode** gives each person an age X25519 keypair and wraps a fresh per-file
+      AES-256-GCM key to every authorised recipient. No shared secret exists,
+      so access is individual, auditable and revocable one person at a time.

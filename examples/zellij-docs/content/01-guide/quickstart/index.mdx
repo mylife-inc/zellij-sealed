@@ -1,0 +1,269 @@
+---
+title: Quickstart
+description: Install what you need, then pick the situation you are actually in and follow it end to end.
+---
+
+Four hands-on labs. Each starts where you are, ends with a site somebody else
+can read, and says what every command does before you run it.
+
+First, the two things they all need.
+
+## Before you start
+
+Zellij asks for very little, and it is worth being precise about what — "install
+the prerequisites" is where most tools lose people.
+
+| | Needed for | |
+| --- | --- | --- |
+| **A container runtime** | `check`, `dev`, `build`, `image` | Docker Desktop, Colima, Podman or Rancher Desktop |
+| `curl` and `tar` | The installer | Already on macOS, Linux and Windows 10+ |
+
+And what you do **not** need:
+
+- **Node.js, npm, a lockfile.** The engine is a Next.js application and it runs
+  inside the container. Nothing is installed on your machine.
+- **`docker-compose`.** One container at a time; nothing to compose.
+- **`gh`, the GitHub CLI.** `zel` never calls it.
+- **A container runtime at all**, if you only want to write and convert. `new`,
+  `explain`, `list`, `context`, `detect` and `convert` are native code with the
+  content model compiled in.
+
+### Installing a container runtime
+
+<Tabs>
+<Tab title="macOS">
+
+**Colima** is the smaller of the two options and has no licence conditions. It
+needs Homebrew, which is worth having anyway:
+
+```bash title="terminal"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew install colima docker
+```
+
+Then start it — **with resources, not the defaults**:
+
+```bash title="terminal"
+colima start --cpu 8 --memory 24 --mount-type virtiofs --disk 80
+```
+
+<Callout type="warning" title="Change those numbers for your machine">
+`colima start` on its own gives you 2 CPUs and 2 GB, and a site build on that is
+painful.
+
+| | |
+| --- | --- |
+| `--cpu` | Up to the cores you have — `sysctl -n hw.ncpu` says how many |
+| `--memory` | GB for the virtual machine, not for your Mac. Half your RAM is a reasonable ceiling |
+| `--disk` | GB, and it only grows as used. Raise it if you will run other containers |
+| `--mount-type virtiofs` | Much faster file sharing than the default. Worth it every time |
+
+The example suits a machine with 8 cores and 32 GB. On a 16 GB machine,
+`--cpu 4 --memory 8 --disk 60` is closer.
+
+These are fixed when the VM is created, so changing them later means
+`colima stop` and starting again with the new values.
+</Callout>
+
+**Docker Desktop** works equally well if you have it already, or if your
+organisation requires it. Nothing here needs one over the other.
+
+</Tab>
+<Tab title="Linux">
+
+Docker Engine, from your distribution or Docker's own script:
+
+```bash title="terminal"
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker "$USER"    # then log out and back in
+```
+
+Or **Podman**, which needs no daemon and no group membership:
+
+```bash title="terminal"
+sudo apt install podman    # or dnf, pacman, zypper
+```
+
+`zel` looks for `docker`, `podman` and `nerdctl`, in that order, so either works
+with no configuration.
+
+</Tab>
+<Tab title="Windows">
+
+**Docker Desktop with the WSL 2 backend.** Install WSL first if you have not:
+
+```powershell title="PowerShell (as administrator)"
+wsl --install
+```
+
+Then install Docker Desktop and enable WSL 2 integration in its settings.
+
+<Callout type="tip" title="Work inside WSL, not on the Windows filesystem">
+Put your content folder under `\\wsl$\Ubuntu\home\you\…` rather than `C:\`.
+Bind-mounting across the Windows filesystem boundary is several times slower —
+the difference between a build that takes one minute and four.
+</Callout>
+
+</Tab>
+</Tabs>
+
+### Start the image downloading now
+
+The base image is about 237 MB, and the first command that needs it will wait for
+it. Start it in the background while you do everything else:
+
+```bash title="terminal"
+docker pull ghcr.io/mylife-inc/zellij-base:latest &
+```
+
+It is a public image — no login, no account. By the time you have installed
+`zel` and written a page, it will be there.
+
+## Install `zel`
+
+`zel` is the Zellij CLI: a single native binary, with no runtime of its own.
+
+<Tabs>
+<Tab title="macOS and Linux">
+
+```bash title="terminal"
+curl -fsSL https://raw.githubusercontent.com/mylife-inc/releases/main/zellij/install.sh | sh
+```
+
+Works on **Apple Silicon and Intel Macs**, and on Linux **x86-64 and arm64** —
+the script reads `uname` and fetches the matching build. Five binaries are
+published; it picks yours.
+
+Pin a version, or install somewhere else:
+
+```bash title="terminal"
+ZEL_VERSION=v0.1.0 ZEL_INSTALL_DIR=/usr/local/bin \
+  curl -fsSL https://raw.githubusercontent.com/mylife-inc/releases/main/zellij/install.sh | sh
+```
+
+It installs to `~/.local/bin` by default, and says so if that is not on your
+PATH.
+
+</Tab>
+<Tab title="Windows">
+
+The installer is POSIX shell and does not run on Windows. There **is** a Windows
+binary; download it directly:
+
+1. Open [the releases page](https://github.com/mylife-inc/releases/releases?q=zellij)
+2. Download `zel-<version>-x86_64-pc-windows-msvc.zip`
+3. Verify it against the `.sha256` published beside it:
+
+```powershell title="PowerShell"
+Get-FileHash .\zel-v0.1.0-x86_64-pc-windows-msvc.zip -Algorithm SHA256
+```
+
+4. Extract `zel.exe` somewhere on your PATH
+
+<Callout type="tip" title="Or install it inside WSL">
+If you are using Docker Desktop with the WSL 2 backend — the recommended setup —
+run the macOS and Linux one-liner **inside WSL** instead. Then `zel`, your
+content and the container runtime are all on the same side of the filesystem
+boundary, which is faster and has fewer edges.
+</Callout>
+
+</Tab>
+</Tabs>
+
+<Callout type="info" title="What that script does">
+Detects your platform, finds the latest release, downloads the archive built for
+it, **verifies it against its published SHA-256**, and puts one binary in
+`~/.local/bin`. It writes nothing else and needs no privileges.
+
+Read it first if you would rather — about a hundred lines of POSIX shell, living
+beside the binaries it installs:
+[install.sh](https://github.com/mylife-inc/releases/blob/main/zellij/install.sh).
+</Callout>
+
+## Check it
+
+```bash title="terminal"
+zel --version
+zel doctor
+```
+
+```
+zel            0.1.0  (aarch64-apple-darwin)
+
+Container runtime
+  ✓ docker     28.0.4 via unix:///Users/you/.colima/default/docker.sock
+  · engine     ghcr.io/mylife-inc/zellij-base:latest  (local)
+
+Content
+  · none here — `zel new docs` writes one
+```
+
+Two ticks and you are ready. If the runtime line is missing, `doctor` names what
+is installed and what to do — see [`zel doctor`](/cli/doctor).
+
+If the engine line says *not pulled*, your `docker pull` has not finished. That
+is fine; the first build waits for it.
+
+---
+
+## Pick your lab
+
+<CardGrid>
+  <Card title="1 · Start from nothing" href="/guide/quickstart/from-scratch" icon="sparkles">
+    An idea and an empty folder. Scaffold a site, watch it in a browser while
+    you write, publish it. **~15 minutes.**
+  </Card>
+
+  <Card title="2 · Documentation you already have" href="/guide/quickstart/existing-docs" icon="arrow-right-left">
+    MkDocs, Docusaurus, or a pile of Markdown. Convert it — or have an AI agent
+    convert it — then edit and publish. **~20 minutes.**
+  </Card>
+
+  <Card title="3 · A new project, docs beside the code" href="/guide/quickstart/new-project" icon="folder-tree">
+    A repository with `docs/` and `product/` as siblings, and a pipeline that
+    turns the docs into a container image on every push. **~25 minutes.**
+  </Card>
+
+  <Card title="4 · A repository you already have" href="/guide/quickstart/existing-repo" icon="git-branch">
+    Code already on GitHub. Migrate the documentation in it and add the
+    pipeline. **~25 minutes.**
+  </Card>
+</CardGrid>
+
+### Which one is yours
+
+| If… | Go to |
+| --- | --- |
+| There is no documentation yet, and no repository to put it in | [Lab 1](/guide/quickstart/from-scratch) |
+| There is documentation, in some other tool or none | [Lab 2](/guide/quickstart/existing-docs) |
+| You are starting a codebase and want the docs to ship with it | [Lab 3](/guide/quickstart/new-project) |
+| The codebase exists and the docs need to catch up | [Lab 4](/guide/quickstart/existing-repo) |
+
+Labs 1 and 2 are about **writing**, and end with a published site. Labs 3 and 4
+are about **shipping from a repository**, and assume you have content already —
+from one of the first two, or the sample the scaffold writes.
+
+<Callout type="warning" title="Pre-1.0">
+Some `zel` commands are implemented and some are not. Every lab marks the steps
+that use one still landing, and gives the way round it. [The command
+reference](/cli) has the current state of each.
+</Callout>
+
+## One optional tool, for publishing
+
+Until [`zel deploy`](/cli/deploy) lands, uploading a built site to Netlify uses
+Netlify's own tool. It is the only thing in these labs that needs npm:
+
+```bash title="terminal"
+npm install -g netlify-cli
+netlify login
+```
+
+Labs 3 and 4 do not need it at all — they publish container images, which `zel`
+does on its own.
+
+## After a lab
+
+- [The content model](/guide/content-model) — what the files you edited are
+- [Sections](/sections) — the nineteen blocks a landing page is built from
+- [The `zel` reference](/cli) — every command in full

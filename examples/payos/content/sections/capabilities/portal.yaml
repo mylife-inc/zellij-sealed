@@ -1,0 +1,17 @@
+type: feature-grid
+id: portal
+heading: The customer portal and your backend
+columns: 2
+items:
+  - icon: mail
+    title: Magic-link portal
+    body: Passwordless and vendor-branded. Buyers see purchases and receipts, reveal and copy keys, manage machines, and cancel subscriptions.
+  - icon: webhook
+    title: Signed outbound webhooks
+    body: PayOS POSTs a signed event the moment it happens — `checkout.completed`, `subscription.renewed`, `license.issued`, `refund.succeeded` — so you never poll.
+  - icon: code
+    title: Query API with scoped keys
+    body: Create checkouts, read subscriptions and licenses, revoke a key.
+  - icon: shield-check
+    title: Entitlement checks
+    body: A single 'does this customer have access right now?' call your backend can lean on if it ever misses a webhook.

@@ -1,0 +1,124 @@
+---
+title: zel context
+description: The whole content model as one file, for handing to an AI agent.
+---
+
+<Callout type="tip" title="Available">
+Works today. Reads a reference compiled into the binary — no container, no
+network, no content folder.
+</Callout>
+
+```bash title="terminal"
+zel context zellij.md
+zel context                 # to stdout
+zel context --json          # the raw schemas
+```
+
+Writes one self-contained description of everything Zellij's content model is:
+
+- the folder layout, and what each file is for
+- the naming and routing rules — how `01-guide/quickstart.mdx` becomes `/guide/quickstart`
+- every field of `site.yaml`, `menu.yaml`, `pages.yaml` and `_sidebar.yaml`
+- all nineteen section types with their fields, defaults and allowed values
+- the MDX components available inside a guide page
+- a worked example: a small site, complete and valid
+
+## The problem it exists for
+
+You have a product and no documentation. Or notes, or a wiki export, or a folder
+of Markdown that [`zel detect`](/cli/detect) refuses to guess at because it has
+no structure to convert from.
+
+An AI agent is genuinely good at this job — turning prose into a structured
+folder is close to what they are best at — and genuinely bad at it without two
+things: a precise description of the target format, and a way to find out
+whether it got it right.
+
+This command is the first. [`zel check`](/cli/check) is the second.
+
+## Using it
+
+```bash title="terminal"
+zel context zellij.md
+```
+
+Then, to the agent:
+
+> Read `zellij.md`. It describes a documentation site format.
+>
+> Using the notes in `./notes`, write a Zellij content folder into `./content`:
+>
+> - one guide folder, with a page per topic and a `_sidebar.yaml` ordering them
+>   the way a reader should meet them, not alphabetically
+> - `site.yaml` with the site name "Acme" and the `cupertino` theme
+> - `pages.yaml` with a landing page: a hero, a feature grid, and a CTA banner
+> - keep the original wording; do not summarise or rewrite
+>
+> Then run `zel check ./content` and fix everything it reports until it passes.
+
+**The last line is the point.** An agent with a precise schema and a validator
+that fails loudly converges in two or three rounds. The same agent without the
+validator produces something plausible, and you find the problems yourself, one
+at a time, over a week.
+
+<Callout type="tip" title="Say what you want it not to do">
+"Keep the original wording; do not summarise" earns its place. Left to itself an
+agent will improve your prose while restructuring it, and you will not notice
+until somebody asks why a page says something different from what it used to.
+</Callout>
+
+## Why it is generated rather than written
+
+The file comes from the engine's schemas, and CI fails if the copy compiled into
+the binary falls behind them.
+
+That guarantee is the whole value. **A stale reference is worse than none.** An
+agent handed an outdated description writes YAML that is confident, internally
+consistent, and wrong — and because it looks right it survives review, and
+surfaces as a failed build in your repository for a reason nobody involved can
+see.
+
+A prose description maintained by hand would be stale within a month. This one
+cannot be.
+
+## It is also just a document
+
+If you are learning the model and would rather read one file than a website:
+
+```bash title="terminal"
+zel context | less
+```
+
+It is written to be read by a person as well as parsed by a model — the folder
+layout with explanations, the rules stated rather than implied, and a complete
+example at the end.
+
+## `--json`
+
+```bash title="terminal"
+zel context schema.json --json
+```
+
+The raw JSON Schemas instead of the prose reference. For building tooling: an
+editor completion, a form generator, a validator in another language.
+
+**For an agent, prefer the prose file.** The schemas describe what is valid; they
+do not carry the conventions — that a guide folder's numeric prefix is an
+ordering instruction and not part of the route, that a sidebar entry naming a
+missing page is a warning rather than an error, that `index.mdx` is the folder's
+landing page. Those are the things an agent gets wrong, and they are in the prose
+and not in the schema.
+
+## Options
+
+| | | |
+| --- | --- | --- |
+| `[file]` | Where to write | stdout |
+| `--json` | Raw JSON Schemas instead of the reference | off |
+
+## See also
+
+- [`zel explain`](/cli/explain) — one type rather than all of them
+- [`zel check`](/cli/check) — what holds the agent to account
+- [Lab 2](/guide/quickstart/existing-docs) — this route, step by step
+- [Converting existing docs](/guide/converting) — when the source *does* have structure

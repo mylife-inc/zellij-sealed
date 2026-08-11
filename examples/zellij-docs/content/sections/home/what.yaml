@@ -1,0 +1,39 @@
+type: bento-grid
+id: what
+heading: What you write, and what you get
+subhead: Four files and a folder of prose. Everything else is the engine's problem.
+items:
+  - title: A folder that describes itself
+    body: >-
+      `site.yaml` for identity, `menu.yaml` for the bar, `pages.yaml` for pages
+      composed from named sections. Point a build at the folder and that is all
+      it needs.
+    image: assets/bento-model.png
+    span: large
+    href: /guide/content-model
+  - title: Sections are files
+    body: One file per band of content, reusable across pages.
+    icon: layers
+    span: normal
+    href: /sections
+  - title: Docs come free
+    body: Drop a `_sidebar.yaml` in any folder.
+    icon: book-open
+    span: normal
+    background: tinted
+    href: /guide/guide-folders
+  - title: Fourteen themes, no forks
+    body: >-
+      Every colour, radius, font and easing is a token. Switching theme
+      restyles the site — try the picker in the bar above.
+    image: assets/bento-themes.png
+    span: wide
+    href: /guide/themes
+  - title: Search included
+    body: A build-time index and a ⌘K modal.
+    icon: search
+    span: normal
+  - title: Ships as a package
+    body: Upgrade by bumping a version.
+    icon: package
+    span: normal

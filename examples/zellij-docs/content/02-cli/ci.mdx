@@ -1,0 +1,177 @@
+---
+title: zel ci
+description: A pipeline that checks, builds and deploys your site on every push.
+---
+
+<Callout type="tip" title="Available">
+`zel ci init github` works today. `gitlab` and `circle` are still planned, and
+say so rather than writing something that will not run.
+</Callout>
+
+```bash title="terminal"
+zel ci init github --content docs
+zel ci init github --content docs --target image
+zel ci init github --content docs --deploy netlify
+```
+
+```
+✓ .github/workflows/docs.yml
+  Validates docs on every pull request.
+
+  Before it can publish:
+    Settings → Actions → General → Workflow permissions → Read and write.
+    Without it the push fails with a 403 that reads like an authentication problem.
+```
+
+Writes a pipeline into your repository. It installs `zel` and calls it — no
+Dockerfile in the file, no fifteen lines of `docker build` arguments to keep in
+step with a base image that changes.
+
+## Why generate it rather than document it
+
+A workflow in a blog post is correct on the day it is written.
+
+Pipelines are the worst place for that. Nobody rereads a working one, so a flag
+that changed, an action that moved major version, or a base image that
+reorganised itself surfaces months later as a failure in a file whose author has
+forgotten writing it.
+
+**A generated pipeline tracks the commands it calls.** When `zel image build`
+gains a flag, the generator gains it too, and running `zel ci init` again gives
+you something that still works. The file says so in its own first line, so
+whoever finds it in a year knows to regenerate rather than repair.
+
+It also refuses to overwrite a workflow that already exists — regenerating is a
+decision, not something to discover afterwards.
+
+## Who this is for
+
+**A team with their own product repository**, keeping documentation beside the
+code it describes:
+
+```
+acme/
+├── src/                # the product
+├── docs/               # the content folder
+└── .github/workflows/
+    └── docs.yml        # written by zel ci init
+```
+
+A push that touches `docs/` publishes the site. A push that does not, does
+nothing. The documentation stays in the same review, the same branch and the
+same pull request as the change it documents, which is the only arrangement
+under which it stays accurate.
+
+This is separate from Zellij's own release pipeline, which builds the engine and
+publishes the base image. You never need that one.
+
+## What it writes
+
+```bash title="terminal"
+zel ci init github --deploy netlify
+```
+
+```yaml title=".github/workflows/docs.yml"
+name: Documentation
+
+on:
+  push:
+    branches: [main]
+    paths: ['docs/**']
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install zel
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/mylife-inc/releases/main/zellij/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - run: zel check docs
+      - run: zel deploy netlify docs
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+```
+
+Four steps, and the two that matter are the ones you would run by hand. The
+command prints which secrets you have to add and where.
+
+For a container target:
+
+```bash title="terminal"
+zel ci init github --target image --registry ghcr.io
+```
+
+```yaml title=".github/workflows/docs.yml"
+      - run: zel check docs
+      - run: zel image build docs --tag ghcr.io/acme/docs:${{ github.sha }}
+      - run: zel image push ghcr.io/acme/docs:${{ github.sha }}
+```
+
+## Options
+
+| | | |
+| --- | --- | --- |
+| `<system>` | `github`, `gitlab`, `circle` | — |
+| `--deploy <provider>` | Adds a deploy step | none — check and build only |
+| `--target <static\|image>` | | implied by `--deploy`, else `static` |
+| `--registry <host>` | For `image` | — |
+| `--content <path>` | The content folder | `content` |
+| `--on <event>` | `push:main`, `pr`, `tag` | `push:main` |
+| `--out <path>` | Where to write | the system's conventional path |
+
+Without `--deploy` or `--target image` the pipeline only validates — which is
+the right first step, and what you want on pull requests regardless.
+
+## What it always writes
+
+Two properties, in every variant:
+
+**A check job that needs no credentials.** No registry, no secrets, about
+fifteen seconds. It runs on every pull request, and it is the part with the best
+return in the whole pipeline: a link to a page somebody deleted gets caught
+before review rather than after deploy.
+
+**A publish job gated on `github.event_name == 'push'`.** A pull request proves
+the content is valid; it does not need to produce an image nobody will pull. It
+also means a pull request from a fork — which cannot have your token — does not
+fail for a reason that has nothing to do with the change.
+
+## Scoped to your content folder
+
+```yaml
+on:
+  push:
+    paths: ['docs/**', '.github/workflows/docs.yml']
+```
+
+A separate workflow rather than a job added to yours, and scoped to the folder.
+Your test suite should not run because somebody fixed a typo, and your
+documentation should not wait for your test suite.
+
+The workflow file is in its own `paths` list so that editing the pipeline still
+runs it.
+
+## Checking without publishing
+
+The most valuable pipeline is the one that fails a pull request whose
+documentation is broken, and it needs no credentials at all:
+
+```bash title="terminal"
+zel ci init github --on pr
+```
+
+```yaml
+      - run: zel check docs
+```
+
+`zel check` catches a link to a page somebody deleted, a section type that does
+not exist, and a sidebar entry pointing at a missing file — before review rather
+than after deploy.
+
+## See also
+
+- [`zel check`](/cli/check) — what the pipeline's first step does
+- [`zel deploy`](/cli/deploy) — providers and their credentials

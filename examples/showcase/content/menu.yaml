@@ -1,0 +1,35 @@
+- { name: Lumen 3 Pro, page: lumen-3-pro }
+
+# A compact dropdown.
+- name: Shop
+  items:
+    - { name: Lumen 3 Pro, page: lumen-3-pro }
+    - { name: Trade in, url: "/lumen-3-pro#trade" }
+    - { name: Compare models, url: "/lumen-3-pro#buy" }
+
+# A child with its own `items` makes this a full-width panel.
+- name: Explore
+  items:
+    - name: The product
+      items:
+        - name: Design
+          url: "/lumen-3-pro#design"
+          description: Grade 5 titanium, twelve grams lighter.
+          icon: gem
+        - name: Camera
+          url: "/lumen-3-pro#camera"
+          description: Four lenses, one button.
+          icon: camera
+    - name: More
+      items:
+        - name: Guide
+          page: guide
+          description: Set it up and move your things across.
+          icon: book-open
+        - name: Source
+          url: "https://github.com/shebka/zellij"
+          description: The engine this site is built with.
+          icon: code
+
+- { name: Specs, url: "/lumen-3-pro#specs" }
+- { name: Guide, page: guide }

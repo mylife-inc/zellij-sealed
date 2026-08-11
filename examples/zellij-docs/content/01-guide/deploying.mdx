@@ -1,0 +1,102 @@
+---
+title: Deploying
+description: Static output, path prefixes, SEO, and where the content folder lives.
+---
+
+A Zellij site is a Next.js app that statically generates every page. Deploy it
+wherever you deploy Next.js.
+
+```bash title="terminal"
+npm run build     # runs `zellij prepare`, then `next build`
+npm run start
+```
+
+## Where the content folder lives
+
+The wrapper decides. It is the one thing about the site that is not inside the
+content root, because it is not about the site — it is about the checkout.
+
+```tsx title="src/app/[[...slug]]/page.tsx"
+const zellij = createZellijPages({
+  contentDir: '../../docs/external',
+});
+```
+
+That is what lets a product repository keep its content beside the product:
+
+```
+payos/
+├── apps/
+│   ├── product/           # the application
+│   └── external/          # the Zellij wrapper — no content of its own
+└── docs/
+    ├── external/          # the content root
+    └── internal/          # not Zellij's business
+```
+
+## Under a path prefix
+
+To serve at `example.com/products/acme/docs`, set the prefix in **both** places:
+
+```js title="next.config.js"
+export default {
+  basePath: '/products/acme/docs',
+  transpilePackages: ['@shebka/zellij'],
+};
+```
+
+```tsx title="src/app/[[...slug]]/page.tsx"
+const zellij = createZellijPages({ basePath: '/products/acme/docs' });
+```
+
+Next applies the prefix to `<Link>` and to optimized `next/image` URLs. Zellij's
+own value covers everything Next does not: the search index fetch, unoptimized
+images, plain `<img>` and `<video>` sources, and the sitemap.
+
+<Callout type="warning" title="This is the trap worth testing">
+`next/image` emits `src` verbatim for unoptimized assets, so a logo that works
+at the root 404s under a prefix. Zellij has an automated check for exactly
+this — eleven assertions against a real build served behind the prefix — because
+it is the kind of breakage nobody notices until production.
+</Callout>
+
+## SEO
+
+Set the canonical origin and a share image:
+
+```yaml title="site.yaml"
+siteUrl: https://acme.example.com
+ogImage: assets/og.png
+```
+
+`siteUrl` is what turns relative URLs absolute, which Open Graph and canonical
+tags require. With it set you get, per page:
+
+- a `<title>` and meta description from the page's own fields
+- Open Graph and Twitter card tags, with the share image
+- a canonical URL
+- an entry in `/sitemap.xml`, and a `/robots.txt`
+
+Both `sitemap.ts` and `robots.ts` are one line each in the wrapper.
+
+## Performance
+
+The demo site scores 100 across the board on desktop Lighthouse. The things
+that keep it there are structural, not tuning:
+
+- every page is statically generated; no data fetching at request time
+- syntax highlighting happens at build time, so no highlighter ships
+- the search index and library load on first open of ⌘K, not before
+- only the active theme's tokens are emitted, unless the runtime picker is on
+- imagery goes through `next/image`, and only the hero is `priority`
+- animation is `transform` and `opacity` only, so entrances cannot shift layout
+
+## Upgrading
+
+Bump the dependency. Nothing was generated into your repository, so there is
+nothing to re-merge — all the rendering logic is in the package.
+
+Unknown keys in `site.yaml` warn rather than fail, and unknown keys inside a
+section file are accepted silently, so a content folder written against a newer
+engine still builds on an older one. Downgrading is survivable; you lose
+features, not the build.

@@ -1,0 +1,13 @@
+type: cta-banner
+id: start
+headline: Seal what should never have been readable.
+body: >-
+  One binary, no service to sign up for, and a repository that still works the
+  way it did yesterday.
+background: { gradient: [accent, inverted-bg] }
+
+## The install line, where someone deciding to try it is already looking.
+command: curl -fsSL https://raw.githubusercontent.com/mylife-inc/releases/main/codeseal/install.sh | sh
+cta:
+  - { label: Install CodeSeal, href: /guide/install, style: primary }
+  - { label: Read the quickstart, href: /quickstart, style: ghost }

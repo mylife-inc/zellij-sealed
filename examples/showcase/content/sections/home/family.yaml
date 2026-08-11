@@ -1,0 +1,68 @@
+type: promo-grid
+id: family
+gap: tight
+items:
+  - eyebrow: Lumen 3 Pro
+    title: Titanium. Featherweight. Relentless.
+    body: The brightest display we have built, and a battery that outlasts the day you actually had.
+    image: assets/promo-pro.png
+    alt: ""
+    width: full
+    height: tall
+    align: top
+    focus: bottom
+    tone: dark
+    scrim: 0.3
+    links:
+      - { label: Learn more, href: /lumen-3-pro }
+      - { label: Buy, href: "/lumen-3-pro#buy" }
+
+  - eyebrow: Lumen 3
+    title: Everything you need. Nothing you don't.
+    image: assets/promo-standard.png
+    alt: ""
+    width: full
+    height: tall
+    align: top
+    focus: bottom
+    tone: light
+    links:
+      - { label: Learn more, href: /lumen-3-pro }
+      - { label: Buy, href: "/lumen-3-pro#buy" }
+
+  # Two half-width tiles pair up on a wide viewport and stack below it.
+  - eyebrow: Lumen Watch
+    title: A day, measured properly.
+    image: assets/promo-watch.png
+    alt: ""
+    width: half
+    height: tall
+    align: top
+    focus: bottom
+    tone: light
+    links:
+      - { label: Learn more, href: /lumen-3-pro }
+
+  - eyebrow: Lumen Buds
+    title: Quiet, on demand.
+    image: assets/promo-buds.png
+    alt: ""
+    width: half
+    height: tall
+    align: top
+    focus: bottom
+    tone: light
+    links:
+      - { label: Learn more, href: /lumen-3-pro }
+
+  # No `links` here: the whole tile is the link, which is the other form.
+  - eyebrow: Trade in
+    title: Get up to £600 toward a new Lumen.
+    image: assets/promo-trade.png
+    alt: ""
+    width: full
+    height: short
+    align: center
+    tone: dark
+    scrim: 0.4
+    href: "/lumen-3-pro#trade"

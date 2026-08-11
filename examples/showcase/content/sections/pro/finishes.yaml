@@ -1,0 +1,24 @@
+type: gallery
+id: finishes
+heading: Six finishes
+subhead: Click any one to see it full size.
+columns: 3
+items:
+  - image: assets/finish/graphite.png
+    alt: Lumen 3 Pro in Graphite
+    caption: Graphite
+  - image: assets/finish/titanium.png
+    alt: Lumen 3 Pro in Natural Titanium
+    caption: Natural Titanium
+  - image: assets/finish/sand.png
+    alt: Lumen 3 Pro in Desert Sand
+    caption: Desert Sand
+  - image: assets/finish/moss.png
+    alt: Lumen 3 Pro in Moss
+    caption: Moss
+  - image: assets/finish/ink.png
+    alt: Lumen 3 Pro in Ink
+    caption: Ink
+  - image: assets/finish/rose.png
+    alt: Lumen 3 Pro in Rose
+    caption: Rose

@@ -1,0 +1,38 @@
+# This file is the whole top bar. Search, the theme picker and the light/dark
+# toggle are built in and configured under `nav:` in site.yaml.
+
+- name: Why Zellij
+  page: why
+
+- name: Guide
+  page: 01-guide
+
+- name: CLI
+  page: 02-cli
+
+- name: Sections
+  page: 03-sections
+
+# A child with its own `items` turns the drawer into a full-width panel.
+- name: Learn
+  items:
+    - name: Start here
+      items:
+        - name: Quickstart
+          url: /guide/quickstart
+          description: A working site in three files.
+          icon: rocket
+        - name: The content model
+          url: /guide/content-model
+          description: What lives in the folder, and why.
+          icon: folder-tree
+    - name: Go further
+      items:
+        - name: Themes
+          url: /guide/themes
+          description: Fourteen glazes, one token system.
+          icon: palette
+        - name: The zel command
+          url: /cli
+          description: One binary, from first folder to published site.
+          icon: terminal

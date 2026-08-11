@@ -1,0 +1,10 @@
+- label: Getting Started
+  items:
+    - quickstart
+    - installation
+- label: Configuration
+  items:
+    - config/overview
+    - label: Data
+      items:
+        - config/database

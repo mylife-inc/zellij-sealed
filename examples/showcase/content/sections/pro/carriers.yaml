@@ -1,0 +1,8 @@
+type: logo-strip
+id: carriers
+heading: Works with every network
+logos:
+  - assets/carriers/northwave.svg
+  - assets/carriers/meridian.svg
+  - assets/carriers/kestrel.svg
+  - assets/carriers/orbit.svg

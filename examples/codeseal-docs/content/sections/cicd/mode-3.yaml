@@ -1,0 +1,75 @@
+type: steps-panel
+id: mode-portal-build
+eyebrow: Mode 3 · portal-build
+heading: Portal-side build — GitHub never sees plaintext
+subhead: >-
+  The strongest isolation. GitHub asks for a build and receives a status;
+  decryption and compilation happen on a Portal worker, in a workspace that is
+  scrubbed afterwards.
+media: left
+
+diagram: |
+  sequenceDiagram
+      autonumber
+      participant C as CI Runner<br/>GitHub Actions
+      participant P as CodeSeal Portal<br/>API
+      participant W as Build Worker<br/>isolated workspace
+      participant A as Artifact Store<br/>S3 / MinIO
+
+      C->>P: POST /api/build {sha}
+      P->>W: enqueue build job
+      W->>W: clone + decrypt (admin key)
+      W->>W: delete keys, run build.sh
+      W->>A: upload artefact
+      W->>P: status + artefact pointer
+      C->>P: poll /api/build/<id>
+      P->>C: succeeded + artefact URL
+
+steps:
+  - title: POST /api/build {sha}
+    body: >-
+      The workflow sends the commit SHA, authenticated with a repository-scoped
+      service token. That is the entirety of GitHub's contribution — no key
+      material is ever present on the runner.
+
+  - title: enqueue build job
+    body: >-
+      The Portal records the build in Postgres and enqueues it on a Redis-backed
+      queue. A per-repository lock stops two builds of the same repo racing.
+
+  - title: clone and decrypt
+    body: >-
+      A worker clones at that exact SHA into a fresh workspace and decrypts using
+      the repository's admin key — which an admin unlocked in the Portal UI. The
+      unlocked key lives in Redis with a TTL, never on disk.
+
+  - title: delete keys, then build
+    body: >-
+      Key material is removed from the workspace *before* `build.sh` starts, so
+      your script runs with plaintext source and zero keys. Logs are scrubbed for
+      secret-shaped strings before they are persisted.
+
+  - title: upload artefact
+    body: >-
+      On success the worker uploads the build output — the compiled artefact, not
+      the source — and receives a pointer.
+
+  - title: status and pointer
+    body: >-
+      The worker reports the terminal state and the pointer, writes audit entries
+      for every step, and scrubs the workspace. Plaintext existed inside the
+      worker, for one build.
+
+  - title: poll /api/build/<id>
+    body: >-
+      Meanwhile the workflow has been polling — `sgit build status --wait` does
+      this for you.
+
+  - title: succeeded + artefact URL
+    body: >-
+      The poll returns the terminal state and the pointer, and the GitHub check
+      turns green or red. GitHub saw one SHA out and one status back.
+
+caption: >-
+  GitHub is reduced to a trigger and a checkmark. It never holds a key and never
+  sees a plaintext file.

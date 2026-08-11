@@ -1,0 +1,53 @@
+name: Lumen
+tagline: Light, captured.
+
+brand:
+  logo:
+    src: assets/logo.svg
+    dark: assets/logo-dark.svg
+    alt: Lumen
+
+theme: cupertino
+mode: system
+motion: expressive
+
+home: home
+
+siteUrl: https://lumen.example.com
+ogImage: assets/og.png
+basePath: ""
+
+nav:
+  sticky: true
+  align: center
+  themeToggle: true
+  themeSwitcher: true
+  search: true
+  transparentOverHero: true
+  scrollThreshold: 60
+  cta:
+    - { label: Buy, href: "/lumen-3-pro#buy", style: primary }
+  social:
+    github: "https://github.com/shebka/zellij"
+  announcement:
+    text: "Lumen 3 Pro is here —"
+    link: { label: "see what changed", href: /lumen-3-pro }
+    dismissible: true
+
+footer:
+  columns:
+    - heading: Shop
+      links:
+        - { label: Lumen 3 Pro, page: lumen-3-pro }
+        - { label: Trade in, href: "/lumen-3-pro#trade" }
+    - heading: Learn
+      links:
+        - { label: Guide, page: guide }
+        - { label: Specifications, href: "/lumen-3-pro#specs" }
+    - heading: Support
+      links:
+        - { label: Getting started, href: /guide/quickstart }
+  legal: "© 2026 Lumen — a fictional brand, built to exercise Zellij."
+
+analytics:
+  provider: none

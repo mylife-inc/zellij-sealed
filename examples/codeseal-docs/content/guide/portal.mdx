@@ -1,0 +1,111 @@
+---
+title: The Portal
+description: What it is, when you need one, and how to run it — the reference behind the overview page.
+---
+
+An optional, self-hosted service. It holds key material for four of CodeSeal's
+eight setups, lends it one build at a time, and can run builds itself.
+
+[The Portal page](/portal) is the overview with the diagrams. This is the
+reference.
+
+<Callout type="tip" title="Most people should not run one">
+`secrets` and `portal-dispatch` need no Portal, and the recommended pair —
+[RD](/quickstart/rd) — is one of them. Adding a Portal moves trust rather than
+removing it: your CI provider stops being able to read your source, and your
+Portal host starts.
+</Callout>
+
+## When it is needed
+
+| CI mode | Portal? | What it does |
+| --- | --- | --- |
+| `secrets` | no | GitHub Secrets holds the key material |
+| `portal-dispatch` | no | your machine holds it and sends it per build |
+| `portal-key` | **yes** | lends the runner a wrapped key for one build |
+| `portal-build` | **yes** | decrypts and builds; GitHub sees only a status |
+
+The encryption mode is irrelevant to this choice. Both `passphrase` and
+`recipient` work with every column.
+
+## What it is made of
+
+- **Next.js 16** App Router — server-rendered pages and the REST API the CLI
+  and runners talk to
+- **PostgreSQL** — fourteen models: repositories, recipients, builds, audit
+- **Redis** — single-use tokens, unlocked admin keys, rate limits, build locks,
+  everything under a TTL
+- **Workers** — rekey, build, rotation, GitHub-secret provisioning, cleanup
+
+An `internal/` API namespace exists for worker-to-Portal traffic and is not
+exposed publicly.
+
+## Running one
+
+`install.sh` puts a compose file and the deployers in `$CODESEAL`, and
+generates `$CODESEAL/.env` with random secrets at `0600`. Read it before
+starting anything.
+
+```bash title="terminal"
+seal up           # postgres, redis, portal, workers
+seal logs -f
+seal down
+```
+
+Or onto a platform:
+
+```bash title="terminal"
+seal deploy railway <workspace>
+seal deploy fly
+seal deploy render
+seal deploy cloudrun
+seal deploy aws          # terraform scaffold
+```
+
+<Callout type="info" title="A dispatch-mode Portal needs no address">
+In `portal-dispatch` the Portal calls GitHub and GitHub never calls back. It
+needs no inbound route, no public DNS and no certificate — a laptop behind a
+home router is a legitimate production Portal for that mode.
+</Callout>
+
+## The admin key
+
+The sharpest thing the Portal holds, and the one worth understanding before
+you run one.
+
+- **At rest:** AES-256-GCM, wrapped
+- **To unlock:** Argon2id over a passphrase an admin types in the browser
+- **Unlocked:** in Redis, under a TTL, never written to disk
+- **On restart:** gone, and re-unlocking is deliberate
+
+It is what rewraps every file key when someone is added or removed. A Portal
+that cannot unlock it can still serve builds whose keys are already wrapped;
+it cannot change who has access.
+
+## What is recorded
+
+Every unlock, token redemption, rekey and build writes an audit row, with
+secret-shaped strings scrubbed before the write. Export with filters, scoped by
+role:
+
+```
+GET /api/audit/export?format=csv
+GET /api/audit/export?format=json
+```
+
+## Health and metrics
+
+| endpoint | answers |
+| --- | --- |
+| `/api/live` | is the process up |
+| `/api/ready` | can it reach Postgres and Redis |
+| `/api/metrics` | Prometheus format |
+
+Correlation IDs are threaded through requests via `AsyncLocalStorage`, so a
+line in the worker log can be traced to the request that caused it.
+
+## See also
+
+- [The Portal page](/portal) — the same thing with diagrams
+- [RK](/quickstart/rk) and [RB](/quickstart/rb) — labs that use one
+- [CI/CD](/cicd) — every mode's message flow

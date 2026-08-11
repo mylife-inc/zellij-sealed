@@ -1,0 +1,87 @@
+type: code-cards
+id: modes
+eyebrow: CI/CD ready
+heading: Build pipelines, sealed.
+subhead: >-
+  Four CI modes, trading runner trust for isolation. Pick the one that matches
+  how much you trust the build environment — and how much operational overhead
+  you are willing to pay for not trusting it.
+
+cards:
+  - eyebrow: Mode 1 · secrets
+    title: Direct secrets
+    body: >-
+      Simplest. The runner receives key material from GitHub Actions Secrets and
+      decrypts directly. Right for solo projects, and for any team already
+      trusting Actions with secrets.
+    code:
+      title: .github/workflows/codeseal-secrets.yml
+      body: |
+        - uses: actions/checkout@v4
+        - run: |
+            curl -fsSL .../install.sh | SGIT_ONLY=1 sh
+        - name: Build securely
+          env:
+            SGIT_KEY: ${{ secrets.SGIT_KEY }}
+          run: sgit run-secure -- ./build.sh
+
+  - eyebrow: Mode 2 · portal-key
+    title: Portal-delivered key
+    body: >-
+      The runner trades a bootstrap secret for a one-shot token, fetches a
+      wrapped key, and unwraps it locally. Key material exists on the runner for
+      under a second.
+    code:
+      title: .github/workflows/codeseal-portal-key.yml
+      body: |
+        - run: sgit ci request-token > .ci-token
+        - run: sgit ci runner-key > runner.wrapped.age
+        - run: sgit ci unwrap-key -i wrapper.age \
+                 -I runner.wrapped.age -o runner.key
+        # key gone BEFORE build
+        - run: rm -f runner.wrapped.age wrapper.age
+        - run: sgit run-secure -- ./build.sh
+
+  - eyebrow: Mode 3 · portal-build
+    title: Portal-side build
+    featured: true
+    body: >-
+      GitHub never sees plaintext. Portal workers clone, decrypt in an isolated
+      sandbox, build, scrub, and hand back artefacts. Strongest isolation;
+      needs a Portal you run.
+    code:
+      title: .github/workflows/codeseal-portal-build.yml
+      body: |
+        - name: Trigger Portal build
+          run: |
+            sgit build trigger \
+              --commit-sha ${{ github.sha }} \
+              --repository-id ${{ vars.CODESEAL_REPO_ID }} \
+              > build.json
+        - name: Wait for terminal state
+          run: sgit build status --build-id $ID --wait
+
+  - eyebrow: Mode 4 · portal-dispatch
+    title: Portal-dispatched build
+    body: >-
+      People decrypt locally with their own keys; builds run on Actions. The
+      Portal calls GitHub, never the reverse — so your Portal can sit behind a
+      home router and GitHub never learns where it is.
+    code:
+      title: .github/workflows/codeseal-portal-dispatch.yml
+      body: |
+        on:
+          workflow_dispatch:
+            inputs:
+              encrypted_token: { required: true }
+        steps:
+          - run: echo "::add-mask::$ENCRYPTED_TOKEN"
+          - run: sgit ci unwrap-dispatch-token
+          - run: sgit run-secure -- ./build.sh
+
+footnote: >-
+  **You never write these by hand.** The snippets show what runs on the runner
+  so that you can audit it — but `sgit init` generates the whole workflow for
+  whichever `--ci-mode` you chose, plus a `build.sh` stub where your build steps
+  go. Developers and CI engineers only ever edit `build.sh`; regenerate the
+  workflow at any time with `sgit workflows`.

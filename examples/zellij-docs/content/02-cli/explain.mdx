@@ -1,0 +1,148 @@
+---
+title: zel explain
+description: Every field a section type takes, generated from the schema that validates it.
+---
+
+<Callout type="tip" title="Available">
+Works today. Reads a schema compiled into the binary, so it needs nothing
+installed, no container and no network.
+</Callout>
+
+```bash title="terminal"
+zel explain hero
+```
+
+```
+hero
+
+Required
+  headline       string
+
+Optional
+  badge          string
+  cta            list of object  (default [])
+  subhead        string
+  visual         string
+  visualStyle    floating | framed | full-bleed  (default floating)
+
+Each entry in `cta`
+  *href          string
+  *label         string
+   style         primary | secondary | ghost  (default primary)
+  * required
+
+Every section also takes: id, background, padding, motion, titleGradient.
+
+Write one with `zel new section hero`.
+```
+
+## What problem this solves
+
+Nineteen section types, each with its own fields, is more than anyone holds in
+their head. The failure that causes is specific and expensive: you write a
+plausible section, it looks right, and the build rejects it four minutes later —
+or worse, accepts it and renders nothing, because the field you invented is
+simply ignored.
+
+The usual answer is to go and read documentation. The trouble with that is the
+documentation might describe a different version of the tool than the one on
+your machine.
+
+**This does not.** The output is generated from the schemas the engine validates
+against, compiled into the binary you are running. If `zel explain` says
+`visualStyle` accepts `floating`, then `zel check` accepts `floating`, because
+the same definition produced both sentences.
+
+## Reading the output
+
+Four things are on that page and each is there for a reason.
+
+**Required against optional.** The line between "this will not build without it"
+and "you can add this later". A type with one required field is thirty seconds
+of work; a type with five wants thinking about.
+
+**Defaults, in the form you would write them.** `(default floating)` means you
+can omit `visualStyle` entirely and get `floating`. Knowing the default is what
+lets you write the shortest file that says what you mean, rather than restating
+values the engine already assumes.
+
+**Allowed values, spelled out.** `floating | framed | full-bleed` is the whole
+set. There is no fourth one documented elsewhere. An unknown value is an error
+naming the key and listing these — Zellij fails on a wrong value rather than
+falling back to a default, because `visualStyle: floatng` is a typo and treating
+it as a preference would render the wrong thing silently.
+
+**Nested shapes.** `cta` is a list of objects, so the fields of one entry are
+listed separately with their own required markers. This is the part a field list
+alone always leaves out, and the part people get wrong.
+
+**The shared five.** `id`, `background`, `padding`, `motion` and `titleGradient`
+work on every section type, so they are stated once at the bottom rather than
+repeated nineteen times. `id` is the one worth knowing: it is what `#anchor`
+links to.
+
+## The loop it belongs to
+
+<Steps>
+<Step title="Find a type">
+[`zel list sections`](/cli/list), or browse [the section reference](/sections)
+where each one is rendered.
+</Step>
+<Step title="Learn its fields">
+
+```bash title="terminal"
+zel explain pricing-table
+```
+
+</Step>
+<Step title="Write one">
+
+```bash title="terminal"
+zel new section pricing-table --out sections/home/plans.yaml
+```
+
+[`zel new section`](/cli/new#zel-new-section-type) produces a file from the same
+schema, with required fields filled in and optional ones commented. In practice
+you often skip straight to this and read the comments instead.
+
+</Step>
+<Step title="Check it">
+
+```bash title="terminal"
+zel check
+```
+
+</Step>
+</Steps>
+
+## For tooling
+
+```bash title="terminal"
+zel explain hero --json
+```
+
+The JSON Schema for the type. Enough to generate an editor completion, a form,
+or a validator in another language — and it will not drift, because it is the
+schema rather than a description of one.
+
+<Callout type="warning" title="Planned">
+`--json` is accepted and ignored today; the output is the human table either
+way. [`zel context --json`](/cli/context) does emit the raw schemas, for all
+nineteen at once.
+</Callout>
+
+## Why not just read the website
+
+You can — [the section reference](/sections) has every type with a rendered
+preview, which this cannot give you.
+
+Use `explain` when you are already in a terminal and want an answer in a second,
+and when it matters that the answer describes *your* binary. Use the website
+when you want to see what a section looks like before choosing it.
+
+## See also
+
+- [`zel list sections`](/cli/list) — all nineteen, with field counts
+- [`zel new section`](/cli/new#zel-new-section-type) — a file from the same schema
+- [`zel context`](/cli/context) — the whole model in one file, for an AI agent
+- [The section reference](/sections) — the same information, rendered

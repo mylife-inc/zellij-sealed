@@ -1,0 +1,132 @@
+---
+title: Teams and recipients
+description: Per-person keys, so access can be withdrawn one person at a time.
+---
+
+Passphrase mode has one secret and everyone holds it. That is fine alone and
+awkward the moment someone leaves: removing their access means changing the
+secret and re-encrypting everything, for everyone.
+
+Recipient mode removes the shared secret entirely.
+
+## How it works
+
+Every protected file gets its own **fresh random AES-256-GCM key**. That key is
+then wrapped — encrypted — separately to each authorised person's **age X25519**
+public key, and the wrapped copies live in `.sgit/stanzas/`.
+
+So one file has one body of ciphertext and several small headers, one per person
+who may open it.
+
+The consequence is the useful part: **adding or removing someone rewrites
+stanzas, not blobs.** On a large repository that is the difference between an
+instant operation and re-encrypting everything.
+
+<Callout type="info" title="Where the recipient list lives">
+The admin key sits in `.sgit/manifest.yaml`, because it is part of the
+project's identity. Everyone else — developers, CI runners — lives in the
+sidecar `.sgit/recipients.yaml`.
+
+That split is deliberate: adding a teammate dirties only the sidecar, so the
+manifest stays stable and its diffs stay meaningful.
+</Callout>
+
+## Starting in recipient mode
+
+```bash title="terminal"
+sgit init --mode recipient -s src/secrets
+```
+
+This generates an **admin keypair**.
+
+<Callout type="danger" title="Back up the admin key now">
+It is written to `$CODESEAL/<alias>/admin.key`. If every copy is lost and no
+recipient remains who can decrypt, the repository's protected files are
+unrecoverable — that is the property you asked for.
+
+Put it somewhere durable before you write another command. A password manager
+or an offline copy; not the repository it protects.
+</Callout>
+
+## Joining
+
+The person joining runs:
+
+```bash title="terminal"
+sgit onboard
+```
+
+That generates their keypair locally, writes the identity to
+`$CODESEAL/<alias>/` with mode `0600`, and prints the public key. The private
+half never leaves their machine — what they send you is the public key.
+
+With a Portal configured, this submits an onboarding request and waits for an
+admin to approve. Without one, they send you the public key and you add it.
+
+## The four operations
+
+### Add someone
+
+```bash title="terminal"
+sgit rekey add-recipient alice age1xxxxxxxxxxxxxxxxx developer
+```
+
+Header-only. Every stanza file gains a copy of the file key wrapped to Alice.
+The blobs do not move.
+
+### Remove someone
+
+```bash title="terminal"
+sgit rekey remove-recipient alice          # soft
+sgit rekey remove-recipient alice --full   # hard
+```
+
+These are genuinely different, and the difference matters more than it looks:
+
+| | what it does | what it costs |
+| --- | --- | --- |
+| **soft** | drops their stanza — they cannot decrypt anything *new* | instant, header-only |
+| **`--full`** | re-encrypts every blob with fresh keys | slow, rewrites the repository |
+
+**Soft removal does not un-tell them what they already know.** If Alice cloned
+the repository while authorised, she holds blobs and a key that opens them.
+Soft removal stops her decrypting future changes; it cannot reach the copy on
+her disk.
+
+Use `--full` when the departure is the kind where that matters.
+
+### Rotate a key
+
+```bash title="terminal"
+sgit rekey rotate-recipient alice age1NEW…
+```
+
+Replaces one public key with another everywhere. This is the lost-laptop
+command, and the routine-hygiene one. Header-only.
+
+### Full rekey
+
+```bash title="terminal"
+sgit rekey full
+```
+
+Fresh file keys for every blob, everything re-encrypted, every stanza rewritten.
+For periodic hygiene — or to recover from a lost admin key, which any remaining
+recipient can run.
+
+## Choosing
+
+Passphrase mode when you are alone, or when the team is small enough that
+"change the secret and tell everyone" is a real option.
+
+Recipient mode the moment more than one person needs access that you might
+later want to withdraw. The setup cost is one extra flag and backing up a key;
+everything after that is cheaper.
+
+You can switch later. It re-encrypts, so it is not free — but it does not
+require starting the repository again.
+
+## See also
+
+- [CI and CD](/guide/ci) — a runner is a recipient too
+- [Security model](/guide/security) — what revocation does and does not undo
