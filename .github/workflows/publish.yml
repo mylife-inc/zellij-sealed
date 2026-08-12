@@ -27,6 +27,17 @@ on:
         description: "age-encrypted dispatch payload (base64)"
         required: true
         type: string
+      # `sgit ci dispatch` always sends this, and GitHub rejects the whole
+      # request with a 422 for any input a workflow has not declared. So it is
+      # not optional in practice — leaving it out is what makes the dispatch
+      # fail, before a runner is ever allocated.
+      #
+      # Optional here rather than required because the "Run workflow" form in
+      # the browser has no build id to offer, and that path should keep working.
+      build_id:
+        description: "UUID from the dispatcher, for audit correlation"
+        required: false
+        type: string
 
 # Read-only, and it is enough.
 #
