@@ -68,17 +68,23 @@ jobs:
       #
       #   Error: Projects detected: @acme/docs, @acme/site, ...
       #
-      # The built site is plain static files with no relationship to any
-      # package, so moving it somewhere with no package.json above it
-      # removes the question rather than answering it.
+      # It looks at the working directory, not at --dir. So this runs
+      # from $RUNNER_TEMP, where nothing walks up into a workspace, and
+      # points --dir at the output where it lies.
+      #
+      # It does NOT move the output first, which was the previous fix and
+      # failed: `zel build` writes dist from inside a container, as root,
+      # and the runner user cannot unlink what root created —
+      #
+      #   mv: cannot move 'dist' to '/home/runner/work/_temp/site': Permission denied
+      #
+      # Nothing needs to move. Only the working directory mattered.
       - name: Upload
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: 91774174-d4c2-41b5-aa4b-ac61eeadbf51
         run: |
           set -eu
-          site="$RUNNER_TEMP/site"
-          rm -rf "$site"
-          mv dist "$site"
           cd "$RUNNER_TEMP"
-          npx --yes netlify-cli@latest deploy --prod --dir "$site"
+          npx --yes netlify-cli@latest deploy --prod \
+            --dir "$GITHUB_WORKSPACE/dist"
