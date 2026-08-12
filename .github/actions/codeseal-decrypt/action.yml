@@ -36,6 +36,15 @@ runs:
         # assets. CI needs none of it.
         SGIT_ONLY: "1"
         INSTALLER: https://raw.githubusercontent.com/mylife-inc/releases/main/codeseal/install.sh
+        # The installer asks the GitHub API which release is current, and the
+        # anonymous API is rate-limited *by IP*. Runners share heavily-used
+        # address pools, so a four-job matrix installing at once is enough:
+        # one job gets through and the rest get 403 — on a public repository
+        # that needs no credential to read at all.
+        #
+        # `github.token` is scoped to this repository and read-only here. It
+        # is not in a job's environment by default, which is why it is named.
+        GITHUB_TOKEN: ${{ github.token }}
       run: |
         set -euo pipefail
         curl -fsSL "$INSTALLER" -o "$RUNNER_TEMP/install-sgit.sh"

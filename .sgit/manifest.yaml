@@ -345,5 +345,10 @@ dispatch:
   default_ref: main
   public_key: age18nq8trkz79fxfmhregd38qy0xvm3g6ufpjrx9z3240tq7hsxjfqsddmmpe
   runner_key_file: ci-runner.key
+  targets:
+    publish:
+      workflow: publish.yml
+      inputs:
+        version: prompt
 codeseal_config:
   alias: zellij-sealed
