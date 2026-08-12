@@ -1,0 +1,134 @@
+# Publish `zel` from the sealed repository.
+#
+# The plaintext repository does this in `.github/workflows/release.yml`, driven
+# by a tag. Here it cannot be: the source is encrypted, and decrypting needs a
+# dispatch token that only a person with the key can mint. So this is
+# `workflow_dispatch` only, and `sgit ci dispatch` is what starts it.
+#
+# The shape is otherwise the same, deliberately. Each matrix job decrypts for
+# itself through the `codeseal-decrypt` action — a release is several machines,
+# and every one of them needs the plaintext. Wrapping the decryption around a
+# single build, which is what the generated `codeseal-*.yml` workflows do,
+# cannot express that.
+#
+# Requires:
+#   Secrets: CODESEAL_DISPATCH_PRIVATE_KEY  to decrypt
+#            RELEASES_GITHUB_TOKEN          to write to the artefact repository
+name: Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish, e.g. v0.1.0"
+        required: true
+        type: string
+      encrypted_token:
+        description: "age-encrypted dispatch payload (base64)"
+        required: true
+        type: string
+
+# Read-only, and it is enough.
+#
+# The release is created in `mylife-inc/releases` — a different repository —
+# using RELEASES_GITHUB_TOKEN, so `contents: write` here would grant nothing
+# that is used. This repository's Actions default is read-only anyway; a
+# workflow that needed more would have to say so, and this one does not.
+permissions:
+  contents: read
+
+jobs:
+  binaries:
+    name: zel (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+
+    # Both Darwin targets are built on the Apple Silicon runner: Rust publishes
+    # `rust-std` for both and the runner's SDK carries both architectures, so
+    # cross-compiling needs no extra linker and no emulation. arm64 Linux is on
+    # a native runner instead, because that one would be QEMU.
+    #
+    # No Windows target. `zel` works through container bind mounts, so a native
+    # Windows build would spend its life crossing the filesystem boundary — WSL
+    # is the supported answer, and there `zel` is an ordinary Linux binary.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, target: x86_64-unknown-linux-gnu }
+          - { os: ubuntu-24.04-arm, target: aarch64-unknown-linux-gnu }
+          - { os: macos-latest, target: aarch64-apple-darwin }
+          - { os: macos-latest, target: x86_64-apple-darwin }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Decrypt, then destroy the key — both inside the action, so no job here
+      # can forget the second half. Everything after this step runs against
+      # plaintext with no way back to it.
+      - uses: ./.github/actions/codeseal-decrypt
+        with:
+          encrypted_token: ${{ inputs.encrypted_token }}
+          dispatch_key: ${{ secrets.CODESEAL_DISPATCH_PRIVATE_KEY }}
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      # Keyed by target, and not shared with the CI workflow's cache: this
+      # builds `--release`, which shares no artefacts with a debug build.
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: cli
+          key: publish-${{ matrix.target }}
+
+      # The same script the plaintext repository's release workflow runs, and
+      # the same one `zrelease-local` runs. The archive name is the contract
+      # `install.sh` reads, so it is defined once.
+      - name: Build and package
+        env:
+          VERSION: ${{ inputs.version }}
+          TARGET: ${{ matrix.target }}
+        run: scripts/publish.sh binary "$VERSION" "$TARGET" dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ matrix.target }}
+          path: dist/*
+
+  release:
+    name: Publish the release
+    needs: binaries
+    runs-on: ubuntu-latest
+
+    # No decryption here, and none needed. This job builds nothing — it
+    # collects the archives the matrix produced and creates a release from
+    # them. `scripts/install.sh` is not encrypted either: an installer that
+    # could not be read by the people meant to run it would be useless.
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: binary-*
+          merge-multiple: true
+
+      # A cross-repository release, so the workflow's own GITHUB_TOKEN cannot
+      # do it — that token is scoped to this repository alone.
+      #
+      # This repository is public and sealed, which is the point: the artefacts
+      # are published where anyone can install them, and the source they were
+      # built from stays unreadable.
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ secrets.RELEASES_GITHUB_TOKEN }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          test -n "$GH_TOKEN" || {
+            echo "::error::RELEASES_GITHUB_TOKEN is not set. It needs a token"
+            echo "::error::with contents:write on mylife-inc/releases."
+            exit 1
+          }
+          scripts/publish.sh release "$VERSION" dist

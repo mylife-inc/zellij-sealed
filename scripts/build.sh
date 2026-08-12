@@ -4,13 +4,17 @@
 #
 # By the time this runs, `specs/`, `engine/` and `cli/crates/` exist as
 # plaintext on the runner and the key material that decrypted them has already
-# been wiped — see the "Wipe runner key" step in the workflow. Nothing here
-# needs a secret, and nothing here should ask for one.
+# been destroyed — the `codeseal-decrypt` action does that before it returns.
+# Nothing here needs a secret, and nothing here should ask for one.
 #
-# The commands mirror .github/workflows/ci.yml from the upstream repository, on
-# purpose. A sealed fork that builds differently from the original proves the
-# sealing works and nothing else; the point is that the SAME build runs on a
-# repository GitHub cannot read.
+# The commands mirror .github/workflows/ci.yml, on purpose. A sealed repository
+# that builds differently from the plaintext one proves the sealing works and
+# nothing else; the point is that the SAME build runs on a repository GitHub
+# cannot read.
+#
+# This lives here rather than in the sealed repository because the sealed
+# repository is derived: everything in it comes from this tree, so anything
+# that exists only there is one re-seal away from being lost.
 set -euo pipefail
 
 say() { printf '\n\033[1m▸ %s\033[0m\n' "$*"; }

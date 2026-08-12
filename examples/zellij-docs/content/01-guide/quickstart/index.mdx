@@ -147,25 +147,18 @@ PATH.
 </Tab>
 <Tab title="Windows">
 
-The installer is POSIX shell and does not run on Windows. There **is** a Windows
-binary; download it directly:
+Run `zel` **inside WSL**, where it is an ordinary Linux binary and the one-liner
+above works unchanged:
 
-1. Open [the releases page](https://github.com/mylife-inc/releases/releases?q=zellij)
-2. Download `zel-<version>-x86_64-pc-windows-msvc.zip`
-3. Verify it against the `.sha256` published beside it:
-
-```powershell title="PowerShell"
-Get-FileHash .\zel-v0.1.0-x86_64-pc-windows-msvc.zip -Algorithm SHA256
+```bash title="WSL"
+curl -fsSL https://raw.githubusercontent.com/mylife-inc/releases/main/zellij/install.sh | sh
 ```
 
-4. Extract `zel.exe` somewhere on your PATH
-
-<Callout type="tip" title="Or install it inside WSL">
-If you are using Docker Desktop with the WSL 2 backend — the recommended setup —
-run the macOS and Linux one-liner **inside WSL** instead. Then `zel`, your
-content and the container runtime are all on the same side of the filesystem
-boundary, which is faster and has fewer edges.
-</Callout>
+There is no native `zel.exe`. Every path `zel` touches is a container bind
+mount, so a native build would spend its life reaching across the Windows
+filesystem boundary — the slow, edge-case-ridden arrangement the tip below
+exists to talk you out of. Under WSL with the Docker Desktop WSL 2 backend,
+`zel`, your content and the container runtime are all on the same side of it.
 
 </Tab>
 </Tabs>
