@@ -85,6 +85,14 @@ jobs:
           NETLIFY_SITE_ID: 91774174-d4c2-41b5-aa4b-ac61eeadbf51
         run: |
           set -eu
+          # Copy, not move: `zel build` writes dist from inside a
+          # container as root, and the runner cannot unlink what root
+          # created. Reading it is fine.
+          rm -rf "$RUNNER_TEMP/site"
+          cp -r dist "$RUNNER_TEMP/site"
+          # Deploy from $RUNNER_TEMP so netlify-cli finds no workspace
+          # above it, with a RELATIVE --dir: an absolute one was
+          # silently ignored and it published the working directory
+          # instead (publishOrigin: default, publish: .../_temp).
           cd "$RUNNER_TEMP"
-          npx --yes netlify-cli@latest deploy --prod \
-            --dir "$GITHUB_WORKSPACE/dist"
+          npx --yes netlify-cli@latest deploy --prod --dir site
