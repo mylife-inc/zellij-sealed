@@ -60,8 +60,25 @@ jobs:
       - run: zel build "$CONTENT" --out dist
 
       # Netlify's own uploader, until `zel deploy` lands.
+      #
+      # Run from outside the checkout, which matters in a workspace.
+      # netlify-cli walks up from the working directory looking for
+      # package.json, and when it finds a root with several packages it
+      # refuses to guess which one it is deploying:
+      #
+      #   Error: Projects detected: @acme/docs, @acme/site, ...
+      #
+      # The built site is plain static files with no relationship to any
+      # package, so moving it somewhere with no package.json above it
+      # removes the question rather than answering it.
       - name: Upload
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: 91774174-d4c2-41b5-aa4b-ac61eeadbf51
-        run: npx --yes netlify-cli@latest deploy --prod --dir dist
+        run: |
+          set -eu
+          site="$RUNNER_TEMP/site"
+          rm -rf "$site"
+          mv dist "$site"
+          cd "$RUNNER_TEMP"
+          npx --yes netlify-cli@latest deploy --prod --dir "$site"
