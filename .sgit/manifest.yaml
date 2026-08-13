@@ -350,5 +350,9 @@ dispatch:
       workflow: publish.yml
       inputs:
         version: prompt
+    base-image:
+      workflow: base-image.yml
+      inputs:
+        version: prompt
 codeseal_config:
   alias: zellij-sealed
